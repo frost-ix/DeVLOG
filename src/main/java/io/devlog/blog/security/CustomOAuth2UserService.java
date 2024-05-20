@@ -1,4 +1,4 @@
-package io.devlog.blog.oauth.service;
+package io.devlog.blog.security;
 
 import io.devlog.blog.oauth.Attr.OAuthAttributes;
 import io.devlog.blog.oauth.DTO.GithubDTO;
@@ -8,15 +8,11 @@ import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 
 @Log4j2
 @Service
@@ -27,9 +23,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        log.info("oAuth2User : {}", oAuth2User.getAttributes());
         String provider = userRequest.getClientRegistration().getRegistrationId();
         OAuth2Info oAuth2Info = null;
+
+        System.out.println(super.loadUser(userRequest).getAttributes());
 
         switch (provider) {
             case "naver" -> {
@@ -45,6 +42,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 oAuth2Info = new GithubDTO(oAuth2User.getAttributes());
             }
         }
+        log.info("oAuth2Info : {}", oAuth2Info);
         String registrationId = userRequest
                 .getClientRegistration().getRegistrationId();
         String userNameAttribute = userRequest
@@ -54,10 +52,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         User user = saveOrUpdate(attributes);
 
-        return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),
-                attributes.getAttributes(),
-                attributes.getNameAttributeKey());
+        return null;
+//        return new PrincipalDetails(user, oAuth2User.getAttributes(), Collections.singleton(new SimpleGrantedAuthority(user.getRole().getKey())));
     }
 
     public User saveOrUpdate(OAuthAttributes attributes) {
