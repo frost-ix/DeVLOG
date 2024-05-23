@@ -52,12 +52,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         User user = saveOrUpdate(attributes);
 
-        return null;
+        return oAuth2User;
 //        return new PrincipalDetails(user, oAuth2User.getAttributes(), Collections.singleton(new SimpleGrantedAuthority(user.getRole().getKey())));
     }
 
     public User saveOrUpdate(OAuthAttributes attributes) {
-        User user = userRepository.findOneById(attributes.getName())
+        User user = userRepository.findOneByUserId(attributes.getName())
                 .map(entity -> entity.update(attributes.getName(), attributes.getEmail()))
                 .orElse(attributes.toEntity());
         return userRepository.save(user);

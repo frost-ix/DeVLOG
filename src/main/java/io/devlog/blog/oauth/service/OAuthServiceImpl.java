@@ -1,71 +1,175 @@
 package io.devlog.blog.oauth.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.devlog.blog.oauth.DTO.NaverToken;
-import lombok.RequiredArgsConstructor;
+import io.devlog.blog.oauth.DTO.Token.GithubTokenDTO;
+import io.devlog.blog.oauth.DTO.Token.GoogleTokenDTO;
+import io.devlog.blog.oauth.DTO.Token.NaverTokenDTO;
+import io.devlog.blog.oauth.DTO.info.GithubInfo;
+import io.devlog.blog.oauth.DTO.info.GoogleInfo;
+import io.devlog.blog.oauth.DTO.info.NaverInfo;
+import io.devlog.blog.oauth.values.GITHUB;
+import io.devlog.blog.oauth.values.GOOGLE;
+import io.devlog.blog.oauth.values.NAVER;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+@Log4j2
 @Service
-@RequiredArgsConstructor
 public class OAuthServiceImpl implements OAuthService {
-    @Value("${spring.security.oauth2.client.registration.naver.client-id}")
-    private String NAVER_CLIENT_ID;
-    @Value("${spring.security.oauth2.client.registration.naver.client-secret}")
-    private String NAVER_CLIENT_SECRET;
-    @Value("${spring.security.oauth2.client.registration.naver.client-authentication-method}")
-    private String NAVER_CLIENT_AUTHENTICATION_METHOD;
-    @Value("${spring.security.oauth2.client.registration.naver.authorization-grant-type}")
-    private String NAVER_AUTHORIZATION_GRANT_TYPE;
-    @Value("${spring.security.oauth2.client.registration.naver.redirect-uri}")
-    private String NAVER_REDIRECT_URI;
-    @Value("${spring.security.oauth2.client.provider.naver.authorization-uri}")
-    private String NAVER_AUTHORIZATION_URI;
-    @Value("${spring.security.oauth2.client.provider.naver.token-uri}")
-    private String NAVER_TOKEN_URI;
-    @Value("${spring.security.oauth2.client.provider.naver.user-info-uri}")
-    private String NAVER_USER_INFO_URI;
+    private final NAVER naver;
+    private final GOOGLE google;
+    private final GITHUB github;
+
     @Value("Bearer")
     private String tokenType;
 
-    public NaverToken loginNaver(String code, String state) {
-        RestTemplate rst = new RestTemplate();
-        HttpEntity<MultiValueMap<String, String>> naverTokenReq = getMultiValueMapHttpEntity(code, state);
-        ResponseEntity<String> oauthTokenRes = rst
-                .exchange(
-                        NAVER_TOKEN_URI,
-                        org.springframework.http.HttpMethod.POST,
-                        naverTokenReq,
-                        String.class);
+    public OAuthServiceImpl(NAVER naver, GOOGLE google, GITHUB github) {
+        this.naver = naver;
+        this.google = google;
+        this.github = github;
+    }
+
+
+    public NaverInfo loginNaver(String code, String state) {
+        ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, "naver");
         ObjectMapper tokenObject = new ObjectMapper();
-        NaverToken naverToken = null;
+        NaverTokenDTO naverTokenDTO;
+        NaverInfo naverInfo;
         try {
-            naverToken = tokenObject.readValue(oauthTokenRes.getBody(), NaverToken.class);
-            return naverToken;
+            naverTokenDTO = tokenObject.readValue(oauthTokenRes.getBody(), NaverTokenDTO.class);
+            String accessToken = naverTokenDTO.getAccessToken();
+            ResponseEntity<String> userInfo = getUserInfo(accessToken, "naver");
+            naverInfo = tokenObject.readValue(userInfo.getBody(), NaverInfo.class);
+            log.info(naverInfo.getResponse());
+            return naverInfo;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Naver login failed");
         }
     }
 
-    private HttpEntity<MultiValueMap<String, String>> getMultiValueMapHttpEntity(String code, String state) {
+    public GoogleInfo loginGoogle(String code, String state) {
+        // To-do
+        ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, "google");
+        ObjectMapper tokenObject = new ObjectMapper();
+        GoogleTokenDTO googleTokenDTO = null;
+        GoogleInfo googleInfo = null;
+        try {
+            googleTokenDTO = tokenObject.readValue(oauthTokenRes.getBody(), GoogleTokenDTO.class);
+            String accessToken = googleTokenDTO.getAccessToken();
+            ResponseEntity<String> userInfo = getUserInfo(accessToken, "google");
+            googleInfo = tokenObject.readValue(userInfo.getBody(), GoogleInfo.class);
+            log.info(googleInfo.getSub());
+            return googleInfo;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Google login failed");
+        }
+    }
+
+    public GithubInfo loginGithub(String code, String state) {
+        ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, "github");
+        ObjectMapper tokenObject = new ObjectMapper();
+        GithubTokenDTO githubTokenDTO = null;
+        GithubInfo githubInfo = null;
+        try {
+            githubTokenDTO = tokenObject.readValue(oauthTokenRes.getBody(), GithubTokenDTO.class);
+            String accessToken = githubTokenDTO.getAccessToken();
+            ResponseEntity<String> userInfo = getUserInfo(accessToken, "github");
+            githubInfo = tokenObject.readValue(userInfo.getBody(), GithubInfo.class);
+            log.info(userInfo.getBody());
+            return githubInfo;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Github login failed");
+        }
+    }
+
+    private HttpEntity<MultiValueMap<String, String>> getHttpParamsEntity(String code, String state, String providerName) {
         HttpHeaders headers = new HttpHeaders();
 
-        headers.set("Content-Type", "application/x-www-form-urlencoded");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 
-        params.add("grant_type", NAVER_AUTHORIZATION_GRANT_TYPE);
-        params.add("client_id", NAVER_CLIENT_ID);
-        params.add("client_secret", NAVER_CLIENT_SECRET);
-        params.add("code", code);
-        params.add("state", state);
-
+        switch (providerName) {
+            case "naver" -> {
+                headers.set("Content-Type", "application/x-www-form-urlencoded");
+                params.add("grant_type", naver.getNAVER_AUTHORIZATION_GRANT_TYPE());
+                params.add("client_id", naver.getNAVER_CLIENT_ID());
+                params.add("client_secret", naver.getNAVER_CLIENT_SECRET());
+                params.add("code", code);
+                params.add("state", state);
+            }
+            case "google" -> {
+                params.add("code", code);
+                params.add("client_id", google.getGOOGLE_CLIENT_ID());
+                params.add("client_secret", google.getGOOGLE_CLIENT_SECRET());
+                params.add("redirect_uri", google.getGOOGLE_REDIRECT_URI());
+                params.add("grant_type", google.getGOOGLE_AUTHORIZATION_GRANT_TYPE());
+                params.add("state", state);
+            }
+            case "github" -> {
+                headers.set("Accept", "application/json");
+                params.add("client_id", github.getGITHUB_CLIENT_ID());
+                params.add("client_secret", github.getGITHUB_CLIENT_SECRET());
+                params.add("code", code);
+                params.add("redirect_uri", github.getGITHUB_REDIRECT_URI());
+                params.add("state", state);
+            }
+            default -> throw new RuntimeException("Provider not found");
+        }
         return new HttpEntity<>(params, headers);
+    }
+
+    private HttpEntity<MultiValueMap<String, String>> getHeadersEntity(String accessToken, String providerName) {
+        HttpHeaders headers = new HttpHeaders();
+        switch (providerName) {
+            case "naver", "google" -> {
+                headers.set("Content-Type", "application/x-www-form-urlencoded");
+                headers.set("Authorization", tokenType + " " + accessToken);
+            }
+            case "github" -> {
+                headers.set("Accept", "application/json");
+                headers.set("Authorization", tokenType + " " + accessToken);
+            }
+            default -> throw new RuntimeException("Provider not found");
+        }
+        return new HttpEntity<>(headers);
+    }
+
+    private ResponseEntity<String> getOAuthToken(String code, String state, String providerName) {
+        RestTemplate rst = new RestTemplate();
+        HttpEntity<MultiValueMap<String, String>> tokenReq = getHttpParamsEntity(code, state, providerName);
+        return rst.exchange(
+                switch (providerName) {
+                    case "naver" -> naver.getNAVER_TOKEN_URI();
+                    case "google" -> google.getGOOGLE_TOKEN_URI();
+                    case "github" -> github.getGITHUB_TOKEN_URI();
+                    default -> throw new RuntimeException("Provider not found");
+                },
+                HttpMethod.POST,
+                tokenReq,
+                String.class);
+    }
+
+    private ResponseEntity<String> getUserInfo(String accessToken, String providerName) {
+        RestTemplate rst = new RestTemplate();
+        return rst.exchange(
+                switch (providerName) {
+                    case "naver" -> naver.getNAVER_USER_INFO_URI();
+                    case "google" -> google.getGOOGLE_USER_INFO_URI();
+                    case "github" -> github.getGITHUB_USER_INFO_URI();
+                    default -> throw new RuntimeException("Provider not found");
+                },
+                HttpMethod.GET,
+                getHeadersEntity(accessToken, providerName),
+                String.class);
     }
 }

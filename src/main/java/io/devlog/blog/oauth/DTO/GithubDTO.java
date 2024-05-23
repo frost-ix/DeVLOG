@@ -15,7 +15,7 @@ public class GithubDTO implements OAuth2Info {
 
     @Override
     public String getProviderId() {
-        return (String) attributes.get("sub");
+        return (String) attributes.get("id");
     }
 
     @Override

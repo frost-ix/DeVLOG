@@ -3,6 +3,7 @@ package io.devlog.blog.user.DTO;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.enums.AccessRole;
 import io.devlog.blog.user.enums.UserRole;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
@@ -10,8 +11,9 @@ import lombok.*;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserDTO {
-    @NonNull
+    @Nullable
     private String id;
+    @Nullable
     private String pw;
     private String name;
     private String mail;
@@ -32,8 +34,8 @@ public class UserDTO {
 
     public UserDTO toDTO(User user) {
         return UserDTO.builder()
-                .id(user.getId())
-                .pw(user.getPw())
+                .id(user.getUserId())
+                .pw(user.getUserPw())
                 .name(user.getName())
                 .mail(user.getMail())
                 .build();
@@ -41,11 +43,10 @@ public class UserDTO {
 
     public User toEntity() {
         return User.builder()
-                .id(id)
-                .pw(pw)
+                .userId(id)
+                .userPw(pw)
                 .name(name)
                 .mail(mail)
-                .userRole(userRole)
                 .accessRole(accessRole)
                 .build();
     }

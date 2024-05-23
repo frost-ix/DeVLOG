@@ -38,12 +38,12 @@ public class UserServiceImpl implements UserService {
     public Map<String, Boolean> login(final String userId, final String userPw) {
         try {
             log.info("Entry userId : {}", userId);
-            Optional<User> find = userRepository.findOneById(userId);
+            Optional<User> find = userRepository.findOneByUserId(userId);
             if (find.isEmpty()) {
                 log.info("No account");
                 return Map.of();
             }
-            boolean check = pwEncoder.matches(userPw, find.get().getPw());
+            boolean check = pwEncoder.matches(userPw, find.get().getUserPw());
             log.info("Encoded check : {}", check);
             if (!check) {
                 log.info("Password not match");
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO create(final UserDTO user) {
         try {
             log.info("Creating user: {}", user);
-            if (userRepository.findOneById(user.getId()).isPresent()) {
+            if (userRepository.findOneByUserId(user.getId()).isPresent()) {
                 log.error("Already exist user: {}", user);
                 return null;
             } else {

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        function loginNaver() {
+            window.location.href = "/oauth2/authorization/naver";
+        }
+
+        function loginGithub() {
+            window.location.href = "/oauth2/authorization/github";
+        }
+
+        function loginGoogle() {
+            window.location.href = "/oauth2/authorization/google";
+        }
+    </script>
+</head>
+<body>
+<form>
+    <button id="naver" onclick="loginNaver()">naver oauth</button>
+    <button id="github" onclick="loginGithub()">github oauth</button>
+    <button id="google" onclick="loginGoogle()">google login</button>
+</form>
+</body>
+</html>

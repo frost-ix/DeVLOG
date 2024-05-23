@@ -1,6 +1,8 @@
 package io.devlog.blog.oauth.controller;
 
-import io.devlog.blog.oauth.DTO.NaverToken;
+import io.devlog.blog.oauth.DTO.info.GithubInfo;
+import io.devlog.blog.oauth.DTO.info.GoogleInfo;
+import io.devlog.blog.oauth.DTO.info.NaverInfo;
 import io.devlog.blog.oauth.service.OAuthServiceImpl;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -25,23 +27,34 @@ public class OAuthController {
 
     /***
      * Naver OAuth2.0 Login
-     * @return NaverToken
+     * @return NaverInfo
      */
-    @GetMapping("/ok")
-    public NaverToken callBack(@RequestParam("code") String code, @RequestParam("state") String state) {
-        NaverToken naverToken = oAuthServiceImpl.loginNaver(code, state);
-        log.info(naverToken);
-        return naverToken;
+    @GetMapping("/naver")
+    public NaverInfo callBack(@RequestParam("code") String code, @RequestParam("state") String state) {
+        return oAuthServiceImpl.loginNaver(code, state);
+    }
+
+    /***
+     * Google OAuth2.0 Login
+     * @return GoogleInfo
+     */
+    @GetMapping("/google")
+    public GoogleInfo googleLogin(@RequestParam("code") String code, @RequestParam("state") String state) {
+        return oAuthServiceImpl.loginGoogle(code, state);
+    }
+
+    /***
+     * GitHub OAuth2.0 Login
+     * @return GithubInfo
+     */
+    @GetMapping("/github")
+    public GithubInfo githubLogin(@RequestParam("code") String code, @RequestParam("state") String state) {
+        return oAuthServiceImpl.loginGithub(code, state);
     }
 
     @GetMapping("/refresh")
     public String tokenRefresh(@ModelAttribute("refresh_token") String refreshToken) {
         log.info("refresh token : {}", refreshToken);
         return "refresh";
-    }
-
-    @GetMapping("/profile")
-    public String getProfile() {
-        return "profile";
     }
 }
