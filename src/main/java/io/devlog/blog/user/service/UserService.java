@@ -1,19 +1,17 @@
 package io.devlog.blog.user.service;
 
 import io.devlog.blog.user.DTO.UserDTO;
-import io.devlog.blog.user.entity.User;
-
-import java.util.List;
-import java.util.Map;
+import org.springframework.http.ResponseEntity;
 
 public interface UserService {
-    List<User> getUsers();
+    ResponseEntity<?> getUsers();
 
-    Map<String, Boolean> login(String userId, String userPw);
+    ResponseEntity<?> login(UserDTO user);
 
-    UserDTO create(UserDTO user);
+    ResponseEntity<?> create(UserDTO user);
 
     UserDTO update(UserDTO user);
 
-    boolean deleteUser(String userId);
+    ResponseEntity<String> deleteUser(String benderUuid);
+
 }

@@ -34,8 +34,10 @@ public class OAuthAttributes {
     public static OAuthAttributes of(String registrationId, String userNameAttributeName, Map<String, Object> attributes) {
         if ("naver".equals(registrationId)) {
             return ofNaver(attributes);
-        } else if ("kakao".equals(registrationId)) {
-            return ofKakao(attributes);
+        } else if ("google".equals(registrationId)) {
+            return ofGoogle(userNameAttributeName, attributes);
+        } else if ("github".equals(registrationId)) {
+            return ofGithub(attributes);
         }
         return ofGoogle(userNameAttributeName, attributes);
     }
@@ -51,18 +53,6 @@ public class OAuthAttributes {
                 .build();
     }
 
-    private static OAuthAttributes ofKakao(Map<String, Object> attributes) {
-        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-        return OAuthAttributes.builder()
-                .name((String) profile.get("nickname"))
-                .email((String) kakaoAccount.get("email"))
-                .picture((String) profile.get("profile_image_url"))
-                .attributes(attributes)
-                .nameAttributeKey("id")
-                .build();
-    }
-
     private static OAuthAttributes ofGoogle(String userNameAttributeName, Map<String, Object> attributes) {
         return OAuthAttributes.builder()
                 .name((String) attributes.get("name"))
@@ -70,6 +60,16 @@ public class OAuthAttributes {
                 .picture((String) attributes.get("picture"))
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
+                .build();
+    }
+
+    private static OAuthAttributes ofGithub(Map<String, Object> attributes) {
+        return OAuthAttributes.builder()
+                .name((String) attributes.get("login"))
+                .email((String) attributes.get("email"))
+                .picture((String) attributes.get("avatar_url"))
+                .attributes(attributes)
+                .nameAttributeKey("id")
                 .build();
     }
 

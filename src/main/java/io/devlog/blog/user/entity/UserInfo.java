@@ -1,5 +1,6 @@
 package io.devlog.blog.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,8 +13,10 @@ import lombok.*;
 @Builder(toBuilder = true)
 public class UserInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userUuid;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonBackReference
+    @JoinColumn(name = "userUuid")
+    private User user;
     @Nullable
     private String userIcon;
     @Nullable

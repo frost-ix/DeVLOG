@@ -10,6 +10,8 @@ import io.devlog.blog.oauth.DTO.info.NaverInfo;
 import io.devlog.blog.oauth.values.GITHUB;
 import io.devlog.blog.oauth.values.GOOGLE;
 import io.devlog.blog.oauth.values.NAVER;
+import io.devlog.blog.security.Jwt.JwtService;
+import io.devlog.blog.user.DTO.JwtToken;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -28,17 +30,34 @@ public class OAuthServiceImpl implements OAuthService {
     private final GOOGLE google;
     private final GITHUB github;
 
+    private final JwtService jwtService;
+
     @Value("Bearer")
     private String tokenType;
 
-    public OAuthServiceImpl(NAVER naver, GOOGLE google, GITHUB github) {
+    public OAuthServiceImpl(NAVER naver, GOOGLE google, GITHUB github, JwtService jwtService) {
         this.naver = naver;
         this.google = google;
         this.github = github;
+        this.jwtService = jwtService;
     }
 
+    public JwtToken loginOf(String code, String state, String providerName) {
+        switch (providerName) {
+            case "naver" -> {
+                return loginNaver(code, state);
+            }
+            case "google" -> {
+                return loginGoogle(code, state);
+            }
+            case "github" -> {
+                return loginGithub(code, state);
+            }
+            default -> throw new RuntimeException("Provider not found");
+        }
+    }
 
-    public NaverInfo loginNaver(String code, String state) {
+    private JwtToken loginNaver(String code, String state) {
         ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, "naver");
         ObjectMapper tokenObject = new ObjectMapper();
         NaverTokenDTO naverTokenDTO;
@@ -48,15 +67,15 @@ public class OAuthServiceImpl implements OAuthService {
             String accessToken = naverTokenDTO.getAccessToken();
             ResponseEntity<String> userInfo = getUserInfo(accessToken, "naver");
             naverInfo = tokenObject.readValue(userInfo.getBody(), NaverInfo.class);
-            log.info(naverInfo.getResponse());
-            return naverInfo;
+            log.info("NAVER : {}", naverInfo.getId());
+            return createToken(naverInfo.getId());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             throw new RuntimeException("Naver login failed");
         }
     }
 
-    public GoogleInfo loginGoogle(String code, String state) {
+    private JwtToken loginGoogle(String code, String state) {
         // To-do
         ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, "google");
         ObjectMapper tokenObject = new ObjectMapper();
@@ -67,15 +86,15 @@ public class OAuthServiceImpl implements OAuthService {
             String accessToken = googleTokenDTO.getAccessToken();
             ResponseEntity<String> userInfo = getUserInfo(accessToken, "google");
             googleInfo = tokenObject.readValue(userInfo.getBody(), GoogleInfo.class);
-            log.info(googleInfo.getSub());
-            return googleInfo;
+            log.info("GOOGLE : {}", googleInfo.getSub());
+            return createToken(googleInfo.getSub());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             throw new RuntimeException("Google login failed");
         }
     }
 
-    public GithubInfo loginGithub(String code, String state) {
+    private JwtToken loginGithub(String code, String state) {
         ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, "github");
         ObjectMapper tokenObject = new ObjectMapper();
         GithubTokenDTO githubTokenDTO = null;
@@ -85,12 +104,19 @@ public class OAuthServiceImpl implements OAuthService {
             String accessToken = githubTokenDTO.getAccessToken();
             ResponseEntity<String> userInfo = getUserInfo(accessToken, "github");
             githubInfo = tokenObject.readValue(userInfo.getBody(), GithubInfo.class);
-            log.info(userInfo.getBody());
-            return githubInfo;
+            log.info("GITHUB : {}", githubInfo.getId());
+            return createToken(githubInfo.getId());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             throw new RuntimeException("Github login failed");
         }
+    }
+
+    private JwtToken createToken(String id) {
+        String accessToken = jwtService.createAccessToken(id);
+        JwtToken jwtToken = new JwtToken(jwtService.createAccessToken(id), jwtService.createRefreshToken(id, accessToken));
+        log.info(jwtToken);
+        return jwtToken;
     }
 
     private HttpEntity<MultiValueMap<String, String>> getHttpParamsEntity(String code, String state, String providerName) {

@@ -1,6 +1,7 @@
 package io.devlog.blog.security.config;
 
-import io.devlog.blog.security.CustomOAuth2UserService;
+//import io.devlog.blog.security.CustomOAuth2UserService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final CustomOAuth2UserService customOAuth2UserService;
+//    private final CustomOAuth2UserService customOAuth2UserService;
 
     /***
      * Security Filter Chain
@@ -31,27 +32,25 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((req) ->
                         req
-                                .requestMatchers("/", "/index", "/board/**").permitAll()
+                                .requestMatchers("/", "/index", "/board/**", "/user/**").permitAll()
                                 .requestMatchers("/api/oauth/**").permitAll()
                                 .anyRequest().authenticated());
-        httpSecurity
-                .oauth2Login((oauth2) -> {
-                    oauth2.userInfoEndpoint((userInfo) -> {
-                        userInfo.userService(customOAuth2UserService);
-                    });
-                });
-        httpSecurity
-                .formLogin((form) ->
-                        form
-                                .loginPage("/login").permitAll());
-        httpSecurity
-                .logout((auth) ->
-                        auth
-                                .logoutUrl("/logout")
-                                .logoutSuccessUrl("/index.html"));
+//        httpSecurity
+//                .oauth2Login((oauth2) -> {
+//                    oauth2.userInfoEndpoint((userInfo) -> userInfo.userService(customOAuth2UserService));
+//                });
+//        httpSecurity
+//                .formLogin((form) ->
+//                        form
+//                                .loginPage("/login").permitAll());
+//        httpSecurity
+//                .logout((auth) ->
+//                        auth
+//                                .logoutUrl("/logout")
+//                                .logoutSuccessUrl("/index.html"));
         return httpSecurity.build();
     }
-    
+
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         BCryptPasswordEncoder.BCryptVersion bCryptVersion = BCryptPasswordEncoder.BCryptVersion.$2Y;
         return new BCryptPasswordEncoder(bCryptVersion, 10);

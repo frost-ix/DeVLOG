@@ -1,102 +1,141 @@
 package io.devlog.blog.user.service;
 
+import io.devlog.blog.security.Jwt.JwtService;
+import io.devlog.blog.user.DTO.JwtToken;
 import io.devlog.blog.user.DTO.UserDTO;
 import io.devlog.blog.user.entity.User;
+import io.devlog.blog.user.repository.SubscribesRepository;
 import io.devlog.blog.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
 @Log4j2
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final SubscribesRepository subscribesRepository;
     private final PasswordEncoder pwEncoder;
+    private final JwtService jwtService;
+    private final HttpServletResponse httpServletResponse;
 
-    public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder) {
+    public UserServiceImpl(final UserRepository userRepository, final SubscribesRepository subscribesRepository, PasswordEncoder pwEncoder, JwtService jwtService, HttpServletResponse httpServletResponse) {
         this.userRepository = userRepository;
+        this.subscribesRepository = subscribesRepository;
         this.pwEncoder = pwEncoder;
+        this.jwtService = jwtService;
+        this.httpServletResponse = httpServletResponse;
     }
 
     @Override
-    public List<User> getUsers() {
-        List<User> finds = userRepository.findAll();
-        if (finds.isEmpty()) {
-            log.error("No user");
+    public ResponseEntity<?> getUsers() {
+        try {
+            List<User> finds = userRepository.findAll();
+            if (finds.isEmpty()) {
+                log.error("No user");
+                return ResponseEntity.notFound().build();
+            } else {
+                for (User f : finds) {
+                    log.info("Get users : {}", f.getRoleKey());
+                    log.info("Get users : {}", f.getAccessRole());
+                }
+                return ResponseEntity.ok().body(finds);
+            }
+        } catch (Exception e) {
+            log.error(e);
             return null;
-        } else {
-            log.info("Get users : {}", finds);
-            return finds;
         }
     }
 
     @Override
-    public Map<String, Boolean> login(final String userId, final String userPw) {
+    public ResponseEntity<?> login(UserDTO user) {
         try {
-            log.info("Entry userId : {}", userId);
-            Optional<User> find = userRepository.findOneByUserId(userId);
+            Optional<User> find = userRepository.findOneByBenderUuid(user.getBenderUuid());
             if (find.isEmpty()) {
                 log.info("No account");
-                return Map.of();
+                return ResponseEntity.notFound().build();
             }
-            boolean check = pwEncoder.matches(userPw, find.get().getUserPw());
-            log.info("Encoded check : {}", check);
-            if (!check) {
+            if (!pwEncoder.matches(user.getPw(), find.get().getUserPw())) {
                 log.info("Password not match");
-                return Map.of("login", false);
+                return ResponseEntity.status(401).body("Password not match");
             } else {
-                log.info("Login success : {}", find.get());
-                return Map.of("login", true);
+                log.info("Login success");
+                String accessToken = jwtService.createAccessToken(find.get().getBenderUuid());
+                JwtToken jwtToken = new JwtToken(accessToken, jwtService.createRefreshToken(find.get().getBenderUuid(), accessToken));
+                httpServletResponse.addHeader("Authorization", jwtToken.getAccessToken());
+                Cookie cookie = new Cookie("refreshToken", jwtToken.getRefreshToken());
+                cookie.setHttpOnly(true);
+                cookie.setSecure(true);
+                cookie.setPath("/");
+                cookie.setMaxAge(60 * 60 * 24);
+                httpServletResponse.addCookie(cookie);
+                return ResponseEntity.ok().body("Login success. check cookie");
             }
         } catch (Exception e) {
             log.error(e);
-            return Map.of("error", true);
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @Override
-    public UserDTO create(final UserDTO user) {
+    public ResponseEntity<?> create(final UserDTO user) {
         try {
             log.info("Creating user: {}", user);
-            if (userRepository.findOneByUserId(user.getId()).isPresent()) {
+            if (userRepository.findOneByBenderUuid(user.getBenderUuid()).isPresent()) {
                 log.error("Already exist user: {}", user);
-                return null;
+                return ResponseEntity.status(409).body("Already exist user");
             } else {
-                String hP = pwEncoder.encode(user.getPw());
-                log.info("Encoded password: {}", hP);
-                User save = user.toEntity();
-                User check = userRepository.save(save);
+                user.setPw(pwEncoder.encode(user.getPw()));
+                User check = userRepository.save(user.toEntity());
                 UserDTO returnData = user.toDTO(check);
                 log.info("Created user: {}", returnData);
-                return returnData;
+                return ResponseEntity.ok().body(returnData);
             }
         } catch (Exception e) {
             log.error(e);
-            return null;
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @Override
     public UserDTO update(UserDTO user) {
         try {
-            return null;
+            log.info("Updating user: {}", user);
+            Optional<User> find = userRepository.findOneByBenderUuid(user.getBenderUuid());
+            if (find.isEmpty()) {
+                log.error("No user: {}", user);
+                return null;
+            } else {
+                User update = find.get();
+                Long uuid = update.getUserUuId();
+//                userRepository.updateUserByUserUuid(uuid, user.toEntity());
+//                User check = userRepository.findOneByUserId(user.getId()).get();
+                /*UserDTO returnData = user.toDTO(check);
+                log.info("Updated user: {}", returnData);
+                return returnData;*/
+                return null;
+            }
         } catch (Exception e) {
             return null;
         }
     }
 
     @Override
-    public boolean deleteUser(String userId) {
+    public ResponseEntity<String> deleteUser(String benderUuid) {
         try {
-            userRepository.deleteById(userId);
-            return true;
+            log.info("Deleting user: {}", benderUuid);
+            User user = userRepository.findOneByBenderUuid(benderUuid).get();
+            userRepository.deleteById(user.getUserUuId());
+            return ResponseEntity.ok().body("Delete user");
         } catch (Exception e) {
             log.error(e);
-            return false;
+            return ResponseEntity.notFound().build();
         }
     }
 }

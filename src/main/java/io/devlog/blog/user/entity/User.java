@@ -1,12 +1,15 @@
 package io.devlog.blog.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.devlog.blog.user.enums.AccessRole;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -14,24 +17,31 @@ import lombok.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userUuid")
     private Long userUuid;
 
-    @Nullable
+    @Column(name = "userId")
     private String userId;
-    @Nullable
+    @Column(name = "userPw")
     private String userPw;
     @Nullable
     @Column(name = "oName")
     private String bender;
-
+    @Column(name = "oUuid")
+    private String benderUuid;
     private String name;
     private String mail;
     @Enumerated(EnumType.STRING)
     private AccessRole accessRole;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_info_userUuid")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "userUuid")
+    @JsonManagedReference
     private UserInfo userInfo;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Subscribes> subscribes;
 
     public User update(String name, String mail) {
         this.name = name;
@@ -41,5 +51,9 @@ public class User {
 
     public String getRoleKey() {
         return this.accessRole.getKey();
+    }
+
+    public Long getUserUuId() {
+        return this.userUuid;
     }
 }
