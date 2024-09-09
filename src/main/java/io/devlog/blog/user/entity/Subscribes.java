@@ -26,5 +26,6 @@ public class Subscribes {
     private String subUser;
 
     @CreationTimestamp
+    @Builder.Default
     private LocalDateTime subDate = LocalDateTime.now();
 }

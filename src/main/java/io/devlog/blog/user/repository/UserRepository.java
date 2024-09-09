@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findOneByBenderUuid(String benderUuid);
 
-    void deleteById(@NonNull Long userUuid);
+    Optional<User> findOneByUserUuid(Long userUuid);
 
+    void deleteById(@NonNull Long userUuid);
 }

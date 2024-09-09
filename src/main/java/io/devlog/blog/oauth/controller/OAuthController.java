@@ -1,7 +1,6 @@
 package io.devlog.blog.oauth.controller;
 
 import io.devlog.blog.oauth.service.OAuthServiceImpl;
-import io.devlog.blog.user.DTO.JwtToken;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +27,7 @@ public class OAuthController {
      * @return NaverInfo
      */
     @GetMapping("/naver")
-    public JwtToken callBack(@RequestParam("code") String code, @RequestParam("state") String state) {
+    public String callBack(@RequestParam("code") String code, @RequestParam("state") String state) {
         return oAuthServiceImpl.loginOf(code, state, "naver");
     }
 
@@ -37,7 +36,7 @@ public class OAuthController {
      * @return GoogleInfo
      */
     @GetMapping("/google")
-    public JwtToken googleLogin(@RequestParam("code") String code, @RequestParam("state") String state) {
+    public String googleLogin(@RequestParam("code") String code, @RequestParam("state") String state) {
         return oAuthServiceImpl.loginOf(code, state, "google");
     }
 
@@ -46,7 +45,7 @@ public class OAuthController {
      * @return GithubInfo
      */
     @GetMapping("/github")
-    public JwtToken githubLogin(@RequestParam("code") String code, @RequestParam("state") String state) {
+    public String githubLogin(@RequestParam("code") String code, @RequestParam("state") String state) {
         return oAuthServiceImpl.loginOf(code, state, "github");
     }
 

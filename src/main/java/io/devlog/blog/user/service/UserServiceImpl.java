@@ -1,14 +1,17 @@
 package io.devlog.blog.user.service;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.DTO.JwtToken;
 import io.devlog.blog.user.DTO.UserDTO;
+import io.devlog.blog.user.entity.QUser;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.repository.SubscribesRepository;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,19 +21,23 @@ import java.util.Optional;
 
 @Service
 @Log4j2
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends QuerydslRepositorySupport implements UserService {
     private final UserRepository userRepository;
     private final SubscribesRepository subscribesRepository;
     private final PasswordEncoder pwEncoder;
     private final JwtService jwtService;
     private final HttpServletResponse httpServletResponse;
 
-    public UserServiceImpl(final UserRepository userRepository, final SubscribesRepository subscribesRepository, PasswordEncoder pwEncoder, JwtService jwtService, HttpServletResponse httpServletResponse) {
+    private final JPAQueryFactory jpaqf;
+
+    public UserServiceImpl(final UserRepository userRepository, final SubscribesRepository subscribesRepository, PasswordEncoder pwEncoder, JwtService jwtService, HttpServletResponse httpServletResponse, JPAQueryFactory jpaqf) {
+        super(User.class);
         this.userRepository = userRepository;
         this.subscribesRepository = subscribesRepository;
         this.pwEncoder = pwEncoder;
         this.jwtService = jwtService;
         this.httpServletResponse = httpServletResponse;
+        this.jpaqf = jpaqf;
     }
 
     @Override
@@ -43,7 +50,6 @@ public class UserServiceImpl implements UserService {
             } else {
                 for (User f : finds) {
                     log.info("Get users : {}", f.getRoleKey());
-                    log.info("Get users : {}", f.getAccessRole());
                 }
                 return ResponseEntity.ok().body(finds);
             }
@@ -84,6 +90,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public ResponseEntity<?> logout() {
+        try {
+            Cookie cookie = new Cookie("refreshToken", null);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(0);
+            httpServletResponse.addCookie(cookie);
+            return ResponseEntity.ok().body("Logout success");
+        } catch (Exception e) {
+            log.error(e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @Override
     public ResponseEntity<?> create(final UserDTO user) {
         try {
             log.info("Creating user: {}", user);
@@ -104,25 +126,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO update(UserDTO user) {
+    public ResponseEntity<?> update(UserDTO user) {
         try {
-            log.info("Updating user: {}", user);
-            Optional<User> find = userRepository.findOneByBenderUuid(user.getBenderUuid());
-            if (find.isEmpty()) {
-                log.error("No user: {}", user);
-                return null;
+            User find = jpaqf.select(QUser.user)
+                    .from(QUser.user)
+                    .where(QUser.user.benderUuid.eq(user.getBenderUuid()))
+                    .fetchOne();
+            if (find == null) {
+                return ResponseEntity.notFound().build();
             } else {
-                User update = find.get();
-                Long uuid = update.getUserUuId();
-//                userRepository.updateUserByUserUuid(uuid, user.toEntity());
-//                User check = userRepository.findOneByUserId(user.getId()).get();
-                /*UserDTO returnData = user.toDTO(check);
-                log.info("Updated user: {}", returnData);
-                return returnData;*/
-                return null;
+                log.info("Updating user: {}", user);
+                return ResponseEntity.ok().body("Test field");
             }
         } catch (Exception e) {
-            return null;
+            return ResponseEntity.badRequest().body("Update fail");
         }
     }
 
@@ -130,9 +147,14 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<String> deleteUser(String benderUuid) {
         try {
             log.info("Deleting user: {}", benderUuid);
-            User user = userRepository.findOneByBenderUuid(benderUuid).get();
-            userRepository.deleteById(user.getUserUuId());
-            return ResponseEntity.ok().body("Delete user");
+            Optional<User> user = userRepository.findOneByBenderUuid(benderUuid);
+            if (user.isEmpty()) {
+                log.error("No user.\nBenderUuid : {}", benderUuid);
+                return ResponseEntity.notFound().build();
+            } else {
+                userRepository.deleteById(user.get().getUserUuId());
+            }
+            return ResponseEntity.ok().body("Delete ok");
         } catch (Exception e) {
             log.error(e);
             return ResponseEntity.notFound().build();

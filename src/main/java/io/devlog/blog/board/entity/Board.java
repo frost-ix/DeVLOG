@@ -20,6 +20,7 @@ public class Board {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long boardUuid;
 
+    @Builder.Default
     @CreationTimestamp
     private LocalDateTime boardDate = LocalDateTime.now();
 

@@ -5,7 +5,10 @@ import io.devlog.blog.user.enums.AccessRole;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
@@ -16,15 +19,20 @@ public class UserDTO {
     private String id;
     @Nullable
     private String pw;
+    @Nullable
     private String bender;
+    @Nullable
     private String benderUuid;
+    @Nullable
     private String name;
+    @Nullable
     private String mail;
+    @Nullable
     @Enumerated(EnumType.STRING)
     private AccessRole accessRole;
 
     @Builder
-    public UserDTO(@NonNull String id, @NonNull String pw, String bender, String benderUuid, String name, String mail) {
+    public UserDTO(@Nullable String id, @Nullable String pw, @Nullable String bender, @Nullable String benderUuid, @Nullable String name, @Nullable String mail) {
         this.id = id;
         this.pw = pw;
         this.bender = bender;

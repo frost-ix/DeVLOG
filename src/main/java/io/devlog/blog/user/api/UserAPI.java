@@ -1,7 +1,6 @@
 package io.devlog.blog.user.api;
 
 import io.devlog.blog.user.DTO.UserDTO;
-import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -29,16 +28,21 @@ public class UserAPI {
         return userService.login(user);
     }
 
+    @DeleteMapping("")
+    public ResponseEntity<?> logout() {
+        return userService.logout();
+    }
+
     @PostMapping("")
     public ResponseEntity<?> createUser(@Validated @ModelAttribute UserDTO user) {
         log.info(user);
         return userService.create(user);
     }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<String> updateUser(@PathVariable String userId, @ModelAttribute User user) {
+    @PatchMapping("")
+    public ResponseEntity<?> updateUser(@ModelAttribute UserDTO user) {
         log.info(user);
-        return ResponseEntity.ok().body("after update");
+        return userService.update(user);
     }
 
     @DeleteMapping("/{benderUuid}")

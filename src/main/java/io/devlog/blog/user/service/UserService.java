@@ -8,9 +8,11 @@ public interface UserService {
 
     ResponseEntity<?> login(UserDTO user);
 
+    ResponseEntity<?> logout();
+
     ResponseEntity<?> create(UserDTO user);
 
-    UserDTO update(UserDTO user);
+    ResponseEntity<?> update(UserDTO user);
 
     ResponseEntity<String> deleteUser(String benderUuid);
 
