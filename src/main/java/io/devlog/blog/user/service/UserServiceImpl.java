@@ -128,6 +128,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     @Override
     public ResponseEntity<?> update(UserDTO user) {
         try {
+            log.info("user : {}", user);
             User find = jpaqf.select(QUser.user)
                     .from(QUser.user)
                     .where(QUser.user.benderUuid.eq(user.getBenderUuid()))
