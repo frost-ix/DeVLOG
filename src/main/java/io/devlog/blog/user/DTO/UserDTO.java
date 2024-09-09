@@ -15,19 +15,12 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserDTO {
-    @Nullable
     private String id;
-    @Nullable
     private String pw;
-    @Nullable
     private String bender;
-    @Nullable
     private String benderUuid;
-    @Nullable
     private String name;
-    @Nullable
     private String mail;
-    @Nullable
     @Enumerated(EnumType.STRING)
     private AccessRole accessRole;
 

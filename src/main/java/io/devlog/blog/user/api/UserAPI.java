@@ -22,25 +22,20 @@ public class UserAPI {
         return userService.getUsers();
     }
 
-    @GetMapping("")
-    public ResponseEntity<?> login(@ModelAttribute UserDTO user) {
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserDTO user) {
         log.info("Entry : {}", user);
         return userService.login(user);
     }
 
-    @DeleteMapping("")
-    public ResponseEntity<?> logout() {
-        return userService.logout();
-    }
-
     @PostMapping("")
-    public ResponseEntity<?> createUser(@Validated @ModelAttribute UserDTO user) {
+    public ResponseEntity<?> createUser(@Validated @RequestBody UserDTO user) {
         log.info(user);
         return userService.create(user);
     }
 
     @PatchMapping("")
-    public ResponseEntity<?> updateUser(@ModelAttribute UserDTO user) {
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO user) {
         log.info(user);
         return userService.update(user);
     }

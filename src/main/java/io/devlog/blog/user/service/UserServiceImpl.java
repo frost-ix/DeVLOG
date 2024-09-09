@@ -10,6 +10,7 @@ import io.devlog.blog.user.repository.SubscribesRepository;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +63,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     @Override
     public ResponseEntity<?> login(UserDTO user) {
         try {
-            Optional<User> find = userRepository.findOneByBenderUuid(user.getBenderUuid());
+            Optional<User> find = userRepository.findOneByUserId(user.getId());
             if (find.isEmpty()) {
                 log.info("No account");
                 return ResponseEntity.notFound().build();
@@ -81,24 +82,9 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 cookie.setPath("/");
                 cookie.setMaxAge(60 * 60 * 24);
                 httpServletResponse.addCookie(cookie);
-                return ResponseEntity.ok().body("Login success. check cookie");
+                User r = find.get();
+                return ResponseEntity.status(200).body(r);
             }
-        } catch (Exception e) {
-            log.error(e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @Override
-    public ResponseEntity<?> logout() {
-        try {
-            Cookie cookie = new Cookie("refreshToken", null);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(0);
-            httpServletResponse.addCookie(cookie);
-            return ResponseEntity.ok().body("Logout success");
         } catch (Exception e) {
             log.error(e);
             return ResponseEntity.badRequest().build();
@@ -126,20 +112,28 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> update(UserDTO user) {
         try {
+            QUser q = QUser.user;
             log.info("user : {}", user);
-            User find = jpaqf.select(QUser.user)
-                    .from(QUser.user)
-                    .where(QUser.user.benderUuid.eq(user.getBenderUuid()))
+            User find = jpaqf.select(q)
+                    .from(q)
+                    .where(q.benderUuid.eq(user.getBenderUuid()))
                     .fetchOne();
             if (find == null) {
                 return ResponseEntity.notFound().build();
             } else {
                 log.info("Updating user: {}", user);
+                long check = jpaqf.update(q)
+                        .set(q.mail, user.getMail())
+                        .where(q.benderUuid.eq(user.getBenderUuid()))
+                        .execute();
+                log.info("update : {}", check);
                 return ResponseEntity.ok().body("Test field");
             }
         } catch (Exception e) {
+            log.error(e);
             return ResponseEntity.badRequest().body("Update fail");
         }
     }

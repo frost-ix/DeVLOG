@@ -8,8 +8,6 @@ public interface UserService {
 
     ResponseEntity<?> login(UserDTO user);
 
-    ResponseEntity<?> logout();
-
     ResponseEntity<?> create(UserDTO user);
 
     ResponseEntity<?> update(UserDTO user);
