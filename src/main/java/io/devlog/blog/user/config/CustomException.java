@@ -1,4 +1,4 @@
-package io.devlog.blog.user.DTO;
+package io.devlog.blog.user.config;
 
 import io.devlog.blog.user.enums.ErrorStatus;
 import lombok.Getter;

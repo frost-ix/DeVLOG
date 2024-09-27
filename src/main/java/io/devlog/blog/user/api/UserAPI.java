@@ -22,6 +22,11 @@ public class UserAPI {
         return userService.getUsers();
     }
 
+    @GetMapping("/{name}")
+    public ResponseEntity<?> getUser(@PathVariable String name, @RequestBody long userUuid) {
+        return userService.getUser(name, userUuid);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO user) {
         log.info("Entry : {}", user);
@@ -40,8 +45,8 @@ public class UserAPI {
         return userService.update(user);
     }
 
-    @DeleteMapping("/{benderUuid}")
-    public ResponseEntity<String> deleteUser(@PathVariable String benderUuid) {
-        return userService.deleteUser(benderUuid);
+    @DeleteMapping("/{userUuid}")
+    public ResponseEntity<String> deleteUser(@PathVariable long userUuid) {
+        return userService.deleteUser(userUuid);
     }
 }

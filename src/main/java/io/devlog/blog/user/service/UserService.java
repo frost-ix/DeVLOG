@@ -6,12 +6,14 @@ import org.springframework.http.ResponseEntity;
 public interface UserService {
     ResponseEntity<?> getUsers();
 
+    ResponseEntity<?> getUser(String name, long userUuid);
+
     ResponseEntity<?> login(UserDTO user);
 
     ResponseEntity<?> create(UserDTO user);
 
     ResponseEntity<?> update(UserDTO user);
 
-    ResponseEntity<String> deleteUser(String benderUuid);
+    ResponseEntity<String> deleteUser(long userUuid);
 
 }

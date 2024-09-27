@@ -4,9 +4,10 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.DTO.JwtToken;
 import io.devlog.blog.user.DTO.UserDTO;
+import io.devlog.blog.user.config.CustomException;
 import io.devlog.blog.user.entity.QUser;
 import io.devlog.blog.user.entity.User;
-import io.devlog.blog.user.repository.SubscribesRepository;
+import io.devlog.blog.user.enums.ErrorStatus;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,17 +25,17 @@ import java.util.Optional;
 @Log4j2
 public class UserServiceImpl extends QuerydslRepositorySupport implements UserService {
     private final UserRepository userRepository;
-    private final SubscribesRepository subscribesRepository;
     private final PasswordEncoder pwEncoder;
     private final JwtService jwtService;
     private final HttpServletResponse httpServletResponse;
 
     private final JPAQueryFactory jpaqf;
 
-    public UserServiceImpl(final UserRepository userRepository, final SubscribesRepository subscribesRepository, PasswordEncoder pwEncoder, JwtService jwtService, HttpServletResponse httpServletResponse, JPAQueryFactory jpaqf) {
+    public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
+                           JwtService jwtService, HttpServletResponse httpServletResponse,
+                           JPAQueryFactory jpaqf) {
         super(User.class);
         this.userRepository = userRepository;
-        this.subscribesRepository = subscribesRepository;
         this.pwEncoder = pwEncoder;
         this.jwtService = jwtService;
         this.httpServletResponse = httpServletResponse;
@@ -57,6 +58,23 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         } catch (Exception e) {
             log.error(e);
             return null;
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getUser(String name, long userUuid) {
+        try {
+            log.info("Get user : {}", name);
+            Optional<User> find = userRepository.findOneByUserUuid(userUuid);
+            if (find.isEmpty()) {
+                log.error("Not found user");
+                return ResponseEntity.badRequest().body(new CustomException(ErrorStatus.USER_NOT_FOUND));
+            } else {
+                return ResponseEntity.ok().body(find.get());
+            }
+        } catch (Exception e) {
+            log.error(e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -139,12 +157,12 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     }
 
     @Override
-    public ResponseEntity<String> deleteUser(String benderUuid) {
+    public ResponseEntity<String> deleteUser(long userUuid) {
         try {
-            log.info("Deleting user: {}", benderUuid);
-            Optional<User> user = userRepository.findOneByBenderUuid(benderUuid);
+            log.info("Deleting user: {}", userUuid);
+            Optional<User> user = userRepository.findOneByUserUuid(userUuid);
             if (user.isEmpty()) {
-                log.error("No user.\nBenderUuid : {}", benderUuid);
+                log.error("No user.\nBenderUuid : {}", userUuid);
                 return ResponseEntity.notFound().build();
             } else {
                 userRepository.deleteById(user.get().getUserUuId());

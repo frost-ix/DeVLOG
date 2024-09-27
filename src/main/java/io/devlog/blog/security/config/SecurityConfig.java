@@ -32,22 +32,9 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((req) ->
                         req
-                                .requestMatchers("/", "/index", "/board/**", "/user/**").permitAll()
+                                .requestMatchers("/", "/index", "/board/**", "/user/**", "/sub/**").permitAll()
                                 .requestMatchers("/api/oauth/**").permitAll()
                                 .anyRequest().authenticated());
-//        httpSecurity
-//                .oauth2Login((oauth2) -> {
-//                    oauth2.userInfoEndpoint((userInfo) -> userInfo.userService(customOAuth2UserService));
-//                });
-//        httpSecurity
-//                .formLogin((form) ->
-//                        form
-//                                .loginPage("/login").permitAll());
-//        httpSecurity
-//                .logout((auth) ->
-//                        auth
-//                                .logoutUrl("/logout")
-//                                .logoutSuccessUrl("/index.html"));
         return httpSecurity.build();
     }
 
