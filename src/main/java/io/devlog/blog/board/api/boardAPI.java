@@ -9,10 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Files;
 import java.util.Optional;
@@ -48,8 +45,8 @@ public class boardAPI {
     public ResponseEntity<?> getCategories() {
         return boardService.getCategories();
     }
-    @GetMapping("/detail")
-    public Optional<Board> getBoard(@RequestBody Long id) {
+    @GetMapping("/detail/{id}")
+    public Optional<Board> getBoard(@PathVariable Long id) {
         log.info("Get board : {}", id);
         return boardService.getBoard(id);
     }
@@ -58,8 +55,8 @@ public class boardAPI {
     public ResponseEntity<?> createBoard(@RequestBody BoardDTO boardDTO) {
         try {
             System.out.println(boardDTO);
-            Board createdBoard = boardService.create(boardDTO);
-            return ResponseEntity.ok(createdBoard);
+            boardService.create(boardDTO);
+            return ResponseEntity.ok(200);
         } catch (Exception e) {
             System.out.println(e);
             return ResponseEntity.badRequest().body("Create board error");
@@ -67,12 +64,26 @@ public class boardAPI {
     }
 
     @GetMapping("/update")
-    public ResponseEntity<?> updateBoard() {
-        return null;
+    public ResponseEntity<?> updateBoard(@RequestBody BoardDTO boardDTO) {
+        try {
+            boardService.update(boardDTO);
+            return ResponseEntity.ok(200);
+        } catch (Exception e) {
+            System.out.println(e);
+            return ResponseEntity.badRequest().body("Update board error");
+        }
     }
-    @GetMapping("/delete")
-    public ResponseEntity<?> deleteBoard(@RequestBody String id) {
-        boardService.deleteBoard(id);
-        return null;
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
+        try {
+            boardServiceImpl.deleteBoard(id);
+            System.out.println("delete board by id:"+id);
+            return ResponseEntity.ok(200);
+        } catch (Exception e) {
+            System.out.println("delete board by id:"+id);
+            System.out.println(e);
+            return ResponseEntity.badRequest().body("Delete board error");
+        }
     }
 }

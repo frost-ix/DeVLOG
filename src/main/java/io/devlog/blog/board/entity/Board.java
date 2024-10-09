@@ -19,7 +19,9 @@ public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long boardUuid;
+
     private Long userUuid;
+    private String userName;
 
     @Builder.Default
     @CreationTimestamp

@@ -20,14 +20,16 @@ public class BoardDTO {
     private String title;
     private String content;
     private List<String> tags;
+    private String userName;
     private Long userUuID;
 
     @Builder
-    public BoardDTO(@Nullable Long boardUuid,@Nullable String categories, @Nullable String title, @Nullable String content,@Nullable List<String> tags, @Nullable Long userUuID) {
+    public BoardDTO(@Nullable Long boardUuid,@Nullable String categories, @Nullable String title, @Nullable String content,@Nullable List<String> tags,@Nullable String userName,@Nullable Long userUuID) {
         this.boardUuid = boardUuid;
         this.title = title;
         this.content = content;
         this.tags = tags;
+        this.userName = userName;
         this.userUuID = userUuID;
         this.categories = categories;
     }
@@ -51,6 +53,7 @@ public class BoardDTO {
                 .boardContent(content)
                 .categories(categories)
                 .tags(tags)
+                .userName(userName)
                 .userUuid(userUuID)
                 .build();
     }

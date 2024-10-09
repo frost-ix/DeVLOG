@@ -15,9 +15,9 @@ public interface BoardService {
 
     Board create(BoardDTO boardDTO);
 
-    Board update(Board board);
+    Board update(BoardDTO boardDTO);
 
-    void deleteBoard(String id);
+    void deleteBoard(Long id);
 
     void deleteAll();
 

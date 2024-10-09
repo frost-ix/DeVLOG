@@ -31,9 +31,18 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> getBoards() {
         try {
-            Optional<List<Board>> boards = Optional.of(boardRepository.findAll());
-            log.info("get boards");
-            return ResponseEntity.ok(boards);
+            Optional<List<Board>> boards = Optional.of(boardRepository.findBoardBy());
+            Optional<List<BoardDTO>> boardDTOS = boards.map(boardList -> boardList.stream()
+                    .map(board -> BoardDTO.builder()
+                            .boardUuid(board.getBoardUuid())
+                            .categories(board.getCategories().getCateName())
+                            .title(board.getBoardTitle())
+                            .content(board.getBoardContent())
+                            .userUuID(board.getUserUuid())
+                            .build())
+                    .collect(Collectors.toList()));
+            return ResponseEntity.ok(boardDTOS);
+
         } catch (Exception e) {
             log.error("get boards error", e);
             return ResponseEntity.badRequest().body("get boards error");
@@ -85,15 +94,42 @@ public class BoardServiceImpl implements BoardService {
 
 
     @Override
-    public Board update(Board board) {
-        boardRepository.save(board);
-        return board;
+    public Board update(BoardDTO boardDTO) {
+        Board originalBoard = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
+                .orElseThrow(() -> new RuntimeException("게시물을 찾을 수 없습니다."));
+
+        Categories category = cateRepository.findByCateName(boardDTO.getCategories())
+                .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
+
+        List<String> tagNames = boardDTO.getTags();
+        List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
+
+        List<Tags> newTags = tagNames.stream()
+                .filter(tagName -> recvtags.stream()
+                        .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
+                .map(tagName -> new Tags(null, originalBoard, tagName))
+                .collect(Collectors.toList());
+
+        if (!newTags.isEmpty()) {
+            tagRepository.saveAll(newTags);
+        }
+
+        recvtags.addAll(newTags);
+
+        originalBoard.setBoardTitle(boardDTO.getTitle());
+        originalBoard.setBoardContent(boardDTO.getContent());
+        originalBoard.setCategories(category);
+        originalBoard.setTags(recvtags); // 태그 리스트 업데이트
+
+        // 8. 수정된 게시물 저장 및 반환
+        return boardRepository.save(originalBoard);
     }
 
+
     @Override
-    public void deleteBoard(String id) {
+    public void deleteBoard(Long id) {
         boardRepository.deleteById(id);
-        log.info("delete board by id: {}", id);
+        System.out.println("delete board by id:"+id);
     }
 
     @Override
