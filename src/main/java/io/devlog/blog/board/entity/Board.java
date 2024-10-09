@@ -19,6 +19,7 @@ public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long boardUuid;
+    private Long userUuid;
 
     @Builder.Default
     @CreationTimestamp
@@ -43,4 +44,5 @@ public class Board {
     @JsonManagedReference
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
     private List<Images> images;
+
 }

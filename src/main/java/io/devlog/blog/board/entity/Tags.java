@@ -11,11 +11,16 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder(toBuilder = true)
 public class Tags {
+
     @Id
-    @ManyToOne
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long taguid;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "boardUuid")
     @JsonBackReference
     private Board board;
 
     private String tagName;
+
 }
