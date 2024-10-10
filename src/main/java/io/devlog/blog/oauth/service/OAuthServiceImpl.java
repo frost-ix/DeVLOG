@@ -71,7 +71,6 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     private String loginGoogle(String code, String state) {
-        // To-do
         ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, "google");
         ObjectMapper tokenObject = new ObjectMapper();
         GoogleTokenDTO googleTokenDTO = null;

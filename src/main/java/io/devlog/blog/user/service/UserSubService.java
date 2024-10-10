@@ -4,7 +4,7 @@ import io.devlog.blog.user.DTO.SubscribesDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface UserSubService {
-    ResponseEntity<?> getUserSubs();
+    ResponseEntity<?> getUsersSub();
 
     ResponseEntity<?> getUserSub(long subUuid);
 

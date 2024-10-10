@@ -50,9 +50,6 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 log.error("No user");
                 return ResponseEntity.notFound().build();
             } else {
-                for (User f : finds) {
-                    log.info("Get users : {}", f.getRoleKey());
-                }
                 return ResponseEntity.ok().body(finds);
             }
         } catch (Exception e) {
