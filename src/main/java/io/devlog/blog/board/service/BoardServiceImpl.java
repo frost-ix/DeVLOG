@@ -61,81 +61,104 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Optional<Board> getBoard(Long id) {
+    public ResponseEntity<?> getBoard(Long id) {
         try {
             log.info("get board by id: {}", id);
-            return boardRepository.findOneByBoardUuid(id);
+            Optional<Board> board = boardRepository.findOneByBoardUuid(id);
+            return ResponseEntity.ok().body(board);
         } catch (Exception e) {
             log.error("get board by id error", e);
-            return Optional.empty();
+            return ResponseEntity.badRequest().body("get board by id error");
         }
     }
 
     @Override
-    public Board create(BoardDTO boardDTO) {
-        Categories category = cateRepository.findByCateName(boardDTO.getCategories())
-                .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
-        List<String> tagNames = boardDTO.getTags();
-        List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
+    public ResponseEntity<?> create(BoardDTO boardDTO) {
+        try{
+            Optional<Categories> category = cateRepository.findByCateName(boardDTO.getCategories());
+            List<String> tagNames = boardDTO.getTags();
+            List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
 
-        List<Tags> newTags = tagNames.stream()
-                .filter(tagName -> recvtags.stream()
-                        .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
-                .map(tagName -> new Tags(null, null, tagName))
-                .collect(Collectors.toList());
+            List<Tags> newTags = tagNames.stream()
+                    .filter(tagName -> recvtags.stream()
+                            .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
+                    .map(tagName -> new Tags(null, null, tagName))
+                    .collect(Collectors.toList());
 
-        if (!newTags.isEmpty()) {
-            tagRepository.saveAll(newTags);
+            if (!newTags.isEmpty()) {
+                tagRepository.saveAll(newTags);
+            }
+            recvtags.addAll(newTags);
+            Board board = boardDTO.toEntity(category.orElse(null), recvtags);
+            boardRepository.save(board);
+            return ResponseEntity.status(200).body("create board success");
         }
-        recvtags.addAll(newTags);
-        Board board = boardDTO.toEntity(category, recvtags);
-        return boardRepository.save(board);
-    }
-
-
-    @Override
-    public Board update(BoardDTO boardDTO) {
-        Board originalBoard = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
-                .orElseThrow(() -> new RuntimeException("게시물을 찾을 수 없습니다."));
-
-        Categories category = cateRepository.findByCateName(boardDTO.getCategories())
-                .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
-
-        List<String> tagNames = boardDTO.getTags();
-        List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
-
-        List<Tags> newTags = tagNames.stream()
-                .filter(tagName -> recvtags.stream()
-                        .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
-                .map(tagName -> new Tags(null, originalBoard, tagName))
-                .collect(Collectors.toList());
-
-        if (!newTags.isEmpty()) {
-            tagRepository.saveAll(newTags);
+        catch (Exception e){
+            log.error("create board error", e);
+            return ResponseEntity.badRequest().body("create board error");
         }
 
-        recvtags.addAll(newTags);
-
-        originalBoard.setBoardTitle(boardDTO.getTitle());
-        originalBoard.setBoardContent(boardDTO.getContent());
-        originalBoard.setCategories(category);
-        originalBoard.setTags(recvtags); // 태그 리스트 업데이트
-
-        // 8. 수정된 게시물 저장 및 반환
-        return boardRepository.save(originalBoard);
     }
 
 
     @Override
-    public void deleteBoard(Long id) {
-        boardRepository.deleteById(id);
-        System.out.println("delete board by id:"+id);
+    public ResponseEntity<?> update(BoardDTO boardDTO) {
+        try{
+            Board originalBoard = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
+                    .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+            Categories category = cateRepository.findByCateName(boardDTO.getCategories())
+                    .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
+
+            List<String> tagNames = boardDTO.getTags();
+            List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
+
+            List<Tags> newTags = tagNames.stream()
+                    .filter(tagName -> recvtags.stream()
+                            .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
+                    .map(tagName -> new Tags(null, originalBoard, tagName))
+                    .collect(Collectors.toList());
+
+            if (!newTags.isEmpty()) {
+                tagRepository.saveAll(newTags);
+            }
+
+            recvtags.addAll(newTags);
+
+            originalBoard.setBoardTitle(boardDTO.getTitle());
+            originalBoard.setBoardContent(boardDTO.getContent());
+            originalBoard.setCategories(category);
+            originalBoard.setTags(recvtags); // 태그 리스트 업데이트
+            boardRepository.save(originalBoard);
+            return ResponseEntity.status(200).body("update board success");
+        }
+        catch (Exception e){
+            log.error("update board error", e);
+            return ResponseEntity.badRequest().body("update board error");
+        }
+
+    }
+
+
+    @Override
+    public ResponseEntity<?> deleteBoard(Long id) {
+        try{
+            boardRepository.deleteById(id);
+            return ResponseEntity.status(200).body("200");
+        }catch (Exception e){
+            log.error("delete board by id error", e);
+            return ResponseEntity.badRequest().body("delete board by id error");
+        }
     }
 
     @Override
-    public void deleteAll() {
-        boardRepository.deleteAll();
-        log.info("delete all boards");
+    public ResponseEntity<?> deleteAll() {
+        try{
+            boardRepository.deleteAll();
+            return ResponseEntity.status(200).body("200");
+        }catch (Exception e){
+            log.error("delete all boards error", e);
+            return ResponseEntity.badRequest().body("delete all boards error");
+        }
     }
 
     @Override

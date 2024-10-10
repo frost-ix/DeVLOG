@@ -45,45 +45,30 @@ public class boardAPI {
     public ResponseEntity<?> getCategories() {
         return boardService.getCategories();
     }
+    
     @GetMapping("/detail/{id}")
-    public Optional<Board> getBoard(@PathVariable Long id) {
+    public ResponseEntity<?> getBoard(@PathVariable Long id) {
         log.info("Get board : {}", id);
         return boardService.getBoard(id);
     }
 
     @GetMapping("/create")
     public ResponseEntity<?> createBoard(@RequestBody BoardDTO boardDTO) {
-        try {
-            System.out.println(boardDTO);
-            boardService.create(boardDTO);
-            return ResponseEntity.ok(200);
-        } catch (Exception e) {
-            System.out.println(e);
-            return ResponseEntity.badRequest().body("Create board error");
-        }
+            log.info("Create board : {}", boardDTO);
+            return boardService.create(boardDTO);
+
     }
 
     @GetMapping("/update")
     public ResponseEntity<?> updateBoard(@RequestBody BoardDTO boardDTO) {
-        try {
-            boardService.update(boardDTO);
-            return ResponseEntity.ok(200);
-        } catch (Exception e) {
-            System.out.println(e);
-            return ResponseEntity.badRequest().body("Update board error");
-        }
+            log.info("Update board : {}", boardDTO);
+            return boardService.update(boardDTO);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
-        try {
-            boardServiceImpl.deleteBoard(id);
-            System.out.println("delete board by id:"+id);
-            return ResponseEntity.ok(200);
-        } catch (Exception e) {
-            System.out.println("delete board by id:"+id);
-            System.out.println(e);
-            return ResponseEntity.badRequest().body("Delete board error");
-        }
+            log.info("Delete board : {}", id);
+            return boardServiceImpl.deleteBoard(id);
+
     }
 }

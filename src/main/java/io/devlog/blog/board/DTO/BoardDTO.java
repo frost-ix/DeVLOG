@@ -2,6 +2,7 @@ package io.devlog.blog.board.DTO;
 
 import io.devlog.blog.board.entity.Board;
 import io.devlog.blog.board.entity.Categories;
+import io.devlog.blog.board.entity.Images;
 import io.devlog.blog.board.entity.Tags;
 import jakarta.annotation.Nullable;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Data
@@ -24,7 +26,7 @@ public class BoardDTO {
     private Long userUuID;
 
     @Builder
-    public BoardDTO(@Nullable Long boardUuid,@Nullable String categories, @Nullable String title, @Nullable String content,@Nullable List<String> tags,@Nullable String userName,@Nullable Long userUuID) {
+    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID) {
         this.boardUuid = boardUuid;
         this.title = title;
         this.content = content;

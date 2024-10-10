@@ -10,16 +10,16 @@ public interface BoardService {
     ResponseEntity<?> getBoards();
 
     ResponseEntity<?> getCategories();
-    
-    Optional<Board> getBoard(Long id);
 
-    Board create(BoardDTO boardDTO);
+    ResponseEntity<?> getBoard(Long id);
 
-    Board update(BoardDTO boardDTO);
+    ResponseEntity<?> create(BoardDTO boardDTO);
 
-    void deleteBoard(Long id);
+    ResponseEntity<?> update(BoardDTO boardDTO);
 
-    void deleteAll();
+    ResponseEntity<?> deleteBoard(Long id);
+
+    ResponseEntity<?> deleteAll();
 
     boolean exists(String id);
 
