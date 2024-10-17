@@ -12,8 +12,9 @@ public interface UserService {
 
     ResponseEntity<?> create(UserDTO user);
 
-    ResponseEntity<?> update(UserDTO user);
+    ResponseEntity<?> update(long userUuid, UserDTO user);
 
     ResponseEntity<String> deleteUser(long userUuid);
 
+    ResponseEntity<?> passwordCheck(long userUuid, String password);
 }

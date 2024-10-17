@@ -5,7 +5,6 @@ import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.DTO.JwtToken;
 import io.devlog.blog.user.DTO.UserDTO;
 import io.devlog.blog.user.config.CustomException;
-import io.devlog.blog.user.entity.QUser;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.enums.ErrorStatus;
 import io.devlog.blog.user.repository.UserRepository;
@@ -42,6 +41,10 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         this.jpaqf = jpaqf;
     }
 
+    /***
+     * Get all users
+     * @return ResponseEntity
+     */
     @Override
     public ResponseEntity<?> getUsers() {
         try {
@@ -58,6 +61,12 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         }
     }
 
+    /***
+     * Get user by name
+     * @param name user name
+     * @param userUuid user uuid
+     * @return ResponseEntity
+     */
     @Override
     public ResponseEntity<?> getUser(String name, long userUuid) {
         try {
@@ -75,6 +84,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         }
     }
 
+    /***
+     * Login check
+     * @param user UserDTO (id, pw)
+     * @return ResponseEntity
+     */
     @Override
     public ResponseEntity<?> login(UserDTO user) {
         try {
@@ -106,6 +120,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         }
     }
 
+    /***
+     * Create user
+     * @param user UserDTO (id, pw, bender, benderUuid, name, mail)
+     * @return ResponseEntity
+     */
     @Override
     public ResponseEntity<?> create(final UserDTO user) {
         try {
@@ -116,7 +135,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             } else {
                 user.setPw(pwEncoder.encode(user.getPw()));
                 User check = userRepository.save(user.toEntity());
-                UserDTO returnData = user.toDTO(check);
+                UserDTO returnData = UserDTO.toDTO(check);
                 log.info("Created user: {}", returnData);
                 return ResponseEntity.ok().body(returnData);
             }
@@ -126,33 +145,38 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         }
     }
 
+    /***
+     * Update user
+     * @param userUuid user uuid
+     * @param user UserDTO (id, pw, bender, benderUuid, name, mail)
+     * @return ResponseEntity
+     */
     @Override
     @Transactional
-    public ResponseEntity<?> update(UserDTO user) {
+    public ResponseEntity<?> update(long userUuid, UserDTO user) {
         try {
-            QUser q = QUser.user;
-            log.info("user : {}", user);
-            User find = jpaqf.select(q)
-                    .from(q)
-                    .where(q.benderUuid.eq(user.getBenderUuid()))
-                    .fetchOne();
-            if (find == null) {
+            if (userRepository.findOneByUserUuid(userUuid).isEmpty()) {
                 return ResponseEntity.notFound().build();
             } else {
-                log.info("Updating user: {}", user);
-                long check = jpaqf.update(q)
-                        .set(q.mail, user.getMail())
-                        .where(q.benderUuid.eq(user.getBenderUuid()))
-                        .execute();
-                log.info("update : {}", check);
-                return ResponseEntity.ok().body("Test field");
+                String pw = pwEncoder.encode(user.getPw());
+                user.setPw(pw);
+                int e = userRepository.updateUserByUserUuid(userUuid, pw, user.getName(), user.getMail());
+                if (e == 0) {
+                    return ResponseEntity.badRequest().body("Update fail");
+                }
+                return ResponseEntity.ok().build();
             }
         } catch (Exception e) {
-            log.error(e);
-            return ResponseEntity.badRequest().body("Update fail");
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body("Check Exception in server");
         }
     }
 
+    /***
+     * Delete user
+     * @param userUuid user uuid
+     * @return ResponseEntity
+     */
     @Override
     public ResponseEntity<String> deleteUser(long userUuid) {
         try {
@@ -168,6 +192,26 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         } catch (Exception e) {
             log.error(e);
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /***
+     * Check password
+     * @param userUuid user uuid
+     * @param password password
+     * @return ResponseEntity
+     */
+    @Override
+    public ResponseEntity<?> passwordCheck(long userUuid, String password) {
+        try {
+            if (userRepository.findOneByUserUuid(userUuid).isPresent()) {
+                return ResponseEntity.ok(pwEncoder.matches(password, userRepository.findOneByUserUuid(userUuid).get().getUserPw()));
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            log.error(e);
+            return ResponseEntity.badRequest().build();
         }
     }
 }

@@ -39,14 +39,19 @@ public class UserAPI {
         return userService.create(user);
     }
 
-    @PatchMapping("")
-    public ResponseEntity<?> updateUser(@RequestBody UserDTO user) {
+    @PatchMapping("/{userUuid}")
+    public ResponseEntity<?> updateUser(@PathVariable long userUuid, @RequestBody UserDTO user) {
         log.info(user);
-        return userService.update(user);
+        return userService.update(userUuid, user);
     }
 
     @DeleteMapping("/{userUuid}")
     public ResponseEntity<String> deleteUser(@PathVariable long userUuid) {
         return userService.deleteUser(userUuid);
+    }
+
+    @PostMapping("/{userUuid}/check")
+    public ResponseEntity<?> passwordCheck(@PathVariable long userUuid, @RequestBody String password) {
+        return userService.passwordCheck(userUuid, password);
     }
 }
