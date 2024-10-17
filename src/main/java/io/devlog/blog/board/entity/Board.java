@@ -20,6 +20,9 @@ public class Board {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long boardUuid;
 
+    private Long userUuid;
+    private String userName;
+
     @Builder.Default
     @CreationTimestamp
     private LocalDateTime boardDate = LocalDateTime.now();
@@ -43,4 +46,5 @@ public class Board {
     @JsonManagedReference
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
     private List<Images> images;
+
 }

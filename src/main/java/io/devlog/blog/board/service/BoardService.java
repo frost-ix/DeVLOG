@@ -1,5 +1,6 @@
 package io.devlog.blog.board.service;
 
+import io.devlog.blog.board.DTO.BoardDTO;
 import io.devlog.blog.board.entity.Board;
 import org.springframework.http.ResponseEntity;
 
@@ -9,16 +10,16 @@ public interface BoardService {
     ResponseEntity<?> getBoards();
 
     ResponseEntity<?> getCategories();
-    
-    Optional<Board> getBoard(String id);
 
-    Board create(Board board);
+    ResponseEntity<?> getBoard(Long id);
 
-    Board update(Board board);
+    ResponseEntity<?> create(BoardDTO boardDTO);
 
-    void delete(String id);
+    ResponseEntity<?> update(BoardDTO boardDTO);
 
-    void deleteAll();
+    ResponseEntity<?> deleteBoard(Long id);
+
+    ResponseEntity<?> deleteAll();
 
     boolean exists(String id);
 
