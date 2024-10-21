@@ -2,8 +2,7 @@ package io.devlog.blog.board.DTO;
 
 import io.devlog.blog.board.entity.Board;
 import io.devlog.blog.board.entity.Categories;
-import io.devlog.blog.board.entity.Images;
-import io.devlog.blog.board.entity.Tags;
+import io.devlog.blog.board.entity.BoardTags;
 import jakarta.annotation.Nullable;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.AccessLevel;
 
 import java.util.List;
-import java.util.Objects;
-
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -36,25 +34,27 @@ public class BoardDTO {
         this.categories = categories;
     }
 
-//    public BoardDTO toDTO(Board board) {
-//        return BoardDTO.builder()
-//                .boardUuid(Objects.requireNonNull(board.getBoardUuid()))
-//                .categories(Objects.requireNonNull(board.getCategories()))
-//                .title(Objects.requireNonNull(board.getBoardTitle()))
-//                .content(Objects.requireNonNull(board.getBoardContent()))
-//                .tags(Objects.requireNonNull(board.getTags()))
-//                .userUuID(Objects.requireNonNull(board.getUserUuid()))
-//                .build();
-//
-//    }
+    public static BoardDTO fromEntity(Board board) {
+        return BoardDTO.builder()
+                .boardUuid(board.getBoardUuid())
+                .categories(board.getCategories().getCateName())
+                .title(board.getBoardTitle())
+                .content(board.getBoardContent())
+                .tags(board.getBoardTags().stream()
+                        .map(boardTag -> boardTag.getTag().getTagName())
+                        .collect(Collectors.toList()))
+                .userName(board.getUserName())
+                .userUuID(board.getUserUuid())
+                .build();
+    }
 
-    public Board toEntity(Categories categories, List<Tags> tags) {
+    public Board toEntity(Categories categories, List<BoardTags> boardTags) {
         return Board.builder()
                 .boardUuid(boardUuid)
                 .boardTitle(title)
                 .boardContent(content)
                 .categories(categories)
-                .tags(tags)
+                .boardTags(boardTags)
                 .userName(userName)
                 .userUuid(userUuID)
                 .build();
