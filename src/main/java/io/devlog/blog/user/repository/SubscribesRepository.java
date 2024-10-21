@@ -12,4 +12,7 @@ import java.util.List;
 public interface SubscribesRepository extends JpaRepository<Subscribes, Long> {
     @Query("SELECT s FROM Subscribes s WHERE s.user.userUuid =:userUuid")
     List<Subscribes> findByUserUuid(@Param("userUuid") long userUuid);
+
+    @Query("select 1 from Subscribes s where s.subUser = :subUser")
+    boolean existsBySubUserUuid(@Param("subUser") long subUserUuid);
 }

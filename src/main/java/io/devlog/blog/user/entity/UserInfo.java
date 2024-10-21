@@ -13,6 +13,8 @@ import lombok.*;
 @Builder(toBuilder = true)
 public class UserInfo {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long infoUuid;
     @OneToOne(cascade = CascadeType.ALL)
     @JsonBackReference
     @JoinColumn(name = "userUuid")

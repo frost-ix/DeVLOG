@@ -1,6 +1,7 @@
 package io.devlog.blog.user.api;
 
 import io.devlog.blog.user.DTO.UserDTO;
+import io.devlog.blog.user.enums.AccessRole;
 import io.devlog.blog.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +23,6 @@ public class UserAPI {
         return userService.getUsers();
     }
 
-    @GetMapping("/{name}")
-    public ResponseEntity<?> getUser(@PathVariable String name, @RequestBody long userUuid) {
-        return userService.getUser(name, userUuid);
-    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO user) {
         log.info("Entry : {}", user);
@@ -35,6 +31,7 @@ public class UserAPI {
 
     @PostMapping("")
     public ResponseEntity<?> createUser(@Validated @RequestBody UserDTO user) {
+        user.setAccessRole(AccessRole.CLIENT);
         log.info(user);
         return userService.create(user);
     }
@@ -46,7 +43,7 @@ public class UserAPI {
     }
 
     @DeleteMapping("/{userUuid}")
-    public ResponseEntity<String> deleteUser(@PathVariable long userUuid) {
+    public ResponseEntity<?> deleteUser(@PathVariable long userUuid) {
         return userService.deleteUser(userUuid);
     }
 

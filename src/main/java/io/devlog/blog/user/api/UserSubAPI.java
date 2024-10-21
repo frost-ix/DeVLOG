@@ -22,14 +22,21 @@ public class UserSubAPI {
         return userSubService.getUsersSub();
     }
 
+    @GetMapping("/{userUuid}/count")
+    public ResponseEntity<?> getUsersSubCount(@PathVariable long userUuid) {
+        log.info("All Subscribe count");
+        return userSubService.getUsersSubCount(userUuid);
+    }
+
+
     @GetMapping("/{userUuid}")
     public ResponseEntity<?> getUserSub(@PathVariable long userUuid) {
         return userSubService.getUserSub(userUuid);
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> addUserSub(@RequestBody SubscribesDTO sbDTO) {
-        return userSubService.addUserSub(sbDTO);
+    @PostMapping("/{userUuid}")
+    public ResponseEntity<?> addUserSub(@PathVariable long userUuid, @RequestBody SubscribesDTO sbDTO) {
+        return userSubService.addUserSub(userUuid, sbDTO);
     }
 
     @DeleteMapping("")
