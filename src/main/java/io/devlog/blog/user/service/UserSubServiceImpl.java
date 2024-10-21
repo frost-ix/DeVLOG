@@ -1,7 +1,6 @@
 package io.devlog.blog.user.service;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.enums.Status;
 import io.devlog.blog.user.DTO.SubscribesDTO;
 import io.devlog.blog.user.DTO.UserDTO;
@@ -10,6 +9,7 @@ import io.devlog.blog.user.entity.Subscribes;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.repository.SubscribesRepository;
 import io.devlog.blog.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.http.ResponseEntity;
@@ -75,46 +75,57 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
                 return ResponseEntity.ok(subUsers);
             }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(Status.BAD_REQUEST);
         }
     }
 
     @Override
     public ResponseEntity<?> addUserSub(long userUuid, SubscribesDTO sbDTO) {
         try {
-            sbDTO.setUserUuid(userUuid);
-            if (sbRepo.existsBySubUserUuid(sbDTO.getSubUser())) {
-                throw new CustomException(Status.CONFLICT);
+            if (userUuid == sbDTO.getSubUser()) {
+                return ResponseEntity.badRequest().body(Status.CONFLICT);
             }
-            return ResponseEntity.ok(sbRepo.save(sbDTO.toEntity()));
+            if (sbRepo.existsBySubUser(sbDTO.getSubUser())) {
+                return ResponseEntity.badRequest().body(Status.CONFLICT);
+            } else {
+                sbDTO.setUserUuid(userUuid);
+                sbRepo.save(sbDTO.toEntity());
+                return ResponseEntity.ok(Status.CREATED);
+            }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e);
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(Status.BAD_REQUEST);
         }
     }
 
+    @Transactional
     @Override
-    public ResponseEntity<?> deleteUserSub(long subUuid) {
+    public ResponseEntity<?> deleteUserSub(SubscribesDTO sbDTO) {
         try {
-            if (!sbRepo.existsBySubUserUuid(subUuid)) {
-                return ResponseEntity.badRequest().body(new CustomException(Status.NO_CONTENT));
+            if (!sbRepo.existsBySubUser(sbDTO.getSubUser())) {
+                return ResponseEntity.badRequest().body(Status.NO_CONTENT);
+            } else {
+                sbRepo.deleteBySubUser(sbDTO.getSubUser());
+                return ResponseEntity.ok(Status.OK);
             }
-            sbRepo.deleteById(subUuid);
-            return ResponseEntity.ok("Deleted");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e);
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(Status.BAD_REQUEST);
         }
     }
 
+    @Transactional
     @Override
-    public ResponseEntity<?> deleteUserSubs(long userUuid) {
+    public ResponseEntity<?> deleteUserSubs(SubscribesDTO sbDTO) {
         try {
             List<Subscribes> listSub = jpaqf.select(QSubscribes.subscribes)
                     .from(QSubscribes.subscribes)
-                    .where(QSubscribes.subscribes.user.userUuid.eq(userUuid))
+                    .where(QSubscribes.subscribes.user.userUuid.eq(sbDTO.getUserUuid())
+                            .and(QSubscribes.subscribes.subUser.eq(sbDTO.getSubUser())))
                     .stream().toList();
             return ResponseEntity.ok(listSub);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(Status.BAD_REQUEST);
         }
     }
 }

@@ -39,14 +39,16 @@ public class UserSubAPI {
         return userSubService.addUserSub(userUuid, sbDTO);
     }
 
+    @DeleteMapping("/{userUuid}")
+    public ResponseEntity<?> deleteUserSub(@PathVariable long userUuid, @RequestBody SubscribesDTO sbDTO) {
+        log.info("Access : {}", userUuid);
+        return userSubService.deleteUserSub(sbDTO);
+    }
+
     @DeleteMapping("")
-    public ResponseEntity<?> deleteUserSubs(@RequestBody long userUuid) {
+    public ResponseEntity<?> deleteUserSubs(@RequestBody SubscribesDTO userUuid) {
         return userSubService.deleteUserSubs(userUuid);
     }
 
-    @DeleteMapping("/{subUuid}")
-    public ResponseEntity<?> deleteUserSub(@PathVariable long subUuid) {
-        return userSubService.deleteUserSub(subUuid);
-    }
 
 }

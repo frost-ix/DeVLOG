@@ -34,20 +34,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AccessRole accessRole;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "userUuid")
     @JsonManagedReference
     private UserInfo userInfo;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Subscribes> subscribes;
-
-    public User update(String name, String mail) {
-        this.name = name;
-        this.mail = mail;
-        return this;
-    }
 
     public String getRoleKey() {
         return this.accessRole.getKey();

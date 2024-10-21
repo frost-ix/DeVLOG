@@ -2,12 +2,19 @@ package io.devlog.blog.user.repository;
 
 import io.devlog.blog.user.entity.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
+    @Modifying
     @Query("UPDATE UserInfo u " +
-            " set  u = :info, u.user.userUuid = :userUuid" +
+            "set u.userGit = :userGit, u.userIcon = :userIcon, u.userInsta = :userInsta, u.userSummary = :userSummary, u.userX = :userX" +
             " WHERE u.user.userUuid = :userUuid")
-    int updateInformation(@Param("userUuid") long userUuid, @Param("info") UserInfo info);
+    int updateInformation(@Param("userUuid") long userUuid,
+                          @Param("userIcon") String userIcon, @Param("userSummary") String userSummary,
+                          @Param("userGit") String userGit, @Param("userX") String userX, @Param("userInsta") String userInsta);
+
+    @Query("SELECT u FROM UserInfo u WHERE u.user.userUuid = :userUuid")
+    UserInfo findByUserUuid(@Param("userUuid") long userUuid);
 }

@@ -12,7 +12,7 @@ public interface UserSubService {
 
     ResponseEntity<?> addUserSub(long userUuid, SubscribesDTO sbDTO);
 
-    ResponseEntity<?> deleteUserSub(long subUuid);
+    ResponseEntity<?> deleteUserSub(SubscribesDTO sbDTO);
 
-    ResponseEntity<?> deleteUserSubs(long userUuid);
+    ResponseEntity<?> deleteUserSubs(SubscribesDTO sbDTO);
 }

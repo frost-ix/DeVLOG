@@ -6,14 +6,14 @@ import lombok.Getter;
 @Getter
 public class UserInfoDTO {
     private final String userIcon;
-    private final String userInfo;
+    private final String userSummary;
     private final String userGit;
     private final String userX;
     private final String userInsta;
 
-    public UserInfoDTO(String userIcon, String userInfo, String userGit, String userX, String userInsta) {
+    public UserInfoDTO(String userIcon, String userSummary, String userGit, String userX, String userInsta) {
         this.userIcon = userIcon;
-        this.userInfo = userInfo;
+        this.userSummary = userSummary;
         this.userGit = userGit;
         this.userX = userX;
         this.userInsta = userInsta;
@@ -22,7 +22,7 @@ public class UserInfoDTO {
     public UserInfo toEntity() {
         return UserInfo.builder()
                 .userIcon(userIcon)
-                .userInfo(userInfo)
+                .userSummary(userSummary)
                 .userGit(userGit)
                 .userX(userX)
                 .userInsta(userInsta)
