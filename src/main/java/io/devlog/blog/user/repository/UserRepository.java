@@ -1,6 +1,7 @@
 package io.devlog.blog.user.repository;
 
 import io.devlog.blog.user.entity.User;
+import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,6 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u from User u where u.userUuid = :userUuid")
     Optional<User> findByUserUuid(Long userUuid);
 
+    @Transactional
     @Modifying
     @Query("update User u " +
             " set u.userPw = :pw, u.name = :name, u.mail = :mail where u.userUuid = :userUuid")

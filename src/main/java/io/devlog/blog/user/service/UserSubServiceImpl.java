@@ -98,7 +98,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
         }
     }
 
-    @Transactional
+
     @Override
     public ResponseEntity<?> deleteUserSub(SubscribesDTO sbDTO) {
         try {

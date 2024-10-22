@@ -1,6 +1,7 @@
 package io.devlog.blog.user.repository;
 
 import io.devlog.blog.user.entity.Subscribes;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,5 +16,6 @@ public interface SubscribesRepository extends JpaRepository<Subscribes, Long> {
 
     boolean existsBySubUser(long subUser);
 
+    @Transactional
     void deleteBySubUser(long subUser);
 }

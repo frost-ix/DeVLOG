@@ -7,7 +7,6 @@ import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.entity.UserInfo;
 import io.devlog.blog.user.repository.UserInfoRepository;
 import io.devlog.blog.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +31,7 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
         return ResponseEntity.ok(userInfoRepository.findByUserUuid(userUuid));
     }
 
-    @Transactional
+
     @Override
     public ResponseEntity<?> updateUserInfo(long userUuid, UserInfoDTO info) {
         try {
@@ -50,7 +49,6 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
                 UserInfo ui = info.toEntity();
                 ui.setUser(user.get());
                 userInfoRepository.save(ui);
-                log.info(ui);
                 ui.getUser().setUserUuid(userUuid);
                 return ResponseEntity.ok().body(Status.OK);
             } else {

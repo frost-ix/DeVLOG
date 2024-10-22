@@ -11,7 +11,6 @@ import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.http.ResponseEntity;
@@ -150,7 +149,6 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
      * @return ResponseEntity
      */
     @Override
-    @Transactional
     public ResponseEntity<?> update(long userUuid, UserDTO user) {
         try {
             if (userRepository.findOneByUserUuid(userUuid).isEmpty()) {

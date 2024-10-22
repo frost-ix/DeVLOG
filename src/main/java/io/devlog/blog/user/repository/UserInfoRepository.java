@@ -1,12 +1,14 @@
 package io.devlog.blog.user.repository;
 
 import io.devlog.blog.user.entity.UserInfo;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
+    @Transactional
     @Modifying
     @Query("UPDATE UserInfo u " +
             "set u.userGit = :userGit, u.userIcon = :userIcon, u.userInsta = :userInsta, u.userSummary = :userSummary, u.userX = :userX" +
