@@ -50,7 +50,6 @@ public class BoardDTO {
 
     public Board toEntity(Categories categories, List<BoardTags> boardTags) {
         return Board.builder()
-                .boardUuid(boardUuid)
                 .boardTitle(title)
                 .boardContent(content)
                 .categories(categories)

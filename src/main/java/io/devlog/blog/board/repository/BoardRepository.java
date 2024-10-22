@@ -17,6 +17,7 @@ public interface BoardRepository extends JpaRepository<Board, String> {
     @Query("SELECT b FROM Board b")
     List<Board> findBoardBy();
 
+    
     @Modifying
     @Transactional
     @Query("delete from Board b where b.boardUuid = ?1")

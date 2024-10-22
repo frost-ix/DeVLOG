@@ -9,6 +9,7 @@ import io.devlog.blog.board.repository.BoardRepository;
 import io.devlog.blog.board.repository.BoardTagsRepository;
 import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.board.repository.TagRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -112,42 +113,34 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public ResponseEntity<?> update(BoardDTO boardDTO) {
-//        try{
-//            Board originalBoard = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
-//                    .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-//            Categories category = cateRepository.findByCateName(boardDTO.getCategories())
-//                    .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
-//
-//            List<String> tagNames = boardDTO.getTags();
-//            List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
-//
-//            List<Tags> newTags = tagNames.stream()
-//                    .filter(tagName -> recvtags.stream()
-//                            .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
-//                    .map(tagName -> new Tags(null, originalBoard, tagName))
-//                    .collect(Collectors.toList());
-//
-//            if (!newTags.isEmpty()) {
-//                tagRepository.saveAll(newTags);
-//            }
-//
-//            recvtags.addAll(newTags);
-//
-//            originalBoard.setBoardTitle(boardDTO.getTitle());
-//            originalBoard.setBoardContent(boardDTO.getContent());
-//            originalBoard.setCategories(category);
-//            originalBoard.setTags(recvtags); // 태그 리스트 업데이트
-//            boardRepository.save(originalBoard);
-//            return ResponseEntity.status(200).body("update board success");
-//        }
-//        catch (Exception e){
-//            log.error("update board error", e);
-//            return ResponseEntity.badRequest().body("update board error");
-//        }
-        try{
+        try {
+            Board originalBoard = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
+                    .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+            Categories category = cateRepository.findByCateName(boardDTO.getCategories())
+                    .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
+
+            List<String> tagNames = boardDTO.getTags();
+            List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
+
+            List<Tags> newTags = tagNames.stream()
+                    .filter(tagName -> recvtags.stream()
+                            .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
+                    .map(tagName -> new Tags(null, tagName, null))
+                    .collect(Collectors.toList());
+
+            if (!newTags.isEmpty()) {
+                tagRepository.saveAll(newTags);
+            }
+
+            recvtags.addAll(newTags);
+
+            originalBoard.setBoardTitle(boardDTO.getTitle());
+            originalBoard.setBoardContent(boardDTO.getContent());
+            originalBoard.setCategories(category);
+
+            boardRepository.save(originalBoard);
             return ResponseEntity.status(200).body("update board success");
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             log.error("update board error", e);
             return ResponseEntity.badRequest().body("update board error");
         }
@@ -155,8 +148,12 @@ public class BoardServiceImpl implements BoardService {
 
 
     @Override
+    @Transactional
     public ResponseEntity<?> deleteBoard(Long id) {
         try{
+            Board board = boardRepository.findOneByBoardUuid(id)
+                    .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+            boardTagsRepository.deleteByBoard(board);
             boardRepository.deleteById(id);
             return ResponseEntity.status(200).body("200");
         }catch (Exception e){
