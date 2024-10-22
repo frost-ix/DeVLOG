@@ -19,12 +19,12 @@ public class UserSubAPI {
     @GetMapping("")
     public ResponseEntity<?> getUserSubs() {
         log.info("test");
-        return userSubService.getUserSubs();
+        return userSubService.getUsersSub();
     }
 
-    @GetMapping("/{subUuid}")
-    public ResponseEntity<?> getUserSub(@PathVariable long subUuid) {
-        return userSubService.getUserSub(subUuid);
+    @GetMapping("/{userUuid}")
+    public ResponseEntity<?> getUserSub(@PathVariable long userUuid) {
+        return userSubService.getUserSub(userUuid);
     }
 
     @PostMapping("")

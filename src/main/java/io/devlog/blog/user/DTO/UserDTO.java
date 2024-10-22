@@ -24,6 +24,7 @@ public class UserDTO {
     @Enumerated(EnumType.STRING)
     private AccessRole accessRole;
 
+    // Normal Create
     @Builder
     public UserDTO(@Nullable String id, @Nullable String pw, @Nullable String bender, @Nullable String benderUuid, @Nullable String name, @Nullable String mail) {
         this.id = id;
@@ -35,7 +36,8 @@ public class UserDTO {
         this.accessRole = AccessRole.CLIENT;
     }
 
-    public UserDTO toDTO(User user) {
+    // Entity to DTO
+    public static UserDTO toDTO(User user) {
         return UserDTO.builder()
                 .id(Objects.requireNonNull(user.getUserId()))
                 .pw(Objects.requireNonNull(user.getUserPw()))
@@ -46,6 +48,7 @@ public class UserDTO {
                 .build();
     }
 
+    // DTO to Entity
     public User toEntity() {
         return User.builder()
                 .userId(id)
