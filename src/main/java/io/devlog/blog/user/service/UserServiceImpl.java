@@ -82,7 +82,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 log.info("Login success");
                 setCookie(find);
                 User r = find.get();
-                return ResponseEntity.status(200).body(UserDTO.toDTO(r));
+                UserDTO u = UserDTO.toDTO(r);
+                u.setPw(null);
+                u.setBenderUuid(null);
+                u.setBender(null);
+                return ResponseEntity.status(200).body(u);
             }
         } catch (Exception e) {
             log.error(e);
