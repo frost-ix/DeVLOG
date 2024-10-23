@@ -37,7 +37,7 @@ public class Board {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
-    private List<Tags> tags;
+    private List<BoardTags> boardTags;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)

@@ -1,8 +1,10 @@
 package io.devlog.blog.board.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "tags")
@@ -16,11 +18,9 @@ public class Tags {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long taguid;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "boardUuid")
-    @JsonBackReference
-    private Board board;
-
     private String tagName;
 
+    @JsonManagedReference
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
+    private List<BoardTags> boardTags;
 }

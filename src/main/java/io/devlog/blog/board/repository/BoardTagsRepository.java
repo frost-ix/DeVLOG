@@ -1,6 +1,7 @@
 package io.devlog.blog.board.repository;
 
 import io.devlog.blog.board.entity.Board;
+import io.devlog.blog.board.entity.BoardTags;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,15 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BoardRepository extends JpaRepository<Board, String> {
-    Optional<Board> findOneByBoardUuid(Long id);
+public interface BoardTagsRepository extends JpaRepository<BoardTags, String> {
 
-    @Query("SELECT b FROM Board b")
-    List<Board> findBoardBy();
 
-    
     @Modifying
     @Transactional
-    @Query("delete from Board b where b.boardUuid = ?1")
-    void deleteById(Long boardUuid);
+    void deleteByBoard(Board board);
 }
