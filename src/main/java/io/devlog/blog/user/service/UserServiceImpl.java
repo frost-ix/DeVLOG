@@ -79,25 +79,67 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             Optional<User> find = userRepository.findOneByUserId(user.getId());
             if (find.isEmpty()) {
                 log.info("No account");
-                throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.USER_NOT_FOUND));
             }
             if (!pwEncoder.matches(user.getPw(), find.get().getUserPw())) {
                 log.info("Password not match");
-                throw new CustomException(ExceptionStatus.UNAUTHORIZED);
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
             } else {
                 log.info("Login success");
+                log.info("Set cookie");
                 setCookie(find);
-                User r = find.get();
-                UserDTO u = UserDTO.toDTO(r);
-                u.setPw(null);
-                u.setBenderUuid(null);
-                u.setBender(null);
-                return ResponseEntity.status(200).body(u);
+                return responseLogin(find.get());
             }
         } catch (Exception e) {
             log.error(e);
             throw new CustomException(ExceptionStatus.BAD_REQUEST);
         }
+    }
+
+    /**
+     * <h1>Auto Login</h1>
+     *
+     * @param refreshToken refresh token
+     * @return ResponseEntity
+     */
+    @Override
+    public ResponseEntity<?> login(String refreshToken) {
+        try {
+            log.debug("Auto login: {}", refreshToken);
+            if (refreshToken == null) {
+                return ResponseEntity.noContent().build();
+            }
+            if (jwtService.validateToken(refreshToken)) {
+                long id = jwtService.getClaims(refreshToken).get("id", Long.class);
+                boolean isExist = userRepository.existsByUserUuid(id);
+                if (!isExist) {
+                    log.error("Invalid user");
+                    return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+                }
+                String accessToken = jwtService.createAccessToken(jwtService.getClaims(refreshToken).get("id", Long.class));
+                JwtToken jwtToken = new JwtToken(accessToken, refreshToken);
+                httpServletResponse.addHeader("Authorization", jwtToken.getAccessToken());
+                if (userRepository.findOneByUserUuid(id).isPresent()) {
+                    log.info("<Token auto login> Login success");
+                    return responseLogin(userRepository.findOneByUserUuid(id).get());
+                } else {
+                    return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.NO_CONTENT));
+                }
+            } else {
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+            }
+        } catch (Exception e) {
+            log.error(e);
+            throw new CustomException(ExceptionStatus.BAD_REQUEST);
+        }
+    }
+
+    private ResponseEntity<?> responseLogin(User r) {
+        UserDTO u = UserDTO.toDTO(r);
+        u.setPw(null);
+        u.setBenderUuid(null);
+        u.setBender(null);
+        return ResponseEntity.status(200).body(u);
     }
 
     /**
@@ -109,16 +151,34 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
      */
     private void setCookie(Optional<User> u) {
         if (u.isPresent()) {
-            String accessToken = jwtService.createAccessToken(u.get().getBenderUuid());
-            JwtToken jwtToken = new JwtToken(accessToken, jwtService.createRefreshToken(u.get().getBenderUuid(), accessToken));
+            String accessToken = jwtService.createAccessToken(u.get().getUserUuId());
+            JwtToken jwtToken = new JwtToken(accessToken, jwtService.createRefreshToken(u.get().getUserUuId()));
+            log.info("Token created");
             httpServletResponse.addHeader("Authorization", jwtToken.getAccessToken());
             Cookie cookie = new Cookie("refreshToken", jwtToken.getRefreshToken());
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
             cookie.setPath("/");
-            cookie.setMaxAge(60 * 60 * 24);
+            cookie.setMaxAge(60 * 60 * 24 * 7);
             httpServletResponse.addCookie(cookie);
         }
+    }
+
+    /**
+     * Logout
+     *
+     * @return ResponseEntity
+     */
+    @Override
+    public ResponseEntity<?> logout() {
+        log.info("User Logout");
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        httpServletResponse.addCookie(cookie);
+        return ResponseEntity.ok().body(new ResponseCheck(Status.OK));
     }
 
     /**

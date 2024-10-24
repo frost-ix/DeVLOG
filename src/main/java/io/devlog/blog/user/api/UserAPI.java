@@ -3,6 +3,7 @@ package io.devlog.blog.user.api;
 import io.devlog.blog.user.DTO.UserDTO;
 import io.devlog.blog.user.enums.AccessRole;
 import io.devlog.blog.user.service.UserService;
+import jakarta.servlet.http.Cookie;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -52,8 +53,18 @@ public class UserAPI {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO user) {
-        log.info("Entry : {}", user);
         return userService.login(user);
+    }
+
+    @PostMapping("/login/r")
+    public ResponseEntity<?> login(@CookieValue(value = "refreshToken", required = false) Cookie token) {
+        log.debug("Second login : {}", token);
+        return userService.login(token != null ? token.getValue() : null);
+    }
+
+    @DeleteMapping("")
+    public ResponseEntity<?> logout() {
+        return userService.logout();
     }
 
     /**

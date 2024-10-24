@@ -29,6 +29,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
                              @Param("name") String name,
                              @Param("mail") String mail);
 
+    boolean existsByUserUuid(Long userId);
+
     Optional<User> findOneByBenderUuid(String benderUuid);
 
     void deleteById(@NonNull Long userUuid);
