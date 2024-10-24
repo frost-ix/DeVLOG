@@ -43,7 +43,6 @@ public class boardAPI {
     public ResponseEntity<?> createBoard(@RequestBody BoardDTO boardDTO) {
         log.info("Create board : {}", boardDTO);
         return boardService.create(boardDTO);
-
     }
 
     @PatchMapping("")
@@ -56,6 +55,6 @@ public class boardAPI {
     public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
         log.info("Delete board : {}", id);
         return boardService.deleteBoard(id);
-
     }
+
 }

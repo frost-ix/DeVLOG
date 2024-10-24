@@ -14,8 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,7 +38,6 @@ public class BoardServiceImpl implements BoardService {
     private List<BoardDTO> streamBoards(List<Board> boardList) {
         return boardList.stream()
                 .map(board -> BoardDTO.builder()
-                        .boardUuid(board.getBoardUuid())
                         .categories(board.getCategories().getCateName())
                         .title(board.getBoardTitle())
                         .content(board.getBoardContent())
@@ -160,34 +159,40 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> update(BoardDTO boardDTO) {
         try {
-            Board originalBoard = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
+            Board board = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
                     .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-            Categories category = cateRepository.findByCateName(boardDTO.getCategories())
-                    .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
+
+            Optional<Categories> category = cateRepository.findByCateName(boardDTO.getCategories());
 
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
-
             List<Tags> newTags = streamTags(tagNames, recvtags);
 
             if (!newTags.isEmpty()) {
                 tagRepository.saveAll(newTags);
             }
-
             recvtags.addAll(newTags);
 
-            originalBoard.setBoardTitle(boardDTO.getTitle());
-            originalBoard.setBoardContent(boardDTO.getContent());
-            originalBoard.setCategories(category);
+            board.setCategories(category.orElse(null));
+            board.setBoardTitle(boardDTO.getTitle());
+            board.setBoardContent(boardDTO.getContent());
+            board.setUserUuid(boardDTO.getUserUuID());
+            board.setUserName(boardDTO.getUserName());
 
-            boardRepository.save(originalBoard);
+            boardRepository.save(board);
+
+            boardTagsRepository.deleteByBoard(board);
+            List<BoardTags> boardTags = recvtags.stream()
+                    .map(tag -> new BoardTags(null, board, tag))
+                    .collect(Collectors.toList());
+            boardTagsRepository.saveAll(boardTags);
+
             return ResponseEntity.status(200).body("update board success");
         } catch (Exception e) {
             log.error("update board error", e);
             return ResponseEntity.badRequest().body("update board error");
         }
     }
-
 
     @Override
     @Transactional
