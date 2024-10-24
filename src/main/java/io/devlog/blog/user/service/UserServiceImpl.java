@@ -8,7 +8,10 @@ import io.devlog.blog.config.enums.Status;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.DTO.JwtToken;
 import io.devlog.blog.user.DTO.UserDTO;
+import io.devlog.blog.user.DTO.UserInfoDTO;
 import io.devlog.blog.user.entity.User;
+import io.devlog.blog.user.entity.UserInfo;
+import io.devlog.blog.user.repository.UserInfoRepository;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,16 +32,18 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final JwtService jwtService;
     private final HttpServletResponse httpServletResponse;
     private final JPAQueryFactory jpaqf;
+    private final UserInfoRepository userInfoRepository;
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
-                           JPAQueryFactory jpaqf) {
+                           JPAQueryFactory jpaqf, UserInfoRepository userInfoRepository) {
         super(User.class);
         this.userRepository = userRepository;
         this.pwEncoder = pwEncoder;
         this.jwtService = jwtService;
         this.httpServletResponse = httpServletResponse;
         this.jpaqf = jpaqf;
+        this.userInfoRepository = userInfoRepository;
     }
 
     /**
@@ -136,6 +141,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             } else {
                 user.setPw(pwEncoder.encode(user.getPw()));
                 User check = userRepository.save(user.toEntity());
+                UserInfoDTO info = new UserInfoDTO(null, null, null, null, null);
+                UserInfo ui = info.toEntity();
+                ui.setUser(check);
+                userInfoRepository.save(ui);
+                check.setUserInfo(ui);
                 UserDTO returnData = UserDTO.toDTO(check);
                 log.info("Created user: {}", returnData);
                 return ResponseEntity.ok().body(new ResponseCheck(Status.CREATED));

@@ -9,6 +9,7 @@ build/
 **/src/main/resources/application.properties
 **/src/main/resources/application-oauth.properties
 **/src/main/resources/**.p12
+**/**.p12
 **/src/main/resources/**.pem
 **/src/main/java/io/devlog/blog/security/properties/**.java
 **/src/main/java/io/devlog/blog/security/config/WebConfig.java

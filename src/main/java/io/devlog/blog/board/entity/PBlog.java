@@ -15,7 +15,10 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class PBlog {
     @Id
-    @OneToOne(cascade = CascadeType.ALL)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long pUuid;
+
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "userUuid")
     private User user;
 

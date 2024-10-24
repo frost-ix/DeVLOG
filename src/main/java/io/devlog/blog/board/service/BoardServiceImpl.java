@@ -9,13 +9,11 @@ import io.devlog.blog.board.repository.BoardRepository;
 import io.devlog.blog.board.repository.BoardTagsRepository;
 import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.board.repository.TagRepository;
-import io.devlog.blog.config.enums.ExceptionStatus;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,23 +59,25 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-    public ResponseEntity<?> pagingBoards(Pageable p) {
-        try {
-            Optional<List<Board>> lists = boardRepository.findSliceBoardBy(p);
-            if (lists.isPresent()) {
-                if (lists.get().isEmpty())
-                    return ResponseEntity.noContent().build();
-                else {
-                    return ResponseEntity.ok(lists.get());
-                }
-            } else {
-                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
-            }
-        } catch (Exception e) {
-            log.error("Server error : ", e);
-            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
-        }
-    }
+//    @Override
+//    public ResponseEntity<?> pagingBoards(int start, int size) {
+//        try {
+//            Pageable pageable = (Pageable) PageRequest.of(start, size);
+//            Slice<Board> lists = boardRepository.findAll(pageable);
+//            if (!lists.isEmpty()) {
+//                if (lists.getContent().isEmpty())
+//                    return ResponseEntity.noContent().build();
+//                else {
+//                    return ResponseEntity.ok(lists.get());
+//                }
+//            } else {
+//                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
+//            }
+//        } catch (Exception e) {
+//            log.error("Server error : ", e);
+//            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+//        }
+//    }
 
     @Override
     public ResponseEntity<?> getCategories() {
