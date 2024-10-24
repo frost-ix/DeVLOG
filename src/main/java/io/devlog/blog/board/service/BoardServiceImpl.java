@@ -9,11 +9,13 @@ import io.devlog.blog.board.repository.BoardRepository;
 import io.devlog.blog.board.repository.BoardTagsRepository;
 import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.board.repository.TagRepository;
+import io.devlog.blog.config.enums.ExceptionStatus;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,24 +35,47 @@ public class BoardServiceImpl implements BoardService {
         this.boardTagsRepository = boardTagsRepository;
     }
 
+    private List<BoardDTO> streamBoards(List<Board> boardList) {
+        return boardList.stream()
+                .map(board -> BoardDTO.builder()
+                        .boardUuid(board.getBoardUuid())
+                        .categories(board.getCategories().getCateName())
+                        .title(board.getBoardTitle())
+                        .content(board.getBoardContent())
+                        .userUuID(board.getUserUuid())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     @Override
     public ResponseEntity<?> getBoards() {
         try {
             Optional<List<Board>> boards = Optional.of(boardRepository.findBoardBy());
-            Optional<List<BoardDTO>> boardDTOS = boards.map(boardList -> boardList.stream()
-                    .map(board -> BoardDTO.builder()
-                            .boardUuid(board.getBoardUuid())
-                            .categories(board.getCategories().getCateName())
-                            .title(board.getBoardTitle())
-                            .content(board.getBoardContent())
-                            .userUuID(board.getUserUuid())
-                            .build())
-                    .collect(Collectors.toList()));
+            Optional<List<BoardDTO>> boardDTOS = streamBoards(boards.orElseThrow()).stream()
+                    .collect(Collectors.collectingAndThen(Collectors.toList(), Optional::of));
             return ResponseEntity.ok(boardDTOS);
 
         } catch (Exception e) {
             log.error("get boards error", e);
             return ResponseEntity.badRequest().body("get boards error");
+        }
+    }
+
+    public ResponseEntity<?> pagingBoards(Pageable p) {
+        try {
+            Optional<List<Board>> lists = boardRepository.findSliceBoardBy(p);
+            if (lists.isPresent()) {
+                if (lists.get().isEmpty())
+                    return ResponseEntity.noContent().build();
+                else {
+                    return ResponseEntity.ok(lists.get());
+                }
+            } else {
+                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
+            }
+        } catch (Exception e) {
+            log.error("Server error : ", e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -66,6 +91,23 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    public ResponseEntity<?> getUserBoards(Long id) {
+        try {
+            Optional<List<Board>> boards = boardRepository.findBoardByUserUuid(id);
+            if (boards.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            } else {
+                Optional<List<BoardDTO>> boardDTOS = streamBoards(boards.orElseThrow()).stream()
+                        .collect(Collectors.collectingAndThen(Collectors.toList(), Optional::of));
+                return ResponseEntity.ok(boardDTOS);
+            }
+        } catch (Exception e) {
+            log.error("Error of get User boards", e);
+            return ResponseEntity.badRequest().body("Error of get User boards");
+        }
+    }
+
+    @Override
     public ResponseEntity<?> getBoard(Long id) {
         try {
             log.info("get board by id: {}", id);
@@ -77,6 +119,14 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
+    private List<Tags> streamTags(List<String> tagNames, List<Tags> recvtags) {
+        return tagNames.stream()
+                .filter(tagName -> recvtags.stream()
+                        .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
+                .map(tagName -> new Tags(null, tagName, null))
+                .collect(Collectors.toList());
+    }
+
     @Override
     public ResponseEntity<?> create(BoardDTO boardDTO) {
         try {
@@ -84,11 +134,7 @@ public class BoardServiceImpl implements BoardService {
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
 
-            List<Tags> newTags = tagNames.stream()
-                    .filter(tagName -> recvtags.stream()
-                            .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
-                    .map(tagName -> new Tags(null, tagName, null))
-                    .collect(Collectors.toList());
+            List<Tags> newTags = streamTags(tagNames, recvtags);
 
             if (!newTags.isEmpty()) {
                 tagRepository.saveAll(newTags);
@@ -122,11 +168,7 @@ public class BoardServiceImpl implements BoardService {
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
 
-            List<Tags> newTags = tagNames.stream()
-                    .filter(tagName -> recvtags.stream()
-                            .noneMatch(existingTag -> existingTag.getTagName().equals(tagName)))
-                    .map(tagName -> new Tags(null, tagName, null))
-                    .collect(Collectors.toList());
+            List<Tags> newTags = streamTags(tagNames, recvtags);
 
             if (!newTags.isEmpty()) {
                 tagRepository.saveAll(newTags);
@@ -150,13 +192,13 @@ public class BoardServiceImpl implements BoardService {
     @Override
     @Transactional
     public ResponseEntity<?> deleteBoard(Long id) {
-        try{
+        try {
             Board board = boardRepository.findOneByBoardUuid(id)
                     .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
             boardTagsRepository.deleteByBoard(board);
             boardRepository.deleteById(id);
             return ResponseEntity.status(200).body("200");
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("delete board by id error", e);
             return ResponseEntity.badRequest().body("delete board by id error");
         }
@@ -164,10 +206,10 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public ResponseEntity<?> deleteAll() {
-        try{
+        try {
             boardRepository.deleteAll();
             return ResponseEntity.status(200).body("200");
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("delete all boards error", e);
             return ResponseEntity.badRequest().body("delete all boards error");
         }

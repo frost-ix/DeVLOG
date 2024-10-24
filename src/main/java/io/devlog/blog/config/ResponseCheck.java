@@ -6,15 +6,15 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public class ResponseCheck {
-    private final Status es;
+    private final Status s;
     private final String message;
     private final HttpStatus status;
     private final String res;
 
-    public ResponseCheck(Status es) {
-        this.es = es;
-        this.res = es.getRes();
-        this.status = es.getStatus();
-        this.message = es.getMessage();
+    public ResponseCheck(Status s) {
+        this.s = s;
+        this.res = s.getRes();
+        this.status = s.getStatus();
+        this.message = s.getMessage();
     }
 }

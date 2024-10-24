@@ -1,15 +1,14 @@
 package io.devlog.blog.board.service;
 
 import io.devlog.blog.board.DTO.BoardDTO;
-import io.devlog.blog.board.entity.Board;
 import org.springframework.http.ResponseEntity;
-
-import java.util.Optional;
 
 public interface BoardService {
     ResponseEntity<?> getBoards();
 
     ResponseEntity<?> getCategories();
+
+    ResponseEntity<?> getUserBoards(Long userId);
 
     ResponseEntity<?> getBoard(Long id);
 

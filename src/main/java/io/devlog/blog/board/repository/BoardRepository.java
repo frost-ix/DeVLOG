@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,11 @@ public interface BoardRepository extends JpaRepository<Board, String> {
     @Query("SELECT b FROM Board b")
     List<Board> findBoardBy();
 
-    
+    @Query("select b from Board b where b.userUuid = ?1")
+    Optional<List<Board>> findBoardByUserUuid(Long userUuid);
+
+    Optional<List<Board>> findSliceBoardBy(Pageable pageable);
+
     @Modifying
     @Transactional
     @Query("delete from Board b where b.boardUuid = ?1")

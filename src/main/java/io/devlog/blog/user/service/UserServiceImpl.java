@@ -3,6 +3,7 @@ package io.devlog.blog.user.service;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.ResponseCheck;
+import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.DTO.JwtToken;
@@ -51,13 +52,13 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             List<User> finds = userRepository.findAll();
             if (finds.isEmpty()) {
                 log.error("No user");
-                throw new CustomException(Status.USER_NOT_FOUND);
+                throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
             } else {
                 return ResponseEntity.ok().body(finds);
             }
         } catch (Exception e) {
             log.error(e);
-            throw new CustomException(Status.BAD_REQUEST);
+            throw new CustomException(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -73,11 +74,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             Optional<User> find = userRepository.findOneByUserId(user.getId());
             if (find.isEmpty()) {
                 log.info("No account");
-                throw new CustomException(Status.USER_NOT_FOUND);
+                throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
             }
             if (!pwEncoder.matches(user.getPw(), find.get().getUserPw())) {
                 log.info("Password not match");
-                throw new CustomException(Status.UNAUTHORIZED);
+                throw new CustomException(ExceptionStatus.UNAUTHORIZED);
             } else {
                 log.info("Login success");
                 setCookie(find);
@@ -90,7 +91,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             }
         } catch (Exception e) {
             log.error(e);
-            throw new CustomException(Status.BAD_REQUEST);
+            throw new CustomException(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -127,11 +128,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             log.info("Creating user: {}", user);
             if (user.getId() == null || user.getPw() == null || user.getBender() == null || user.getBenderUuid() == null || user.getName() == null || user.getMail() == null) {
                 log.error("Invalid user data");
-                throw new CustomException(Status.BAD_REQUEST);
+                throw new CustomException(ExceptionStatus.BAD_REQUEST);
             }
             if (userRepository.findOneByBenderUuid(user.getId()).isPresent()) {
                 log.error("사용중인 ID : {}", user);
-                throw new CustomException(Status.CONFLICT);
+                throw new CustomException(ExceptionStatus.CONFLICT);
             } else {
                 user.setPw(pwEncoder.encode(user.getPw()));
                 User check = userRepository.save(user.toEntity());
@@ -141,7 +142,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             }
         } catch (Exception e) {
             log.error(e);
-            throw new CustomException(Status.BAD_REQUEST);
+            throw new CustomException(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -157,20 +158,20 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         try {
             if (userRepository.findOneByUserUuid(userUuid).isEmpty()) {
                 log.error("User not exist");
-                throw new CustomException(Status.USER_NOT_FOUND);
+                throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
             } else {
                 String pw = pwEncoder.encode(user.getPw());
                 user.setPw(pw);
                 int e = userRepository.updateUserByUserUuid(userUuid, pw, user.getName(), user.getMail());
                 if (e == 0) {
                     log.error("Update failed");
-                    throw new CustomException(Status.NOT_MODIFIED);
+                    throw new CustomException(ExceptionStatus.NOT_MODIFIED);
                 }
                 return ResponseEntity.ok().body(new ResponseCheck(Status.OK));
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new CustomException(Status.BAD_REQUEST);
+            throw new CustomException(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -186,14 +187,14 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             Optional<User> user = userRepository.findOneByUserUuid(userUuid);
             if (user.isEmpty()) {
                 log.error("Already deleted user");
-                return ResponseEntity.badRequest().body(new CustomException(Status.USER_NOT_FOUND));
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.USER_NOT_FOUND));
             } else {
                 userRepository.deleteById(user.get().getUserUuId());
             }
             return ResponseEntity.ok().body(new ResponseCheck(Status.OK));
         } catch (Exception e) {
             log.error(e);
-            return ResponseEntity.badRequest().body(new CustomException(Status.BAD_REQUEST));
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
 
@@ -213,13 +214,13 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                     return ResponseEntity.ok().body(new ResponseCheck(Status.OK));
                 } else {
                     log.error("Password not match");
-                    throw new CustomException(Status.UNAUTHORIZED);
+                    throw new CustomException(ExceptionStatus.UNAUTHORIZED);
                 }
             }
-            throw new CustomException(Status.USER_NOT_FOUND);
+            throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
         } catch (Exception e) {
             log.error(e);
-            throw new CustomException(Status.BAD_REQUEST);
+            throw new CustomException(ExceptionStatus.BAD_REQUEST);
         }
     }
 }

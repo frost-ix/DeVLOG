@@ -1,6 +1,7 @@
 package io.devlog.blog.user.service;
 
 import io.devlog.blog.config.CustomException;
+import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
 import io.devlog.blog.user.DTO.UserInfoDTO;
 import io.devlog.blog.user.entity.User;
@@ -37,14 +38,14 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
         try {
             if (info == null) {
                 log.error("Cannot find data");
-                throw new CustomException(Status.NO_CONTENT);
+                throw new CustomException(ExceptionStatus.NO_CONTENT);
             }
             UserInfo u = userInfoRepository.findByUserUuid(userUuid);
             if (u == null) {
                 Optional<User> user = userRepository.findByUserUuid(userUuid);
                 if (user.isEmpty()) {
                     log.error("Cannot find user");
-                    throw new CustomException(Status.USER_NOT_FOUND);
+                    throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
                 }
                 UserInfo ui = info.toEntity();
                 ui.setUser(user.get());
@@ -59,14 +60,14 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
                 );
                 if (c == 0) {
                     log.error("Cannot update user information");
-                    throw new CustomException(Status.NOT_MODIFIED);
+                    throw new CustomException(ExceptionStatus.NOT_MODIFIED);
                 } else {
                     return ResponseEntity.ok().body(Status.OK);
                 }
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ResponseEntity.badRequest().body(Status.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 }

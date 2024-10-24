@@ -1,6 +1,7 @@
 package io.devlog.blog.user.service;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
 import io.devlog.blog.user.DTO.SubscribesDTO;
 import io.devlog.blog.user.DTO.UserDTO;
@@ -75,7 +76,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
                 return ResponseEntity.ok(subUsers);
             }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Status.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -83,10 +84,10 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
     public ResponseEntity<?> addUserSub(long userUuid, SubscribesDTO sbDTO) {
         try {
             if (userUuid == sbDTO.getSubUser()) {
-                return ResponseEntity.badRequest().body(Status.CONFLICT);
+                return ResponseEntity.badRequest().body(ExceptionStatus.CONFLICT);
             }
             if (sbRepo.existsBySubUser(sbDTO.getSubUser())) {
-                return ResponseEntity.badRequest().body(Status.CONFLICT);
+                return ResponseEntity.badRequest().body(ExceptionStatus.CONFLICT);
             } else {
                 sbDTO.setUserUuid(userUuid);
                 sbRepo.save(sbDTO.toEntity());
@@ -94,7 +95,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ResponseEntity.badRequest().body(Status.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -103,14 +104,14 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
     public ResponseEntity<?> deleteUserSub(SubscribesDTO sbDTO) {
         try {
             if (!sbRepo.existsBySubUser(sbDTO.getSubUser())) {
-                return ResponseEntity.badRequest().body(Status.NO_CONTENT);
+                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
             } else {
                 sbRepo.deleteBySubUser(sbDTO.getSubUser());
                 return ResponseEntity.ok(Status.OK);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ResponseEntity.badRequest().body(Status.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -125,7 +126,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
                     .stream().toList();
             return ResponseEntity.ok(listSub);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Status.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 }
