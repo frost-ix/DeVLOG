@@ -85,38 +85,35 @@ public class UserAPI {
      * <h1>Update User</h1>
      * <ul>PATCH /user/{userUuid} : Update User</ul>
      *
-     * @param userUuid User's uuid
-     * @param user     UserDTO
+     * @param user UserDTO
      * @return ResponseEntity<?> ? Success : Error
      */
-    @PatchMapping("/{userUuid}")
-    public ResponseEntity<?> updateUser(@PathVariable long userUuid, @RequestBody UserDTO user) {
+    @PatchMapping("")
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO user) {
         log.info(user);
-        return userService.update(userUuid, user);
+        return userService.update(user);
     }
 
     /**
      * <h1>Delete User</h1>
      * <ul>DELETE /user/{userUuid} : Delete User</ul>
      *
-     * @param userUuid User's uuid
      * @return ResponseEntity<?> ? Success : Error
      */
-    @DeleteMapping("/{userUuid}")
-    public ResponseEntity<?> deleteUser(@PathVariable long userUuid) {
-        return userService.deleteUser(userUuid);
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser() {
+        return userService.deleteUser();
     }
 
     /**
      * <h1>Check Password</h1>
      * <ul>POST /user/{userUuid}/check : Check Password</ul>
      *
-     * @param userUuid User's uuid
      * @param password User's password
      * @return ResponseEntity<?> ? Success : Error
      */
-    @PostMapping("/{userUuid}/check")
-    public ResponseEntity<?> passwordCheck(@PathVariable long userUuid, @RequestBody String password) {
-        return userService.passwordCheck(userUuid, password);
+    @PostMapping("/check")
+    public ResponseEntity<?> passwordCheck(@RequestBody String password) {
+        return userService.passwordCheck(password);
     }
 }

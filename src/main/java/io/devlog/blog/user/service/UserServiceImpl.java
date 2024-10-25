@@ -11,9 +11,11 @@ import io.devlog.blog.user.DTO.UserDTO;
 import io.devlog.blog.user.DTO.UserInfoDTO;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.entity.UserInfo;
+import io.devlog.blog.user.repository.SubscribesRepository;
 import io.devlog.blog.user.repository.UserInfoRepository;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -33,10 +35,12 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final HttpServletResponse httpServletResponse;
     private final JPAQueryFactory jpaqf;
     private final UserInfoRepository userInfoRepository;
+    private final HttpServletRequest httpServletRequest;
+    private final SubscribesRepository subscribesRepository;
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
-                           JPAQueryFactory jpaqf, UserInfoRepository userInfoRepository) {
+                           JPAQueryFactory jpaqf, UserInfoRepository userInfoRepository, HttpServletRequest httpServletRequest, SubscribesRepository subscribesRepository) {
         super(User.class);
         this.userRepository = userRepository;
         this.pwEncoder = pwEncoder;
@@ -44,6 +48,8 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         this.httpServletResponse = httpServletResponse;
         this.jpaqf = jpaqf;
         this.userInfoRepository = userInfoRepository;
+        this.httpServletRequest = httpServletRequest;
+        this.subscribesRepository = subscribesRepository;
     }
 
     /**
@@ -57,7 +63,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             List<User> finds = userRepository.findAll();
             if (finds.isEmpty()) {
                 log.error("No user");
-                throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
+                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
             } else {
                 return ResponseEntity.ok().body(finds);
             }
@@ -79,11 +85,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             Optional<User> find = userRepository.findOneByUserId(user.getId());
             if (find.isEmpty()) {
                 log.info("No account");
-                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.USER_NOT_FOUND));
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             }
             if (!pwEncoder.matches(user.getPw(), find.get().getUserPw())) {
                 log.info("Password not match");
-                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             } else {
                 log.info("Login success");
                 log.info("Set cookie");
@@ -92,7 +98,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             }
         } catch (Exception e) {
             log.error(e);
-            throw new CustomException(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -114,7 +120,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 boolean isExist = userRepository.existsByUserUuid(id);
                 if (!isExist) {
                     log.error("Invalid user");
-                    return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+                    return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
                 }
                 String accessToken = jwtService.createAccessToken(jwtService.getClaims(refreshToken).get("id", Long.class));
                 JwtToken jwtToken = new JwtToken(accessToken, refreshToken);
@@ -123,14 +129,16 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                     log.info("<Token auto login> Login success");
                     return responseLogin(userRepository.findOneByUserUuid(id).get());
                 } else {
-                    return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.NO_CONTENT));
+                    log.error("<Token auto login> User not exist");
+                    return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
                 }
             } else {
-                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+                log.error("<Token auto login> Token expired");
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
             log.error(e);
-            throw new CustomException(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -193,11 +201,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             log.info("Creating user: {}", user);
             if (user.getId() == null || user.getPw() == null || user.getBender() == null || user.getBenderUuid() == null || user.getName() == null || user.getMail() == null) {
                 log.error("Invalid user data");
-                throw new CustomException(ExceptionStatus.BAD_REQUEST);
+                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
             }
-            if (userRepository.findOneByBenderUuid(user.getId()).isPresent()) {
+            if (userRepository.findOneByUserId(user.getId()).isPresent()) {
                 log.error("사용중인 ID : {}", user);
-                throw new CustomException(ExceptionStatus.CONFLICT);
+                return ResponseEntity.badRequest().body(ExceptionStatus.CONFLICT);
             } else {
                 user.setPw(pwEncoder.encode(user.getPw()));
                 User check = userRepository.save(user.toEntity());
@@ -212,85 +220,88 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
             }
         } catch (Exception e) {
             log.error(e);
-            throw new CustomException(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
     /**
      * Update user
      *
-     * @param userUuid user uuid
-     * @param user     UserDTO (id, pw, bender, benderUuid, name, mail)
+     * @param user UserDTO (id, pw, bender, benderUuid, name, mail)
      * @return ResponseEntity
      */
     @Override
-    public ResponseEntity<?> update(long userUuid, UserDTO user) {
+    public ResponseEntity<?> update(UserDTO user) {
         try {
-            if (userRepository.findOneByUserUuid(userUuid).isEmpty()) {
+            long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
+            if (userRepository.findOneByUserUuid(id).isEmpty()) {
                 log.error("User not exist");
-                throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
+                return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
             } else {
                 String pw = pwEncoder.encode(user.getPw());
                 user.setPw(pw);
-                int e = userRepository.updateUserByUserUuid(userUuid, pw, user.getName(), user.getMail());
+                int e = userRepository.updateUserByUserUuid(id, pw, user.getName(), user.getMail());
                 if (e == 0) {
                     log.error("Update failed");
-                    throw new CustomException(ExceptionStatus.NOT_MODIFIED);
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
                 }
                 return ResponseEntity.ok().body(new ResponseCheck(Status.OK));
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new CustomException(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
     /***
      * Delete user
-     * @param userUuid user uuid
      * @return ResponseEntity
      */
     @Override
-    public ResponseEntity<?> deleteUser(long userUuid) {
+    public ResponseEntity<?> deleteUser() {
         try {
-            log.info("Deleting user: {}", userUuid);
-            Optional<User> user = userRepository.findOneByUserUuid(userUuid);
+            long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
+            log.info("Deleting user: {}", id);
+            Optional<User> user = userRepository.findOneByUserUuid(id);
             if (user.isEmpty()) {
                 log.error("Already deleted user");
-                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.USER_NOT_FOUND));
+                return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
             } else {
-                userRepository.deleteById(user.get().getUserUuId());
+                userInfoRepository.deleteByUserUuid(id);
+                subscribesRepository.deleteAllByUserUuid(id);
+                userRepository.deleteByUserUuid(id);
+                return ResponseEntity.ok().body(new ResponseCheck(Status.OK));
             }
-            return ResponseEntity.ok().body(new ResponseCheck(Status.OK));
         } catch (Exception e) {
             log.error(e);
-            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
     /**
      * Check password
      *
-     * @param userUuid user uuid
      * @param password password
      * @return ResponseEntity
      */
     @Override
-    public ResponseEntity<?> passwordCheck(long userUuid, String password) {
+    public ResponseEntity<?> passwordCheck(String password) {
         try {
-            if (userRepository.findOneByUserUuid(userUuid).isPresent()) {
-                if (pwEncoder.matches(password, userRepository.findOneByUserUuid(userUuid).get().getUserPw())) {
+            long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
+            if (userRepository.findOneByUserUuid(id).isPresent()) {
+                if (pwEncoder.matches(password, userRepository.findOneByUserUuid(id).get().getUserPw())) {
                     log.info("Password match");
                     return ResponseEntity.ok().body(new ResponseCheck(Status.OK));
                 } else {
                     log.error("Password not match");
-                    throw new CustomException(ExceptionStatus.UNAUTHORIZED);
+                    return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
                 }
             }
-            throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
+            log.error("<PasswordCheck> User not exist");
+            return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
         } catch (Exception e) {
             log.error(e);
-            throw new CustomException(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 }

@@ -31,7 +31,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByUserUuid(Long userId);
 
-    Optional<User> findOneByBenderUuid(String benderUuid);
-
-    void deleteById(@NonNull Long userUuid);
+    @Transactional
+    @Modifying
+    @Query("delete from User u where u.userUuid = :userUuid")
+    void deleteByUserUuid(@Param("userUuid") @NonNull Long userUuid);
 }

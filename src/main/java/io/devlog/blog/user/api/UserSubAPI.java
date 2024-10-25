@@ -7,14 +7,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * <h1>User subscribe API</h1>
- * <ul>Handling user subscribes</ul>
- * <ul>GET /user/s : Get all user subscribes</ul>
- * <ul>GET /user/s/{userUuid}/count : Get user subscribe count</ul>
- * <ul>GET /user/s/{userUuid} : Get user subscribe</ul>
- * <ul>POST /user/s/{userUuid} : Add user subscribe</ul>
- * <ul>DELETE /user/s/{userUuid} : Delete user subscribe</ul>
- * <ul>DELETE /user/s : Delete user subscribes</ul>
+ * <h1>User Subscribe API</h1>
+ * <p>
+ * User Subscribe API is a REST API that provides the following functionalities:
+ *  <ul>
+ *      <li>Get all user subscribes</li> GET /user/s/all
+ *      <li>Get user subscribe count</li> GET /user/s/count
+ *      <li>Get user subscribe</li> GET /user/s
+ *      <li>Add user subscribe</li> POST /user/s
+ *      <li>Delete user subscribe</li> DELETE /user/s
+ *      <li>Delete user subscribes</li> DELETE /user/s/all
+ * </ul>
+ * <p>
+ * <b>Note:</b> This API is only accessible to the user with the role of CLIENT.
  *
  * @see io.devlog.blog.user.service.UserSubServiceImpl
  * @see io.devlog.blog.user.DTO.SubscribesDTO
@@ -35,8 +40,8 @@ public class UserSubAPI {
      *
      * @return ResponseEntity<?> ? User Subscribes : Error
      */
-    @GetMapping("")
-    public ResponseEntity<?> getUserSubs() {
+    @GetMapping("/all")
+    public ResponseEntity<?> getUsersSub() {
         log.info("test");
         return userSubService.getUsersSub();
     }
@@ -45,13 +50,12 @@ public class UserSubAPI {
      * <h1>Get user subscribe count</h1>
      * <ul>GET /user/s/{userUuid}/count : Get user subscribe count</ul>
      *
-     * @param userUuid user's uuid
      * @return ResponseEntity<?> ? User Subscribe count : Error
      */
-    @GetMapping("/{userUuid}/count")
-    public ResponseEntity<?> getUsersSubCount(@PathVariable long userUuid) {
+    @GetMapping("/count")
+    public ResponseEntity<?> getUsersSubCount() {
         log.info("All Subscribe count");
-        return userSubService.getUsersSubCount(userUuid);
+        return userSubService.getUsersSubCount();
     }
 
 
@@ -59,38 +63,34 @@ public class UserSubAPI {
      * <h1>Get user subscribe</h1>
      * <ul>GET /user/s/{userUuid} : Get user subscribe</ul>
      *
-     * @param userUuid user's uuid
      * @return ResponseEntity<?> ? User Subscribes : Error
      */
-    @GetMapping("/{userUuid}")
-    public ResponseEntity<?> getUserSub(@PathVariable long userUuid) {
-        return userSubService.getUserSub(userUuid);
+    @GetMapping("")
+    public ResponseEntity<?> getUserSub() {
+        return userSubService.getUserSub();
     }
 
     /**
      * <h1>Add user subscribe</h1>
      * <ul>POST /user/s/{userUuid} : Add user subscribe</ul>
      *
-     * @param userUuid user's uuid
-     * @param sbDTO    SubscribesDTO
+     * @param sbDTO SubscribesDTO
      * @return ResponseEntity<?> ? Success : Error
      */
-    @PostMapping("/{userUuid}")
-    public ResponseEntity<?> addUserSub(@PathVariable long userUuid, @RequestBody SubscribesDTO sbDTO) {
-        return userSubService.addUserSub(userUuid, sbDTO);
+    @PostMapping("")
+    public ResponseEntity<?> addUserSub(@RequestBody SubscribesDTO sbDTO) {
+        return userSubService.addUserSub(sbDTO);
     }
 
     /**
      * <h1>Delete user subscribe</h1>
      * <ul>DELETE /user/s/{userUuid} : Delete user subscribe</ul>
      *
-     * @param userUuid user's uuid
-     * @param sbDTO    SubscribesDTO
+     * @param sbDTO SubscribesDTO
      * @return ResponseEntity<?> ? Success : Error
      */
-    @DeleteMapping("/{userUuid}")
-    public ResponseEntity<?> deleteUserSub(@PathVariable long userUuid, @RequestBody SubscribesDTO sbDTO) {
-        log.info("Access : {}", userUuid);
+    @DeleteMapping("")
+    public ResponseEntity<?> deleteUserSub(@RequestBody SubscribesDTO sbDTO) {
         return userSubService.deleteUserSub(sbDTO);
     }
 
@@ -98,12 +98,11 @@ public class UserSubAPI {
      * <h1>Delete user subscribes</h1>
      * <ul>DELETE /user/s : Delete user subscribes</ul>
      *
-     * @param userUuid user's uuid
      * @return ResponseEntity<?> ? Success : Error
      */
-    @DeleteMapping("")
-    public ResponseEntity<?> deleteUserSubs(@RequestBody SubscribesDTO userUuid) {
-        return userSubService.deleteUserSubs(userUuid);
+    @DeleteMapping("/all")
+    public ResponseEntity<?> deleteUserSubs() {
+        return userSubService.deleteUserSubs();
     }
 
 

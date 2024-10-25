@@ -65,4 +65,8 @@ public class JwtService {
         log.debug("token: {}", token);
         return getClaims(token).getExpiration().before(new Date());
     }
+
+    public long getAuthorizationId(String token) {
+        return getClaims(token).get("id", Long.class);
+    }
 }
