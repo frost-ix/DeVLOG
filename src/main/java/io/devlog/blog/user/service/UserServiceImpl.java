@@ -1,6 +1,5 @@
 package io.devlog.blog.user.service;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.ResponseCheck;
 import io.devlog.blog.config.enums.ExceptionStatus;
@@ -33,20 +32,18 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final PasswordEncoder pwEncoder;
     private final JwtService jwtService;
     private final HttpServletResponse httpServletResponse;
-    private final JPAQueryFactory jpaqf;
     private final UserInfoRepository userInfoRepository;
     private final HttpServletRequest httpServletRequest;
     private final SubscribesRepository subscribesRepository;
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
-                           JPAQueryFactory jpaqf, UserInfoRepository userInfoRepository, HttpServletRequest httpServletRequest, SubscribesRepository subscribesRepository) {
+                           UserInfoRepository userInfoRepository, HttpServletRequest httpServletRequest, SubscribesRepository subscribesRepository) {
         super(User.class);
         this.userRepository = userRepository;
         this.pwEncoder = pwEncoder;
         this.jwtService = jwtService;
         this.httpServletResponse = httpServletResponse;
-        this.jpaqf = jpaqf;
         this.userInfoRepository = userInfoRepository;
         this.httpServletRequest = httpServletRequest;
         this.subscribesRepository = subscribesRepository;
