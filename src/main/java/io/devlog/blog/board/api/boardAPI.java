@@ -17,7 +17,7 @@ public class boardAPI {
         this.boardService = boardService;
     }
 
-    @PostMapping("/photo")
+    @PostMapping(value = "/photo", consumes = "multipart/form-data")
     public ResponseEntity<?> uploadPhoto(@RequestParam("image") MultipartFile file) {
         return boardService.uploadPhoto(file);
     }
@@ -64,7 +64,6 @@ public class boardAPI {
     public ResponseEntity<?> createBoard(@RequestBody BoardDTO boardDTO) {
         log.info("Create board : {}", boardDTO);
         return boardService.create(boardDTO);
-
     }
 
     @PatchMapping("")
@@ -77,6 +76,6 @@ public class boardAPI {
     public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
         log.info("Delete board : {}", id);
         return boardService.deleteBoard(id);
-
     }
+
 }

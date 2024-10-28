@@ -44,12 +44,12 @@ public class BoardDTO {
                         .map(boardTag -> boardTag.getTag().getTagName())
                         .collect(Collectors.toList()))
                 .userName(board.getUserName())
-                .userUuID(board.getUserUuid())
                 .build();
     }
 
     public Board toEntity(Categories categories, List<BoardTags> boardTags) {
         return Board.builder()
+                .boardUuid(boardUuid)
                 .boardTitle(title)
                 .boardContent(content)
                 .categories(categories)

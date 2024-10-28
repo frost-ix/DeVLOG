@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,7 +43,8 @@ public class BoardServiceImpl implements BoardService {
     private final UserRepository userRepository;
     private final HttpServletRequest httpServletRequest;
 
-    @Value("${file.upload-dir}")
+//    @Value("/home/jungsonghun/image_server/")
+    @Value("D:\\image_server\\")
     private String fileDir;
 
     public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest) {
@@ -54,6 +57,27 @@ public class BoardServiceImpl implements BoardService {
         this.httpServletRequest = httpServletRequest;
     }
 
+    public Long checkJwt() {
+        try{
+            String accessToken = httpServletRequest.getHeader("Authorization");
+            Long id = jwtService.getClaims(accessToken).get("id", Long.class);
+                if (accessToken == null || id == 0 || !jwtService.validateToken(accessToken)) {
+                    return 0L;
+                }
+                else{
+                    // 2. accessToken이 있으나 expireDate가 지났으나 refreshToken이 만료 전 이면 accessToken 재발급 후 진행
+                    if(userRepository.existsByUserUuid(id)) {
+                            return id;
+
+                    }else{
+                        return 0L;
+                    }
+                }
+        }catch (Exception e){
+            return 0L;
+        }
+
+    }
     @Override
     public ResponseEntity<?> uploadPhoto(MultipartFile file) {
         try {
@@ -147,8 +171,9 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> getCategories() {
         try {
-            Optional<List<Categories>> categories = Optional.of(cateRepository.findAll());
-            return ResponseEntity.ok(categories);
+            Long id = checkJwt();
+            List<String> cateNames = cateRepository.findByUserCateName(id);
+            return ResponseEntity.ok(cateNames);
         } catch (Exception e) {
             log.error("get categories error", e);
             return ResponseEntity.badRequest().body("get categories error");
@@ -177,7 +202,12 @@ public class BoardServiceImpl implements BoardService {
         try {
             log.info("get board by id: {}", id);
             Optional<Board> board = boardRepository.findOneByBoardUuid(id);
-            return ResponseEntity.ok().body(board);
+            if (board.isPresent()) {
+                BoardDTO boardDTO = BoardDTO.fromEntity(board.get());
+                return ResponseEntity.ok().body(boardDTO);
+            }else{
+                return ResponseEntity.noContent().build();
+            }
         } catch (Exception e) {
             log.error("get board by id error", e);
             return ResponseEntity.badRequest().body("get board by id error");
@@ -195,10 +225,9 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> create(BoardDTO boardDTO) {
         try {
-            String accessToken = httpServletRequest.getHeader("Authorization");
-            long id = jwtService.getClaims(accessToken).get("id", Long.class);
-            if (accessToken == null || id == 0 || !jwtService.validateToken(accessToken)) {
-                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            Long id = checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token is invalid");
             }
             Optional<Categories> category = cateRepository.findByCateName(boardDTO.getCategories());
             List<String> tagNames = boardDTO.getTags();
@@ -232,10 +261,13 @@ public class BoardServiceImpl implements BoardService {
             return ResponseEntity.badRequest().body("create board error");
         }
     }
-
+    // 1.accessToken이 유효하거나 있으면 id 추출 해서 db에 있는지 체크 (create, update, delete)
+    // 2. accessToken이 있으나 expireDate가 지났으나 refreshToken이 만료 전 이면 accessToken 재발급 후 진행 (create, update, delete)
+    // 3. 작성자와 로그인한사람 일치 불일치 확인(update, delete)
     @Override
     public ResponseEntity<?> update(BoardDTO boardDTO) {
         try {
+
             Board originalBoard = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
                     .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
             Categories category = cateRepository.findByCateName(boardDTO.getCategories())
@@ -255,6 +287,7 @@ public class BoardServiceImpl implements BoardService {
             originalBoard.setBoardTitle(boardDTO.getTitle());
             originalBoard.setBoardContent(boardDTO.getContent());
             originalBoard.setCategories(category);
+            originalBoard.setBoardDate(LocalDateTime.now());
 
             boardRepository.save(originalBoard);
             return ResponseEntity.status(200).body("update board success");
