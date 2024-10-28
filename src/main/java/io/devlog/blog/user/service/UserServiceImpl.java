@@ -169,9 +169,6 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     public ResponseEntity<?> login(String refreshToken) {
         try {
             log.debug("Auto login: {}", refreshToken);
-            if (refreshToken == null) {
-                return ResponseEntity.noContent().build();
-            }
             if (jwtService.validateToken(refreshToken)) {
                 long id = jwtService.getClaims(refreshToken).get("id", Long.class);
                 boolean isExist = userRepository.existsByUserUuid(id);

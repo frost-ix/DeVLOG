@@ -49,7 +49,7 @@ public class OAuthHandler {
 
     public OAuthInfoDTO loginGoogle(String code, String state, GOOGLE google) {
         this.google = google;
-        ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, google.getGOOGLE_TOKEN_URI(), "google");
+        ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, google.getGOOGLE_AUTHORIZATION_URI(), "google");
         log.info("Google token : {}", oauthTokenRes.getBody());
         ObjectMapper tokenObject = new ObjectMapper();
         GoogleTokenDTO googleTokenDTO = null;
@@ -78,9 +78,10 @@ public class OAuthHandler {
             githubTokenDTO = tokenObject.readValue(oauthTokenRes.getBody(), GithubTokenDTO.class);
             String accessToken = githubTokenDTO.getAccessToken();
             ResponseEntity<String> userInfo = getUserInfo(accessToken, github.getGITHUB_USER_INFO_URI(), "github");
+            log.info("User info : {}", userInfo.getBody());
             githubInfo = tokenObject.readValue(userInfo.getBody(), GithubInfo.class);
             log.info("GITHUB : {}", githubInfo.getId());
-            return new OAuthInfoDTO(githubInfo.getName(), githubInfo.getId());
+            return new OAuthInfoDTO(githubInfo.getEmail(), githubInfo.getId());
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException("Github login failed");
@@ -103,11 +104,11 @@ public class OAuthHandler {
             }
             case "google" -> {
                 headers.set("Content-Type", "application/x-www-form-urlencoded");
-                params.add("code", code);
-                params.add("state", state);
+                params.add("response_type", code);
+                params.add("redirect_uri", google.getGOOGLE_REDIRECT_URI());
                 params.add("client_id", google.getGOOGLE_CLIENT_ID());
                 params.add("client_secret", google.getGOOGLE_CLIENT_SECRET());
-                params.add("redirect_uri", google.getGOOGLE_REDIRECT_URI());
+                params.add("scope", google.getGOOGLE_SCOPE());
                 params.add("grant_type", google.getGOOGLE_AUTHORIZATION_GRANT_TYPE());
             }
             case "github" -> {
@@ -140,11 +141,13 @@ public class OAuthHandler {
         log.info("Code, State, Provider name : {}, {}, {}", code, state, providerName);
         log.info("Token uri : {}", tokenUri);
         log.info("Token request : {}", tokenReq);
-        return rst.exchange(
+        ResponseEntity<String> response = rst.exchange(
                 tokenUri,
                 HttpMethod.POST,
                 tokenReq,
                 String.class);
+        log.info("Response : {}", response);
+        return response;
     }
 
     private ResponseEntity<String> getUserInfo(String accessToken, String userInfoUri, String providerName) {

@@ -34,6 +34,7 @@ public class SecurityConfig {
                                 .requestMatchers("/oauth/**").permitAll()
                                 .requestMatchers("/board", "/user", "/p").permitAll()
                                 .requestMatchers("/board/**", "/user/**", "/p/**").permitAll()
+                                .requestMatchers("/user/*/**").permitAll()
                                 .requestMatchers("/api/oauth/**").permitAll()
                                 .anyRequest().authenticated());
         return httpSecurity.build();

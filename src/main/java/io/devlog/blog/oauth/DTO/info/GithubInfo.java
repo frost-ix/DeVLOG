@@ -12,5 +12,5 @@ public class GithubInfo {
     @JsonProperty("node_id")
     private String node_id;
     private String id;
-    private String name;
+    private String email;
 }
