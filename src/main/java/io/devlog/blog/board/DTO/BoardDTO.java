@@ -44,7 +44,6 @@ public class BoardDTO {
                         .map(boardTag -> boardTag.getTag().getTagName())
                         .collect(Collectors.toList()))
                 .userName(board.getUserName())
-                .userUuID(board.getUserUuid())
                 .build();
     }
 

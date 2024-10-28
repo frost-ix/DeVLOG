@@ -17,7 +17,7 @@ public class boardAPI {
         this.boardService = boardService;
     }
 
-    @PostMapping("/photo")
+    @PostMapping(value = "/photo", consumes = "multipart/form-data")
     public ResponseEntity<?> uploadPhoto(@RequestParam("image") MultipartFile file) {
         return boardService.uploadPhoto(file);
     }
