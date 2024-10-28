@@ -24,7 +24,8 @@ public class BoardDTO {
     private Long userUuID;
 
     @Builder
-    public BoardDTO(@Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID) {
+    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID) {
+        this.boardUuid = boardUuid;
         this.title = title;
         this.content = content;
         this.tags = tags;
@@ -35,6 +36,7 @@ public class BoardDTO {
 
     public static BoardDTO fromEntity(Board board) {
         return BoardDTO.builder()
+                .boardUuid(board.getBoardUuid())
                 .categories(board.getCategories().getCateName())
                 .title(board.getBoardTitle())
                 .content(board.getBoardContent())

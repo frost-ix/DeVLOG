@@ -177,7 +177,12 @@ public class BoardServiceImpl implements BoardService {
         try {
             log.info("get board by id: {}", id);
             Optional<Board> board = boardRepository.findOneByBoardUuid(id);
-            return ResponseEntity.ok().body(board);
+            if (board.isPresent()) {
+                BoardDTO boardDTO = BoardDTO.fromEntity(board.get());
+                return ResponseEntity.ok().body(boardDTO);
+            }else{
+                return ResponseEntity.noContent().build();
+            }
         } catch (Exception e) {
             log.error("get board by id error", e);
             return ResponseEntity.badRequest().body("get board by id error");
