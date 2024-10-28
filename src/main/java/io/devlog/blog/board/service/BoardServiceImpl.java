@@ -171,8 +171,9 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> getCategories() {
         try {
-            Optional<List<Categories>> categories = Optional.of(cateRepository.findAll());
-            return ResponseEntity.ok(categories);
+            Long id = checkJwt();
+            List<String> cateNames = cateRepository.findByUserCateName(id);
+            return ResponseEntity.ok(cateNames);
         } catch (Exception e) {
             log.error("get categories error", e);
             return ResponseEntity.badRequest().body("get categories error");
