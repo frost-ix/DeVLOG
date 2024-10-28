@@ -3,7 +3,6 @@ package io.devlog.blog.board.api;
 import io.devlog.blog.board.DTO.BoardDTO;
 import io.devlog.blog.board.service.BoardService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,16 +13,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class boardAPI {
     private final BoardService boardService;
 
-    @Value("${file.upload-dir}")
-    private String fileDir;
-
     public boardAPI(BoardService boardService) {
         this.boardService = boardService;
     }
 
     @PostMapping("/photo")
     public ResponseEntity<?> uploadPhoto(@RequestParam("image") MultipartFile file) {
-        log.info("Upload photo : {}", file.getOriginalFilename());
         return boardService.uploadPhoto(file);
     }
 

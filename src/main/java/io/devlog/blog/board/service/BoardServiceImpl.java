@@ -15,6 +15,7 @@ import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -38,6 +40,9 @@ public class BoardServiceImpl implements BoardService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final HttpServletRequest httpServletRequest;
+
+    @Value("${file.upload-dir}")
+    private String fileDir;
 
     public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest) {
         this.boardRepository = boardRepository;
@@ -52,15 +57,24 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> uploadPhoto(MultipartFile file) {
         try {
-            log.info("Upload photo : {}", file.getOriginalFilename());
-            if (!file.isEmpty()) {
-                String fullPath = file.getOriginalFilename();
-                file.transferTo(new File(fullPath));
+            if (file.getOriginalFilename() == null ||
+                    file.getContentType() == null ||
+                    !file.getContentType().startsWith("image/") ||
+                    file.isEmpty()) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            } else {
+                String ogFileName = file.getOriginalFilename();
+                String ext = ogFileName.substring(ogFileName.lastIndexOf("."));
+                String uuid = UUID.randomUUID().toString();
+                String fileName = uuid + ext;
+                file.transferTo(new File(fileDir + fileName));
+                log.info("upload photo success : {}", fileName);
+                return ResponseEntity.ok().body(fileName);
+
             }
-            return null;
         } catch (Exception e) {
             log.error("upload photo error", e);
-            return ResponseEntity.badRequest().body("upload photo error");
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
