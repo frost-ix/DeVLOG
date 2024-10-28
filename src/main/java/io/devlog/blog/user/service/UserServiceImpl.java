@@ -4,11 +4,16 @@ import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.ResponseCheck;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
+import io.devlog.blog.oauth.functions.OAuthHandler;
+import io.devlog.blog.oauth.values.GITHUB;
+import io.devlog.blog.oauth.values.GOOGLE;
+import io.devlog.blog.oauth.values.NAVER;
 import io.devlog.blog.pblog.DTO.PblogDTO;
 import io.devlog.blog.pblog.Entity.PBlog;
 import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.security.Jwt.JwtToken;
+import io.devlog.blog.user.DTO.OAuthDTO;
 import io.devlog.blog.user.DTO.UserDTO;
 import io.devlog.blog.user.DTO.UserInfoDTO;
 import io.devlog.blog.user.entity.User;
@@ -20,6 +25,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,9 +46,20 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final SubscribesRepository subscribesRepository;
     private final PblogRepository pblogRepository;
 
+    @Autowired
+    private final NAVER naver;
+    @Autowired
+    private final GOOGLE google;
+    @Autowired
+    private final GITHUB github;
+
+    private OAuthHandler oAuthHandler;
+
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
-                           UserInfoRepository userInfoRepository, HttpServletRequest httpServletRequest, SubscribesRepository subscribesRepository, PblogRepository pblogRepository) {
+                           UserInfoRepository userInfoRepository, HttpServletRequest httpServletRequest,
+                           SubscribesRepository subscribesRepository, PblogRepository pblogRepository, NAVER naver, GOOGLE google, GITHUB github
+    ) {
         super(User.class);
         this.userRepository = userRepository;
         this.pwEncoder = pwEncoder;
@@ -52,6 +69,9 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         this.httpServletRequest = httpServletRequest;
         this.subscribesRepository = subscribesRepository;
         this.pblogRepository = pblogRepository;
+        this.naver = naver;
+        this.google = google;
+        this.github = github;
     }
 
     /**
@@ -96,8 +116,43 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 log.info("Login success");
                 log.info("Set cookie");
                 setCookie(find);
-                return responseLogin(find.get());
+                return responseLogin(UserDTO.toDTO(find.get()));
             }
+        } catch (Exception e) {
+            log.error(e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Login with OAuth
+     *
+     * @param oauthDTO OAuthDTO (provider, code, state)
+     * @return ResponseEntity
+     */
+    @Override
+    public ResponseEntity<?> loginOauth(OAuthDTO oauthDTO) {
+        try {
+            Optional<User> find;
+            switch (oauthDTO.getState()) {
+                case "naver" -> {
+                    String naverUuid = oAuthHandler.loginNaver(oauthDTO.getCode(), oauthDTO.getState(), naver).getUuid();
+                    find = userRepository.findByBenderUuid(naverUuid);
+                }
+                case "github" -> {
+                    String githubUuid = oAuthHandler.loginGithub(oauthDTO.getCode(), oauthDTO.getState(), github).getUuid();
+                    find = userRepository.findByBenderUuid(githubUuid);
+                }
+                case "google" -> {
+                    String googleUuid = oAuthHandler.loginGoogle(oauthDTO.getCode(), oauthDTO.getState(), google).getUuid();
+                    find = userRepository.findByBenderUuid(googleUuid);
+                }
+                default -> {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+                }
+            }
+            find.ifPresent(user -> login(UserDTO.toDTO(user)));
+            return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
         } catch (Exception e) {
             log.error(e);
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
@@ -129,7 +184,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 httpServletResponse.addHeader("Authorization", jwtToken.getAccessToken());
                 if (userRepository.findOneByUserUuid(id).isPresent()) {
                     log.info("<Token auto login> Login success");
-                    return responseLogin(userRepository.findOneByUserUuid(id).get());
+                    return responseLogin(UserDTO.toDTO(userRepository.findOneByUserUuid(id).get()));
                 } else {
                     log.error("<Token auto login> User not exist");
                     return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
@@ -144,12 +199,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         }
     }
 
-    private ResponseEntity<?> responseLogin(User r) {
-        UserDTO u = UserDTO.toDTO(r);
-        u.setPw(null);
-        u.setBenderUuid(null);
-        u.setBender(null);
-        return ResponseEntity.status(200).body(u);
+    private ResponseEntity<?> responseLogin(UserDTO r) {
+        r.setPw(null);
+        r.setBenderUuid(null);
+        r.setBender(null);
+        return ResponseEntity.status(200).body(r);
     }
 
     /**

@@ -1,7 +1,9 @@
 package io.devlog.blog.oauth.controller;
 
 import io.devlog.blog.oauth.service.OAuthServiceImpl;
+import io.devlog.blog.user.DTO.OAuthDTO;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 // To-do
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Log4j2
 @RestController
-@RequestMapping(value = "/api/oauth")
+@RequestMapping(value = "/oauth")
 public class OAuthController {
     private final OAuthServiceImpl oAuthServiceImpl;
 
@@ -26,27 +28,30 @@ public class OAuthController {
      * Naver OAuth2.0 Login
      * @return NaverInfo
      */
-    @GetMapping("/naver")
-    public String callBack(@RequestParam("code") String code, @RequestParam("state") String state) {
-        return oAuthServiceImpl.loginOf(code, state, "naver");
+    @PostMapping("/naver")
+    public ResponseEntity<?> callBack(@RequestBody OAuthDTO oauthDTO) {
+        log.info("naver : {}", oauthDTO);
+        return oAuthServiceImpl.loginOf(oauthDTO.getCode(), oauthDTO.getState(), "naver");
     }
 
     /***
      * Google OAuth2.0 Login
      * @return GoogleInfo
      */
-    @GetMapping("/google")
-    public String googleLogin(@RequestParam("code") String code, @RequestParam("state") String state) {
-        return oAuthServiceImpl.loginOf(code, state, "google");
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@RequestBody OAuthDTO oauthDTO) {
+        log.info("google : {}", oauthDTO);
+        return oAuthServiceImpl.loginOf(oauthDTO.getCode(), oauthDTO.getState(), "google");
     }
 
     /***
      * GitHub OAuth2.0 Login
      * @return GithubInfo
      */
-    @GetMapping("/github")
-    public String githubLogin(@RequestParam("code") String code, @RequestParam("state") String state) {
-        return oAuthServiceImpl.loginOf(code, state, "github");
+    @PostMapping("/github")
+    public ResponseEntity<?> githubLogin(@RequestBody OAuthDTO oauthDTO) {
+        log.info("github : {}", oauthDTO);
+        return oAuthServiceImpl.loginOf(oauthDTO.getCode(), oauthDTO.getState(), "github");
     }
 
     @GetMapping("/refresh")

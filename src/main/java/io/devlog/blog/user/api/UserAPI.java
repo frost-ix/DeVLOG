@@ -1,5 +1,6 @@
 package io.devlog.blog.user.api;
 
+import io.devlog.blog.user.DTO.OAuthDTO;
 import io.devlog.blog.user.DTO.UserDTO;
 import io.devlog.blog.user.enums.AccessRole;
 import io.devlog.blog.user.service.UserService;
@@ -60,6 +61,11 @@ public class UserAPI {
     public ResponseEntity<?> login(@CookieValue(value = "refreshToken", required = false) Cookie token) {
         log.debug("Second login : {}", token);
         return userService.login(token != null ? token.getValue() : null);
+    }
+
+    @PostMapping("/login/oauth")
+    public ResponseEntity<?> loginOauth(@RequestBody OAuthDTO user) {
+        return userService.loginOauth(user);
     }
 
     @DeleteMapping("")

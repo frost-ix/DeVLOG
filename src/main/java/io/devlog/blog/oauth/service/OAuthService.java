@@ -1,5 +1,7 @@
 package io.devlog.blog.oauth.service;
 
+import org.springframework.http.ResponseEntity;
+
 public interface OAuthService {
-    String loginOf(String code, String state, String providerName);
+    ResponseEntity<?> loginOf(String code, String state, String providerName);
 }
