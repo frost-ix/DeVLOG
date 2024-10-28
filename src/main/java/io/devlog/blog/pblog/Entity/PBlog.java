@@ -1,6 +1,7 @@
-package io.devlog.blog.board.entity;
+package io.devlog.blog.pblog.Entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import io.devlog.blog.board.entity.Categories;
 import io.devlog.blog.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,7 +27,7 @@ public class PBlog {
     @JsonManagedReference
     private List<Categories> categories;
 
-    private String pDName;
+    private String pDomain;
     private String pBanner;
     private String pName;
 }

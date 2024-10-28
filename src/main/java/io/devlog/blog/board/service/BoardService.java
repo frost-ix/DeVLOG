@@ -8,7 +8,9 @@ public interface BoardService {
 
     ResponseEntity<?> getCategories();
 
-//    ResponseEntity<?> pagingBoards(int start, int size);
+    ResponseEntity<?> pagingBoards(int page, int size);
+
+    ResponseEntity<?> pagingCateBoards(long cateUuid, int page, int size);
 
     ResponseEntity<?> getUserBoards(Long userId);
 

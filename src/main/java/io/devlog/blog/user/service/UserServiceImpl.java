@@ -4,8 +4,11 @@ import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.ResponseCheck;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
+import io.devlog.blog.pblog.DTO.PblogDTO;
+import io.devlog.blog.pblog.Entity.PBlog;
+import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
-import io.devlog.blog.user.DTO.JwtToken;
+import io.devlog.blog.security.Jwt.JwtToken;
 import io.devlog.blog.user.DTO.UserDTO;
 import io.devlog.blog.user.DTO.UserInfoDTO;
 import io.devlog.blog.user.entity.User;
@@ -35,10 +38,11 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final UserInfoRepository userInfoRepository;
     private final HttpServletRequest httpServletRequest;
     private final SubscribesRepository subscribesRepository;
+    private final PblogRepository pblogRepository;
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
-                           UserInfoRepository userInfoRepository, HttpServletRequest httpServletRequest, SubscribesRepository subscribesRepository) {
+                           UserInfoRepository userInfoRepository, HttpServletRequest httpServletRequest, SubscribesRepository subscribesRepository, PblogRepository pblogRepository) {
         super(User.class);
         this.userRepository = userRepository;
         this.pwEncoder = pwEncoder;
@@ -47,6 +51,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         this.userInfoRepository = userInfoRepository;
         this.httpServletRequest = httpServletRequest;
         this.subscribesRepository = subscribesRepository;
+        this.pblogRepository = pblogRepository;
     }
 
     /**
@@ -156,8 +161,8 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
      */
     private void setCookie(Optional<User> u) {
         if (u.isPresent()) {
-            String accessToken = jwtService.createAccessToken(u.get().getUserUuId());
-            JwtToken jwtToken = new JwtToken(accessToken, jwtService.createRefreshToken(u.get().getUserUuId()));
+            String accessToken = jwtService.createAccessToken(u.get().getUserUuid());
+            JwtToken jwtToken = new JwtToken(accessToken, jwtService.createRefreshToken(u.get().getUserUuid()));
             log.info("Token created");
             httpServletResponse.addHeader("Authorization", jwtToken.getAccessToken());
             Cookie cookie = new Cookie("refreshToken", jwtToken.getRefreshToken());
@@ -211,6 +216,12 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 ui.setUser(check);
                 userInfoRepository.save(ui);
                 check.setUserInfo(ui);
+                PblogDTO pblog = new PblogDTO(check.getName(), null, check.getName());
+                PBlog pb = pblog.toEntity();
+                pb.setUser(check);
+                check.setPbLog(pb);
+                userRepository.save(check);
+                pblogRepository.save(pb);
                 UserDTO returnData = UserDTO.toDTO(check);
                 log.info("Created user: {}", returnData);
                 return ResponseEntity.ok().body(new ResponseCheck(Status.CREATED));

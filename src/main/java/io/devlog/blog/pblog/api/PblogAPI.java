@@ -1,27 +1,30 @@
 package io.devlog.blog.pblog.api;
 
+import io.devlog.blog.pblog.DTO.PblogDTO;
+import io.devlog.blog.pblog.service.PblogService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.core.io.ResourceLoader;
-import java.nio.file.Files;
+import org.springframework.web.bind.annotation.*;
 
 @Log4j2
 @RestController
-@RequestMapping("/pblog")
+@RequestMapping("/p")
 public class PblogAPI {
+    private final PblogService pblogService;
 
-    private ResourceLoader resourceLoader;
-    @GetMapping("/")
-    public ResponseEntity<String> index() throws Exception {
-        Resource resource = resourceLoader.getResource("classpath:static/index.html");
-        String htmlContent = Files.readString(resource.getFile().toPath());
-        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlContent);
+    public PblogAPI(PblogService pblogService) {
+        this.pblogService = pblogService;
     }
 
+    @GetMapping("")
+    public ResponseEntity<?> getPblog() {
+        log.info("Get pblog");
+        return pblogService.getPblog();
+    }
+
+    @PatchMapping("")
+    public ResponseEntity<?> updatePblog(@RequestBody PblogDTO pblogDTO) {
+        log.info("Update pblog : {}, {}, {}", pblogDTO.getDomain(), pblogDTO.getName(), pblogDTO.getBanner());
+        return pblogService.update(pblogDTO);
+    }
 }

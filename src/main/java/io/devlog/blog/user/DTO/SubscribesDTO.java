@@ -31,7 +31,7 @@ public class SubscribesDTO {
                 .id(subscribes.getId())
                 .subUser(subscribes.getSubUser())
                 .subDate(subscribes.getSubDate())
-                .userUuid(subscribes.getUser().getUserUuId())
+                .userUuid(subscribes.getUser().getUserUuid())
                 .build();
     }
 

@@ -30,13 +30,13 @@ public class Board {
     private String boardTitle;
     private String boardContent;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JsonBackReference
     @JoinColumn(name = "cateUuid")
     private Categories categories;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
     private List<BoardTags> boardTags;
 
     @JsonManagedReference

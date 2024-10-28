@@ -9,8 +9,15 @@ import io.devlog.blog.board.repository.BoardRepository;
 import io.devlog.blog.board.repository.BoardTagsRepository;
 import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.board.repository.TagRepository;
+import io.devlog.blog.config.enums.ExceptionStatus;
+import io.devlog.blog.security.Jwt.JwtService;
+import io.devlog.blog.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
@@ -26,12 +33,16 @@ public class BoardServiceImpl implements BoardService {
     private final CateRepository cateRepository;
     private final TagRepository tagRepository;
     private final BoardTagsRepository boardTagsRepository;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository) {
+    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository) {
         this.boardRepository = boardRepository;
         this.cateRepository = cateRepository;
         this.tagRepository = tagRepository;
         this.boardTagsRepository = boardTagsRepository;
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     private List<BoardDTO> streamBoards(List<Board> boardList) {
@@ -59,25 +70,45 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-//    @Override
-//    public ResponseEntity<?> pagingBoards(int start, int size) {
-//        try {
-//            Pageable pageable = (Pageable) PageRequest.of(start, size);
-//            Slice<Board> lists = boardRepository.findAll(pageable);
-//            if (!lists.isEmpty()) {
-//                if (lists.getContent().isEmpty())
-//                    return ResponseEntity.noContent().build();
-//                else {
-//                    return ResponseEntity.ok(lists.get());
-//                }
-//            } else {
-//                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
-//            }
-//        } catch (Exception e) {
-//            log.error("Server error : ", e);
-//            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
-//        }
-//    }
+    private ResponseEntity<?> checkLists(Slice<Board> lists) {
+        if (!lists.isEmpty()) {
+            if (lists.getContent().isEmpty())
+                return ResponseEntity.noContent().build();
+            else {
+                log.info("lists : {}", lists);
+                for (Board board : lists.getContent()) {
+                    log.info("board : {}", board);
+                }
+                return ResponseEntity.ok(lists.get());
+            }
+        } else {
+            return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> pagingBoards(int page, int size) {
+        try {
+            Pageable p = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "boardUuid"));
+            Slice<Board> lists = boardRepository.findAll(p);
+            return checkLists(lists);
+        } catch (Exception e) {
+            log.error("Server error : ", e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> pagingCateBoards(long cateUuid, int page, int size) {
+        try {
+            Pageable p = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "boardUuid"));
+            Slice<Board> lists = boardRepository.findBoardByCategoriesCateUuid(cateUuid, p);
+            return checkLists(lists);
+        } catch (Exception e) {
+            log.error("Server error : ", e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
 
     @Override
     public ResponseEntity<?> getCategories() {
@@ -130,9 +161,18 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> create(BoardDTO boardDTO) {
         try {
+            if (jwtService.getAuthorizationId("Authorization") == 0) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            }
             Optional<Categories> category = cateRepository.findByCateName(boardDTO.getCategories());
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
+
+            userRepository.findByUserUuid(jwtService.getAuthorizationId("Authorization"))
+                    .ifPresent((user) -> {
+                        boardDTO.setUserUuID(user.getUserUuid());
+                        boardDTO.setUserName(user.getName());
+                    });
 
             List<Tags> newTags = streamTags(tagNames, recvtags);
 

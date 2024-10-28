@@ -30,7 +30,9 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((req) ->
                         req
-                                .requestMatchers("/", "/index", "/board/**", "/user/**", "/sub/**").permitAll()
+                                .requestMatchers("/").permitAll()
+                                .requestMatchers("/board", "/user", "/p").permitAll()
+                                .requestMatchers("/board/**", "/user/**", "/p/**").permitAll()
                                 .requestMatchers("/api/oauth/**").permitAll()
                                 .anyRequest().authenticated());
         return httpSecurity.build();
