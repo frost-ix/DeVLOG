@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
  * <h1>User info API</h1>
  * <ul>Handling user information</ul>
  * <ul>GET /user/i/{userUuid} : Get user information</ul>
- * <ul>POST /user/i/{userUuid} : Update user information</ul>
+ * <ul>Patch /user/i/{userUuid} : Update user information</ul>
  *
  * @see io.devlog.blog.user.service.UserInfoServiceImpl
  * @see io.devlog.blog.user.DTO.UserInfoDTO
@@ -39,12 +39,12 @@ public class UserInfoAPI {
 
     /**
      * <h1>Update user information</h1>
-     * <ul>POST /user/i/{userUuid} : Update user information</ul>
+     * <ul>Patch /user/i/{userUuid} : Update user information</ul>
      *
      * @param info UserInfoDTO
      * @return ResponseEntity<?> ? Success : Error
      */
-    @PostMapping("")
+    @PatchMapping("")
     public ResponseEntity<?> updateUserInfo(@RequestBody UserInfoDTO info) {
         return userInfoService.updateUserInfo(info);
     }

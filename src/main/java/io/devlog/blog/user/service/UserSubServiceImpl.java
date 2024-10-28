@@ -76,7 +76,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
                         e.setMail(null);
                         e.setBender(null);
                         e.setBenderUuid(null);
-                        subUsers.put(i.get().getUserUuId(), e);
+                        subUsers.put(i.get().getUserUuid(), e);
                     }
                 });
                 return ResponseEntity.ok(subUsers);

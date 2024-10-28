@@ -1,4 +1,4 @@
-package io.devlog.blog.user.DTO;
+package io.devlog.blog.security.Jwt;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,7 @@
 package io.devlog.blog.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import io.devlog.blog.pblog.Entity.PBlog;
 import io.devlog.blog.user.enums.AccessRole;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -43,11 +44,15 @@ public class User {
     @JsonManagedReference
     private List<Subscribes> subscribes;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private PBlog pbLog;
+
     public String getRoleKey() {
         return this.accessRole.getKey();
     }
 
-    public Long getUserUuId() {
+    public Long getUserUuid() {
         return this.userUuid;
     }
 }

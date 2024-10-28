@@ -16,7 +16,7 @@ public class boardAPI {
         this.boardService = boardService;
     }
 
-    @GetMapping("/list")
+    @GetMapping("/all")
     public ResponseEntity<?> getBoardList() {
         log.info("Get boards");
         return boardService.getBoards();
@@ -27,11 +27,20 @@ public class boardAPI {
         return boardService.getCategories();
     }
 
-//    @GetMapping("/paging")
-//    public ResponseEntity<?> pagingBoards(@RequestParam int start, @RequestParam int size) {
-//        log.info("Paging boards : {} {}", start, size);
-//        return boardService.pagingBoards(start, size);
-//    }
+    @GetMapping("/list")
+    public ResponseEntity<?> pagingBoards(@RequestParam("p") int page, @RequestParam("s") int size) {
+        log.info("Paging boards : {} {}", page, size);
+        return boardService.pagingBoards(page, size);
+    }
+
+    @GetMapping("/{cateName}/{cateUuid}")
+    public ResponseEntity<?> pagingCateBoards(
+            @PathVariable String cateName,
+            @PathVariable Long cateUuid,
+            @RequestParam("p") int page, @RequestParam("s") int size) {
+        log.info("Paging cate boards : {} {} {} {}", cateName, cateUuid, page, size);
+        return boardService.pagingCateBoards(cateUuid, page, size);
+    }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserBoards(@PathVariable Long userId) {
