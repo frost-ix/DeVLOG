@@ -4,7 +4,7 @@ import io.devlog.blog.user.DTO.UserInfoDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface UserInfoService {
-    ResponseEntity<?> getUserInfo(long userUuid);
+    ResponseEntity<?> getUserInfo();
 
-    ResponseEntity<?> updateUserInfo(long userUuid, UserInfoDTO info);
+    ResponseEntity<?> updateUserInfo(UserInfoDTO info);
 }

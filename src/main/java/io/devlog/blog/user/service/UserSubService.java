@@ -6,13 +6,13 @@ import org.springframework.http.ResponseEntity;
 public interface UserSubService {
     ResponseEntity<?> getUsersSub();
 
-    ResponseEntity<?> getUsersSubCount(long userUuid);
+    ResponseEntity<?> getUsersSubCount();
 
-    ResponseEntity<?> getUserSub(long subUuid);
+    ResponseEntity<?> getUserSub();
 
-    ResponseEntity<?> addUserSub(long userUuid, SubscribesDTO sbDTO);
+    ResponseEntity<?> addUserSub(SubscribesDTO sbDTO);
 
     ResponseEntity<?> deleteUserSub(SubscribesDTO sbDTO);
 
-    ResponseEntity<?> deleteUserSubs(SubscribesDTO sbDTO);
+    ResponseEntity<?> deleteUserSubs();
 }

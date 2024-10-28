@@ -8,6 +8,8 @@ public interface BoardService {
 
     ResponseEntity<?> getCategories();
 
+//    ResponseEntity<?> pagingBoards(int start, int size);
+
     ResponseEntity<?> getUserBoards(Long userId);
 
     ResponseEntity<?> getBoard(Long id);

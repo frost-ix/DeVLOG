@@ -29,7 +29,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
                              @Param("name") String name,
                              @Param("mail") String mail);
 
-    Optional<User> findOneByBenderUuid(String benderUuid);
+    boolean existsByUserUuid(Long userId);
 
-    void deleteById(@NonNull Long userUuid);
+    @Transactional
+    @Modifying
+    @Query("delete from User u where u.userUuid = :userUuid")
+    void deleteByUserUuid(@Param("userUuid") @NonNull Long userUuid);
 }

@@ -8,11 +8,15 @@ public interface UserService {
 
     ResponseEntity<?> login(UserDTO user);
 
+    ResponseEntity<?> login(String refreshToken);
+
+    ResponseEntity<?> logout();
+
     ResponseEntity<?> create(UserDTO user);
 
-    ResponseEntity<?> update(long userUuid, UserDTO user);
+    ResponseEntity<?> update(UserDTO user);
 
-    ResponseEntity<?> deleteUser(long userUuid);
+    ResponseEntity<?> deleteUser();
 
-    ResponseEntity<?> passwordCheck(long userUuid, String password);
+    ResponseEntity<?> passwordCheck(String password);
 }

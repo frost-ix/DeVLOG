@@ -27,6 +27,12 @@ public class boardAPI {
         return boardService.getCategories();
     }
 
+//    @GetMapping("/paging")
+//    public ResponseEntity<?> pagingBoards(@RequestParam int start, @RequestParam int size) {
+//        log.info("Paging boards : {} {}", start, size);
+//        return boardService.pagingBoards(start, size);
+//    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserBoards(@PathVariable Long userId) {
         log.info("Get user boards : {}", userId);
