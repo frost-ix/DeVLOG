@@ -5,6 +5,7 @@ import io.devlog.blog.board.service.BoardService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Log4j2
 @RestController
@@ -14,6 +15,11 @@ public class boardAPI {
 
     public boardAPI(BoardService boardService) {
         this.boardService = boardService;
+    }
+
+    @PostMapping("/photo")
+    public ResponseEntity<?> uploadPhoto(@RequestParam("image") MultipartFile file) {
+        return boardService.uploadPhoto(file);
     }
 
     @GetMapping("/all")

@@ -12,18 +12,22 @@ import io.devlog.blog.board.repository.TagRepository;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -35,19 +39,49 @@ public class BoardServiceImpl implements BoardService {
     private final BoardTagsRepository boardTagsRepository;
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final HttpServletRequest httpServletRequest;
 
-    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository) {
+    @Value("${file.upload-dir}")
+    private String fileDir;
+
+    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest) {
         this.boardRepository = boardRepository;
         this.cateRepository = cateRepository;
         this.tagRepository = tagRepository;
         this.boardTagsRepository = boardTagsRepository;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.httpServletRequest = httpServletRequest;
+    }
+
+    @Override
+    public ResponseEntity<?> uploadPhoto(MultipartFile file) {
+        try {
+            if (file.getOriginalFilename() == null ||
+                    file.getContentType() == null ||
+                    !file.getContentType().startsWith("image/") ||
+                    file.isEmpty()) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            } else {
+                String ogFileName = file.getOriginalFilename();
+                String ext = ogFileName.substring(ogFileName.lastIndexOf("."));
+                String uuid = UUID.randomUUID().toString();
+                String fileName = uuid + ext;
+                file.transferTo(new File(fileDir + fileName));
+                log.info("upload photo success : {}", fileName);
+                return ResponseEntity.ok().body(fileName);
+
+            }
+        } catch (Exception e) {
+            log.error("upload photo error", e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
     }
 
     private List<BoardDTO> streamBoards(List<Board> boardList) {
         return boardList.stream()
                 .map(board -> BoardDTO.builder()
+                        .boardUuid(board.getBoardUuid())
                         .categories(board.getCategories().getCateName())
                         .title(board.getBoardTitle())
                         .content(board.getBoardContent())
@@ -161,14 +195,16 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> create(BoardDTO boardDTO) {
         try {
-            if (jwtService.getAuthorizationId("Authorization") == 0) {
+            String accessToken = httpServletRequest.getHeader("Authorization");
+            long id = jwtService.getClaims(accessToken).get("id", Long.class);
+            if (accessToken == null || id == 0 || !jwtService.validateToken(accessToken)) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             }
             Optional<Categories> category = cateRepository.findByCateName(boardDTO.getCategories());
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
 
-            userRepository.findByUserUuid(jwtService.getAuthorizationId("Authorization"))
+            userRepository.findByUserUuid(id)
                     .ifPresent((user) -> {
                         boardDTO.setUserUuID(user.getUserUuid());
                         boardDTO.setUserName(user.getName());
@@ -200,40 +236,34 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> update(BoardDTO boardDTO) {
         try {
-            Board board = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
+            Board originalBoard = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
                     .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-
-            Optional<Categories> category = cateRepository.findByCateName(boardDTO.getCategories());
+            Categories category = cateRepository.findByCateName(boardDTO.getCategories())
+                    .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
 
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
+
             List<Tags> newTags = streamTags(tagNames, recvtags);
 
             if (!newTags.isEmpty()) {
                 tagRepository.saveAll(newTags);
             }
+
             recvtags.addAll(newTags);
 
-            board.setCategories(category.orElse(null));
-            board.setBoardTitle(boardDTO.getTitle());
-            board.setBoardContent(boardDTO.getContent());
-            board.setUserUuid(boardDTO.getUserUuID());
-            board.setUserName(boardDTO.getUserName());
+            originalBoard.setBoardTitle(boardDTO.getTitle());
+            originalBoard.setBoardContent(boardDTO.getContent());
+            originalBoard.setCategories(category);
 
-            boardRepository.save(board);
-
-            boardTagsRepository.deleteByBoard(board);
-            List<BoardTags> boardTags = recvtags.stream()
-                    .map(tag -> new BoardTags(null, board, tag))
-                    .collect(Collectors.toList());
-            boardTagsRepository.saveAll(boardTags);
-
+            boardRepository.save(originalBoard);
             return ResponseEntity.status(200).body("update board success");
         } catch (Exception e) {
             log.error("update board error", e);
             return ResponseEntity.badRequest().body("update board error");
         }
     }
+
 
     @Override
     @Transactional

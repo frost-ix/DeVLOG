@@ -2,8 +2,11 @@ package io.devlog.blog.board.service;
 
 import io.devlog.blog.board.DTO.BoardDTO;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface BoardService {
+    ResponseEntity<?> uploadPhoto(MultipartFile file);
+
     ResponseEntity<?> getBoards();
 
     ResponseEntity<?> getCategories();
