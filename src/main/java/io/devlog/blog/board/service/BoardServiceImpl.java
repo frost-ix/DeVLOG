@@ -12,6 +12,7 @@ import io.devlog.blog.board.repository.TagRepository;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +21,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,14 +37,31 @@ public class BoardServiceImpl implements BoardService {
     private final BoardTagsRepository boardTagsRepository;
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final HttpServletRequest httpServletRequest;
 
-    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository) {
+    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest) {
         this.boardRepository = boardRepository;
         this.cateRepository = cateRepository;
         this.tagRepository = tagRepository;
         this.boardTagsRepository = boardTagsRepository;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.httpServletRequest = httpServletRequest;
+    }
+
+    @Override
+    public ResponseEntity<?> uploadPhoto(MultipartFile file) {
+        try {
+            log.info("Upload photo : {}", file.getOriginalFilename());
+            if (!file.isEmpty()) {
+                String fullPath = file.getOriginalFilename();
+                file.transferTo(new File(fullPath));
+            }
+            return null;
+        } catch (Exception e) {
+            log.error("upload photo error", e);
+            return ResponseEntity.badRequest().body("upload photo error");
+        }
     }
 
     private List<BoardDTO> streamBoards(List<Board> boardList) {
@@ -161,14 +181,16 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> create(BoardDTO boardDTO) {
         try {
-            if (jwtService.getAuthorizationId("Authorization") == 0) {
+            String accessToken = httpServletRequest.getHeader("Authorization");
+            long id = jwtService.getClaims(accessToken).get("id", Long.class);
+            if (accessToken == null || id == 0 || !jwtService.validateToken(accessToken)) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             }
             Optional<Categories> category = cateRepository.findByCateName(boardDTO.getCategories());
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
 
-            userRepository.findByUserUuid(jwtService.getAuthorizationId("Authorization"))
+            userRepository.findByUserUuid(id)
                     .ifPresent((user) -> {
                         boardDTO.setUserUuID(user.getUserUuid());
                         boardDTO.setUserName(user.getName());
