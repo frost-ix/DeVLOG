@@ -22,4 +22,9 @@ public interface PblogRepository extends JpaRepository<PBlog, Long> {
                     @Param("pBanner") String pBanner,
                     @Param("pDomain") String pDomain,
                     @Param("pName") String pName);
+
+    @Transactional
+    @Modifying
+    @Query("delete from PBlog p where p.user.userUuid = :userUuid")
+    void deletePBlogByUserUuid(@Param("userUuid") long userUuid);
 }

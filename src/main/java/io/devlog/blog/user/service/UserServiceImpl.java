@@ -1,5 +1,9 @@
 package io.devlog.blog.user.service;
 
+import io.devlog.blog.board.entity.Board;
+import io.devlog.blog.board.repository.BoardRepository;
+import io.devlog.blog.board.repository.BoardTagsRepository;
+import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.ResponseCheck;
 import io.devlog.blog.config.enums.ExceptionStatus;
@@ -52,8 +56,12 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final GOOGLE google;
     @Autowired
     private final GITHUB github;
-
-    private OAuthHandler oAuthHandler;
+    @Autowired
+    private CateRepository cateRepository;
+    @Autowired
+    private BoardRepository boardRepository;
+    @Autowired
+    private BoardTagsRepository boardTagsRepository;
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
@@ -133,6 +141,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     @Override
     public ResponseEntity<?> loginOauth(OAuthDTO oauthDTO) {
         try {
+            OAuthHandler oAuthHandler = new OAuthHandler();
             Optional<User> find;
             switch (oauthDTO.getState()) {
                 case "naver" -> {
@@ -151,8 +160,14 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                     return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
                 }
             }
-            find.ifPresent(user -> login(UserDTO.toDTO(user)));
-            return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            find.ifPresent((user) ->
+                    setCookie(Optional.of(user))
+            );
+            if (find.isPresent()) {
+                return responseLogin(UserDTO.toDTO(find.get()));
+            } else {
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            }
         } catch (Exception e) {
             log.error(e);
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
@@ -169,9 +184,6 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     public ResponseEntity<?> login(String refreshToken) {
         try {
             log.debug("Auto login: {}", refreshToken);
-            if (refreshToken == null) {
-                return ResponseEntity.noContent().build();
-            }
             if (jwtService.validateToken(refreshToken)) {
                 long id = jwtService.getClaims(refreshToken).get("id", Long.class);
                 boolean isExist = userRepository.existsByUserUuid(id);
@@ -329,6 +341,15 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 log.error("Already deleted user");
                 return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
             } else {
+                Optional<List<Board>> board = boardRepository.findBoardByUserUuid(id);
+                if (board.isPresent()) {
+                    for (Board b : board.get()) {
+                        boardTagsRepository.deleteByBoardUuid(b.getBoardUuid());
+                    }
+                }
+                boardRepository.deleteBoardsById(id);
+                cateRepository.deleteAllByUserUuid(id);
+                pblogRepository.deletePBlogByUserUuid(id);
                 userInfoRepository.deleteByUserUuid(id);
                 subscribesRepository.deleteAllByUserUuid(id);
                 userRepository.deleteByUserUuid(id);
@@ -351,6 +372,9 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         try {
             long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
             if (userRepository.findOneByUserUuid(id).isPresent()) {
+                log.info("Checking password");
+                log.info("Password: {}", password);
+                log.info("User: {}", userRepository.findOneByUserUuid(id).get().getUserPw());
                 if (pwEncoder.matches(password, userRepository.findOneByUserUuid(id).get().getUserPw())) {
                     log.info("Password match");
                     return ResponseEntity.ok().body(new ResponseCheck(Status.OK));

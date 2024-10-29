@@ -30,7 +30,6 @@ public class OAuthHandler {
     public OAuthInfoDTO loginNaver(String code, String state, NAVER naver) {
         this.naver = naver;
         ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, naver.getNAVER_TOKEN_URI(), "naver");
-        log.info("Naver token : {}", oauthTokenRes.getBody());
         ObjectMapper tokenObject = new ObjectMapper();
         NaverTokenDTO naverTokenDTO;
         NaverInfo naverInfo;
@@ -39,7 +38,6 @@ public class OAuthHandler {
             String accessToken = naverTokenDTO.getAccessToken();
             ResponseEntity<String> userInfo = getUserInfo(accessToken, naver.getNAVER_USER_INFO_URI(), "naver");
             naverInfo = tokenObject.readValue(userInfo.getBody(), NaverInfo.class);
-            log.info("NAVER : {}", naverInfo.getId());
             return new OAuthInfoDTO(naverInfo.getEmail(), naverInfo.getId());
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -50,7 +48,6 @@ public class OAuthHandler {
     public OAuthInfoDTO loginGoogle(String code, String state, GOOGLE google) {
         this.google = google;
         ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, google.getGOOGLE_TOKEN_URI(), "google");
-        log.info("Google token : {}", oauthTokenRes.getBody());
         ObjectMapper tokenObject = new ObjectMapper();
         GoogleTokenDTO googleTokenDTO = null;
         GoogleInfo googleInfo = null;
@@ -59,7 +56,6 @@ public class OAuthHandler {
             String accessToken = googleTokenDTO.getAccessToken();
             ResponseEntity<String> userInfo = getUserInfo(accessToken, google.getGOOGLE_USER_INFO_URI(), "google");
             googleInfo = tokenObject.readValue(userInfo.getBody(), GoogleInfo.class);
-            log.info("GOOGLE : {}", googleInfo.getSub());
             return new OAuthInfoDTO(googleInfo.getEmail(), googleInfo.getSub());
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -70,7 +66,6 @@ public class OAuthHandler {
     public OAuthInfoDTO loginGithub(String code, String state, GITHUB github) {
         this.github = github;
         ResponseEntity<String> oauthTokenRes = getOAuthToken(code, state, github.getGITHUB_TOKEN_URI(), "github");
-        log.info("Github token : {}", oauthTokenRes.getBody());
         ObjectMapper tokenObject = new ObjectMapper();
         GithubTokenDTO githubTokenDTO = null;
         GithubInfo githubInfo = null;
@@ -79,8 +74,7 @@ public class OAuthHandler {
             String accessToken = githubTokenDTO.getAccessToken();
             ResponseEntity<String> userInfo = getUserInfo(accessToken, github.getGITHUB_USER_INFO_URI(), "github");
             githubInfo = tokenObject.readValue(userInfo.getBody(), GithubInfo.class);
-            log.info("GITHUB : {}", githubInfo.getId());
-            return new OAuthInfoDTO(githubInfo.getName(), githubInfo.getId());
+            return new OAuthInfoDTO(githubInfo.getEmail(), githubInfo.getId());
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new RuntimeException("Github login failed");
@@ -104,7 +98,6 @@ public class OAuthHandler {
             case "google" -> {
                 headers.set("Content-Type", "application/x-www-form-urlencoded");
                 params.add("code", code);
-                params.add("state", state);
                 params.add("client_id", google.getGOOGLE_CLIENT_ID());
                 params.add("client_secret", google.getGOOGLE_CLIENT_SECRET());
                 params.add("redirect_uri", google.getGOOGLE_REDIRECT_URI());
@@ -120,37 +113,31 @@ public class OAuthHandler {
             }
             default -> throw new RuntimeException("Provider not found");
         }
-        log.info("Params : {}", params.values());
         return new HttpEntity<>(params, headers);
     }
 
-    private HttpEntity<MultiValueMap<String, String>> getHeadersEntity(String accessToken, String providerName) {
+    private HttpEntity<MultiValueMap<String, String>> getHeadersEntity(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
-        log.info("Headers entity accessToken : {}", accessToken);
-        log.info("Provider : {}", providerName);
         String tokenType = "Bearer";
         headers.set("Authorization", tokenType + " " + accessToken);
-        log.info("Headers : {}", headers);
         return new HttpEntity<>(headers);
     }
 
     private ResponseEntity<String> getOAuthToken(String code, String state, String tokenUri, String providerName) {
         RestTemplate rst = new RestTemplate();
         HttpEntity<MultiValueMap<String, String>> tokenReq = getHttpParamsEntity(code, state, providerName);
-        log.info("Code, State, Provider name : {}, {}, {}", code, state, providerName);
-        log.info("Token uri : {}", tokenUri);
-        log.info("Token request : {}", tokenReq);
-        return rst.exchange(
+        ResponseEntity<String> response = rst.exchange(
                 tokenUri,
                 HttpMethod.POST,
                 tokenReq,
                 String.class);
+        log.info("Response : {}", response);
+        return response;
     }
 
     private ResponseEntity<String> getUserInfo(String accessToken, String userInfoUri, String providerName) {
         RestTemplate rst = new RestTemplate();
-        log.info("accessToken : {}", accessToken);
-        HttpEntity<MultiValueMap<String, String>> headers = getHeadersEntity(accessToken, providerName);
+        HttpEntity<MultiValueMap<String, String>> headers = getHeadersEntity(accessToken);
         return rst.exchange(
                 userInfoUri,
                 HttpMethod.GET,

@@ -68,7 +68,7 @@ public class UserAPI {
         return userService.loginOauth(user);
     }
 
-    @DeleteMapping("")
+    @DeleteMapping("/logout")
     public ResponseEntity<?> logout() {
         return userService.logout();
     }
@@ -106,7 +106,7 @@ public class UserAPI {
      *
      * @return ResponseEntity<?> ? Success : Error
      */
-    @DeleteMapping("/delete")
+    @DeleteMapping("")
     public ResponseEntity<?> deleteUser() {
         return userService.deleteUser();
     }
@@ -120,6 +120,9 @@ public class UserAPI {
      */
     @PostMapping("/check")
     public ResponseEntity<?> passwordCheck(@RequestBody String password) {
-        return userService.passwordCheck(password);
+        String[] split = password.split("=");
+        String p = split[0];
+        log.info("Password : {}", p);
+        return userService.passwordCheck(p);
     }
 }
