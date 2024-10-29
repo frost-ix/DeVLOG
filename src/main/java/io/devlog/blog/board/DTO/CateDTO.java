@@ -22,7 +22,7 @@ public class CateDTO {
     private int cateIdx;
 
     @Builder
-    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateidx) {
+    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx) {
         this.cateName = cateName;
         this.userUuid = userUuid;
         this.cateUuid = cateUuid;
@@ -33,7 +33,9 @@ public class CateDTO {
         return Categories.builder()
                 .cateName(cateName)
                 .userUuid(userUuid)
-                .cateidx(cateIdx)
+                .cateUuid(cateUuid)
+                .cateIdx(cateIdx)
+
                 .build();
     }
 }

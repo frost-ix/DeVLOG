@@ -21,7 +21,7 @@ public class Categories {
     private String cateName;
 
     private Long userUuid;
-    private int cateidx;
+    private int cateIdx;
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonBackReference
     @JoinColumn(name = "pUuid")

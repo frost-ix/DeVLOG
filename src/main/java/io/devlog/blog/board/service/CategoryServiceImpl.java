@@ -1,5 +1,6 @@
 package io.devlog.blog.board.service;
 
+import io.devlog.blog.board.DTO.CateDTO;
 import io.devlog.blog.board.entity.Categories;
 import io.devlog.blog.board.repository.BoardRepository;
 import io.devlog.blog.board.repository.BoardTagsRepository;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CategoryServiceImpl implements CategoryService {
     private final BoardRepository boardRepository;
@@ -66,12 +68,23 @@ public class CategoryServiceImpl implements CategoryService {
     public ResponseEntity<?> createCategory(List<String> cateName) {
         try {
             Long id = checkJWT();
+            AtomicInteger index = new AtomicInteger(0);
             for (String name : cateName) {
-                if (cateRepository.findByCateName(name).isPresent()) {
-                    continue;
+                int i = index.getAndIncrement();
+                //cateName이 중복인데 cateIdx가 다른 경우 바뀐 idx를 저장
+                if(cateRepository.findByCateName(name).isPresent()){
+                    if(cateRepository.findByIdx(name)!=i){
+                        cateRepository.UpdateCateIdx(name,i);
+                    }
                 }
                 else{
-
+                    CateDTO cateDTO = CateDTO.builder()
+                            .cateName(name)
+                            .userUuid(id)
+                            .cateIdx(i)
+                            .build();
+                    Categories categories = cateDTO.toEntity();
+                    cateRepository.save(categories);
                 }
 
             }
