@@ -2,11 +2,14 @@ package io.devlog.blog.security.mail.Service;
 
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
+import io.devlog.blog.security.mail.DTO.VerifyCode;
 import io.devlog.blog.security.mail.entity.Invitation;
 import io.devlog.blog.security.mail.enums.InvitationStatus;
 import io.devlog.blog.security.mail.repository.InvitationRepository;
 import io.devlog.blog.team.entity.TBlog;
+import io.devlog.blog.team.entity.TBlogRole;
 import io.devlog.blog.team.repository.TBlogRepository;
+import io.devlog.blog.team.repository.TBlogRoleRepository;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
@@ -26,15 +29,18 @@ public class EmailService {
     private final InvitationRepository invitationRepository;
     private final UserRepository userRepository;
     private final TBlogRepository tBlogRepository;
+    private final TBlogRoleRepository tBlogRoleRepository;
 
     public EmailService(JavaMailSender mailSender,
                         InvitationRepository invitationRepository,
                         UserRepository userRepository,
-                        TBlogRepository tBlogRepository) {
+                        TBlogRepository tBlogRepository,
+                        TBlogRoleRepository tBlogRoleRepository) {
         this.mailSender = mailSender;
         this.invitationRepository = invitationRepository;
         this.userRepository = userRepository;
         this.tBlogRepository = tBlogRepository;
+        this.tBlogRoleRepository = tBlogRoleRepository;
     }
 
     private String generateCode() {
@@ -70,9 +76,10 @@ public class EmailService {
 
     }
 
-    public ResponseEntity<?> verifyEmail(String code) {
-        Optional<Invitation> invitation = invitationRepository.findByCode(code);
-        if (invitation.isEmpty()) {
+    public ResponseEntity<?> verifyEmail(VerifyCode code) {
+        log.info("code: {}", code);
+        Optional<Invitation> invitation = invitationRepository.findByCode(code.getCode());
+        if (invitation.isEmpty() || invitation.get().getStatus().equals(InvitationStatus.ACCEPTED)) {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         } else {
             invitation.get().setStatus(InvitationStatus.ACCEPTED);
@@ -80,15 +87,20 @@ public class EmailService {
             Optional<User> sender = userRepository.findOneByName(invitation.get().getSender());
             Optional<User> receiver = userRepository.findOneByName(invitation.get().getReceiver());
             if (sender.isEmpty() || receiver.isEmpty()) {
-                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+                return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
             }
-            TBlog tBlog = TBlog.builder()
-                    .user(receiver.get())
-                    .teamRole("MEMBER")
+            if (tBlogRoleRepository.existsTBlogRoleByUserUuid(receiver.get().getUserUuid())) {
+                return ResponseEntity.badRequest().body("이미 팀원입니다.");
+            }
+            TBlog tBlog = tBlogRepository.findTBlogByUserUuid(sender.get().getUserUuid());
+            TBlogRole tBlogRole = TBlogRole.builder()
+                    .tBlog(tBlog)
+                    .userUuid(receiver.get().getUserUuid())
+                    .teamRole("팀원")
+                    .memberDescription("팀원 입니다.")
                     .build();
-            tBlogRepository.save(tBlog);
+            tBlogRoleRepository.save(tBlogRole);
+            return ResponseEntity.ok().body(Status.OK);
         }
-        invitationRepository.delete(invitation.get());
-        return ResponseEntity.ok().body(Status.OK);
     }
 }

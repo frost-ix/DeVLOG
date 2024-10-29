@@ -4,4 +4,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface TBlogService {
     ResponseEntity<?> getTeamBlog();
+
+    ResponseEntity<?> getTeamBlogMembers();
 }

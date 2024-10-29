@@ -1,5 +1,6 @@
 package io.devlog.blog.security.mail.api;
 
+import io.devlog.blog.security.mail.DTO.VerifyCode;
 import io.devlog.blog.security.mail.Service.EmailService;
 import io.devlog.blog.security.mail.entity.Invitation;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class MailAPI {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verify(@RequestBody String code) {
+    public ResponseEntity<?> verify(@RequestBody VerifyCode code) {
         return emailService.verifyEmail(code);
     }
 }

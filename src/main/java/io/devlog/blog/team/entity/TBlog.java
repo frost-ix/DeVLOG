@@ -20,6 +20,11 @@ public class TBlog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tUuid;
 
+    private String tDomain;
+    private String tBanner;
+    private String tName;
+    private String tInfo;
+
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonBackReference
     @JoinColumn(name = "userUuid")
@@ -29,9 +34,12 @@ public class TBlog {
     @JsonManagedReference
     private List<Categories> categories;
 
-    private String teamRole;
 
     @OneToOne(mappedBy = "tBlog", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private TBlogInfo tBlogInfo;
+    private TBlogRole tBlogRole;
+
+    public long getUserUuid() {
+        return this.user.getUserUuid();
+    }
 }
