@@ -1,17 +1,12 @@
 package io.devlog.blog.board.DTO;
 
 
-import io.devlog.blog.board.entity.Board;
 import io.devlog.blog.board.entity.Categories;
-import io.devlog.blog.board.entity.BoardTags;
 import jakarta.annotation.Nullable;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AccessLevel;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -35,7 +30,6 @@ public class CateDTO {
                 .userUuid(userUuid)
                 .cateUuid(cateUuid)
                 .cateIdx(cateIdx)
-
                 .build();
     }
 }
