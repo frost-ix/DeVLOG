@@ -1,13 +1,13 @@
 package io.devlog.blog.board.DTO;
 
 import io.devlog.blog.board.entity.Board;
-import io.devlog.blog.board.entity.Categories;
 import io.devlog.blog.board.entity.BoardTags;
+import io.devlog.blog.board.entity.Categories;
 import jakarta.annotation.Nullable;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AccessLevel;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,9 +22,10 @@ public class BoardDTO {
     private List<String> tags;
     private String userName;
     private Long userUuID;
+    private String boardProfilepath;
 
     @Builder
-    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID) {
+    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath) {
         this.boardUuid = boardUuid;
         this.title = title;
         this.content = content;
@@ -32,6 +33,7 @@ public class BoardDTO {
         this.userName = userName;
         this.userUuID = userUuID;
         this.categories = categories;
+        this.boardProfilepath = boardProfilepath;
     }
 
     public static BoardDTO fromEntity(Board board) {
@@ -44,6 +46,7 @@ public class BoardDTO {
                         .map(boardTag -> boardTag.getTag().getTagName())
                         .collect(Collectors.toList()))
                 .userName(board.getUserName())
+                .boardProfilepath(board.getBoardProfilepath())
                 .build();
     }
 
@@ -52,10 +55,12 @@ public class BoardDTO {
                 .boardUuid(boardUuid)
                 .boardTitle(title)
                 .boardContent(content)
+                .boardProfilepath(boardProfilepath)
                 .categories(categories)
                 .boardTags(boardTags)
                 .userName(userName)
                 .userUuid(userUuID)
                 .build();
+
     }
 }
