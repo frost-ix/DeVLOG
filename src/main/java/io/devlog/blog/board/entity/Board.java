@@ -29,6 +29,7 @@ public class Board {
 
     private String boardTitle;
     private String boardContent;
+    private String boardProfilepath;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JsonBackReference
