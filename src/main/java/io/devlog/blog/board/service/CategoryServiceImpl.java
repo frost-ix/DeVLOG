@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -40,32 +39,10 @@ public class CategoryServiceImpl implements CategoryService {
         this.httpServletRequest = httpServletRequest;
     }
 
-    public Long checkJWT() {
-        try {
-            String accessToken = httpServletRequest.getHeader("Authorization");
-            Long id = jwtService.getClaims(accessToken).get("id", Long.class);
-            if (accessToken == null || id == 0 || !jwtService.validateToken(accessToken)) {
-                return 0L;
-            } else {
-                // 2. accessToken이 있으나 expireDate가 지났으나 refreshToken이 만료 전 이면 accessToken 재발급 후 진행
-                if (userRepository.existsByUserUuid(id)) {
-                    return id;
-
-                } else {
-                    return 0L;
-                }
-            }
-        } catch (Exception e) {
-            return 0L;
-        }
-
-    }
-
     @Override
     public ResponseEntity<?> getCategories() {
         try {
-            Long id = checkJWT();
-            List<Categories> categories = cateRepository.findByUserCateName(id);
+            List<Categories> categories = cateRepository.findByUserCateName(jwtService.checkJwt());
             List<CateDTO> cateDTOS = categories.stream()
                     .map(CateDTO::toDTO)
                     .collect(Collectors.toList());
@@ -78,32 +55,61 @@ public class CategoryServiceImpl implements CategoryService {
 
     //{"","","",""}
     @Override
-    public ResponseEntity<?> createCategory(List<CateDTO> cateDTOS) {
+    public ResponseEntity<?> createCategory(CateDTO cateDTO) {
         try {
-            Long id = checkJWT();
-            AtomicInteger index = new AtomicInteger(0);
+            cateDTO.setUserUuid(jwtService.checkJwt());
+            cateRepository.save(cateDTO.toEntity());
+            Optional<Categories> category = cateRepository.findByCateName(cateDTO.getCateName());
+            if (category.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.ok().body(CateDTO.toDTO(category.get()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("create category error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateCateName(CateDTO cateDTO) {
+        try {
+            Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
+            if (existingCategory.isPresent()) {
+                Categories category = existingCategory.get();
+                if (!category.getCateName().equals(cateDTO.getCateName())) {
+                    category.setCateName(cateDTO.getCateName());
+                    cateRepository.save(category);
+                }
+                return ResponseEntity.ok("category updated");
+            } else {
+                return ResponseEntity.badRequest().body("category not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("delete category error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateCategory(List<CateDTO> cateDTOS) {
+        try {
             for (CateDTO cateDTO : cateDTOS) {
-                int i = index.getAndIncrement();
                 Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
                 if (existingCategory.isPresent()) {
                     Categories category = existingCategory.get();
                     if (!category.getCateName().equals(cateDTO.getCateName())) {
                         category.setCateName(cateDTO.getCateName());
                         cateRepository.save(category);
-                    } else if (category.getCateIdx() != i) {
-                        category.setCateIdx(i);
+                    } else if (category.getCateIdx() != cateDTO.getCateIdx()) {
+                        category.setCateIdx(cateDTO.getCateIdx());
                         cateRepository.save(category);
                     }
                 } else {
-                    cateDTO.setUserUuid(id);
-                    cateDTO.setCateIdx(i);
-                    Categories categories = cateDTO.toEntity();
-                    cateRepository.save(categories);
+                    return ResponseEntity.badRequest().body("category not found");
                 }
             }
-            return ResponseEntity.ok("category created");
+            return ResponseEntity.ok("category updated");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("create category error");
+            return ResponseEntity.badRequest().body("delete category error");
         }
     }
 

@@ -2,6 +2,8 @@ package io.devlog.blog.board.DTO;
 
 
 import io.devlog.blog.board.entity.Categories;
+import io.devlog.blog.pblog.Entity.PBlog;
+import io.devlog.blog.team.entity.TBlog;
 import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,7 +19,7 @@ public class CateDTO {
     private int cateIdx;
 
     @Builder
-    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx) {
+    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx, @Nullable PBlog pBlog, @Nullable TBlog tBlog) {
         this.cateName = cateName;
         this.userUuid = userUuid;
         this.cateUuid = cateUuid;
@@ -27,7 +29,6 @@ public class CateDTO {
     public static CateDTO toDTO(Categories categories) {
         return CateDTO.builder()
                 .cateName(categories.getCateName())
-                .userUuid(categories.getUserUuid())
                 .cateUuid(categories.getCateUuid())
                 .cateIdx(categories.getCateIdx())
                 .build();
