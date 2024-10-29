@@ -120,6 +120,7 @@ public class UserAPI {
      */
     @PostMapping("/check")
     public ResponseEntity<?> passwordCheck(@RequestBody String password) {
+        log.info("Password : {}", password);
         return userService.passwordCheck(password);
     }
 }

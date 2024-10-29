@@ -1,6 +1,8 @@
 package io.devlog.blog.user.service;
 
+import io.devlog.blog.board.entity.Board;
 import io.devlog.blog.board.repository.BoardRepository;
+import io.devlog.blog.board.repository.BoardTagsRepository;
 import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.ResponseCheck;
@@ -58,6 +60,8 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private CateRepository cateRepository;
     @Autowired
     private BoardRepository boardRepository;
+    @Autowired
+    private BoardTagsRepository boardTagsRepository;
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
@@ -331,8 +335,15 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 log.error("Already deleted user");
                 return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
             } else {
+                Optional<List<Board>> board = boardRepository.findBoardByUserUuid(id);
+                if (board.isPresent()) {
+                    for (Board b : board.get()) {
+                        boardTagsRepository.deleteByBoardUuid(b.getBoardUuid());
+                    }
+                }
                 boardRepository.deleteBoardsById(id);
                 cateRepository.deleteAllByUserUuid(id);
+                pblogRepository.deletePBlogByUserUuid(id);
                 userInfoRepository.deleteByUserUuid(id);
                 subscribesRepository.deleteAllByUserUuid(id);
                 userRepository.deleteByUserUuid(id);
@@ -355,6 +366,9 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         try {
             long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
             if (userRepository.findOneByUserUuid(id).isPresent()) {
+                log.info("Checking password");
+                log.info("Password: {}", password);
+                log.info("User: {}", userRepository.findOneByUserUuid(id).get().getUserPw());
                 if (pwEncoder.matches(password, userRepository.findOneByUserUuid(id).get().getUserPw())) {
                     log.info("Password match");
                     return ResponseEntity.ok().body(new ResponseCheck(Status.OK));

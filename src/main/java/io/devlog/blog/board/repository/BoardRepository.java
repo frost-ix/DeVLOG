@@ -16,8 +16,7 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, String> {
     Optional<Board> findOneByBoardUuid(Long id);
-
-
+    
     @Query("SELECT b FROM Board b")
     List<Board> findBoardBy();
 
