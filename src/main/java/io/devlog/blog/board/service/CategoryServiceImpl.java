@@ -32,27 +32,28 @@ public class CategoryServiceImpl implements CategoryService {
         this.userRepository = userRepository;
         this.httpServletRequest = httpServletRequest;
     }
+
     public Long checkJWT() {
-        try{
+        try {
             String accessToken = httpServletRequest.getHeader("Authorization");
             Long id = jwtService.getClaims(accessToken).get("id", Long.class);
             if (accessToken == null || id == 0 || !jwtService.validateToken(accessToken)) {
                 return 0L;
-            }
-            else{
+            } else {
                 // 2. accessToken이 있으나 expireDate가 지났으나 refreshToken이 만료 전 이면 accessToken 재발급 후 진행
-                if(userRepository.existsByUserUuid(id)) {
+                if (userRepository.existsByUserUuid(id)) {
                     return id;
 
-                }else{
+                } else {
                     return 0L;
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             return 0L;
         }
 
     }
+
     @Override
     public ResponseEntity<?> getCategories() {
         try {
@@ -63,6 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
             return ResponseEntity.badRequest().body("get categories error");
         }
     }
+
     //{"","","",""}
     @Override
     public ResponseEntity<?> createCategory(List<String> cateName) {
@@ -72,12 +74,11 @@ public class CategoryServiceImpl implements CategoryService {
             for (String name : cateName) {
                 int i = index.getAndIncrement();
                 //cateName이 중복인데 cateIdx가 다른 경우 바뀐 idx를 저장
-                if(cateRepository.findByCateName(name).isPresent()){
-                    if(cateRepository.findByIdx(name)!=i){
-                        cateRepository.UpdateCateIdx(name,i);
+                if (cateRepository.findByCateName(name).isPresent()) {
+                    if (cateRepository.findByIdx(name) != i) {
+                        cateRepository.UpdateCateIdx(name, i);
                     }
-                }
-                else{
+                } else {
                     CateDTO cateDTO = CateDTO.builder()
                             .cateName(name)
                             .userUuid(id)
@@ -86,7 +87,6 @@ public class CategoryServiceImpl implements CategoryService {
                     Categories categories = cateDTO.toEntity();
                     cateRepository.save(categories);
                 }
-
             }
             return ResponseEntity.ok("category created");
         } catch (Exception e) {
