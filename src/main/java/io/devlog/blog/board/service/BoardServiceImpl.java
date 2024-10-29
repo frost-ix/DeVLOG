@@ -168,22 +168,12 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-    @Override
-    public ResponseEntity<?> getCategories() {
-        try {
-            Long id = checkJwt();
-            List<String> cateNames = cateRepository.findByUserCateName(id);
-            return ResponseEntity.ok(cateNames);
-        } catch (Exception e) {
-            log.error("get categories error", e);
-            return ResponseEntity.badRequest().body("get categories error");
-        }
-    }
+
 
     @Override
-    public ResponseEntity<?> getUserBoards(Long id) {
+    public ResponseEntity<?> getUserBoards() {
         try {
-            Optional<List<Board>> boards = boardRepository.findBoardByUserUuid(id);
+            Optional<List<Board>> boards = boardRepository.findBoardByUserUuid(checkJwt());
             if (boards.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -316,6 +306,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> deleteAll() {
         try {
+            Long id = checkJwt();
             boardRepository.deleteAll();
             return ResponseEntity.status(200).body("200");
         } catch (Exception e) {
@@ -323,6 +314,7 @@ public class BoardServiceImpl implements BoardService {
             return ResponseEntity.badRequest().body("delete all boards error");
         }
     }
+
 
     @Override
     public boolean exists(String id) {
