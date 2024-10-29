@@ -30,7 +30,7 @@ public class Categories {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonBackReference
-    @JoinColumn(name = "teamUuid")
+    @JoinColumn(name = "tUuid")
     private TeamBlog teamBlog;
 
     @OneToMany(mappedBy = "categories", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
