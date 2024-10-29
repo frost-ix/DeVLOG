@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Log4j2
 @RestController
 @RequestMapping("/board")
@@ -28,10 +30,6 @@ public class boardAPI {
         return boardService.getBoards();
     }
 
-    @GetMapping("/cate")
-    public ResponseEntity<?> getCategories() {
-        return boardService.getCategories();
-    }
 
     @GetMapping("/list")
     public ResponseEntity<?> pagingBoards(@RequestParam("p") int page, @RequestParam("s") int size) {
@@ -48,10 +46,9 @@ public class boardAPI {
         return boardService.pagingCateBoards(cateUuid, page, size);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getUserBoards(@PathVariable Long userId) {
-        log.info("Get user boards : {}", userId);
-        return boardService.getUserBoards(userId);
+    @GetMapping("/user/post")
+    public ResponseEntity<?> getUserBoards() {
+        return boardService.getUserBoards();
     }
 
     @GetMapping("/{id}")
