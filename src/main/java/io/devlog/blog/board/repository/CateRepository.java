@@ -17,6 +17,8 @@ public interface CateRepository extends JpaRepository<Categories, String> {
     @Query("select c.cateName from Categories c where c.userUuid = :userUuid")
     List<String> findByUserCateName(Long userUuid);
 
+    Optional<Categories> findById(Long cateUuid);
+
     Optional<Categories> findByCateName(String cateName);
 
     @Query("select c.cateIdx from Categories c where c.cateName = :name")
@@ -25,6 +27,9 @@ public interface CateRepository extends JpaRepository<Categories, String> {
     @Modifying
     @Query("update Categories c set c.cateIdx = :cateIdx where c.cateName = :cateName")
     int UpdateCateIdx(String cateName, int cateIdx);
+
+    @Query("delete from Categories c where c.cateUuid = :cateUuid")
+    int deleteByCategoriId(Long cateUuid);
 
     @Transactional
     @Modifying

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -72,33 +73,45 @@ public class CategoryServiceImpl implements CategoryService {
 
     //{"","","",""}
     @Override
-    public ResponseEntity<?> createCategory(List<String> cateName) {
+    public ResponseEntity<?> createCategory(List<CateDTO> cateDTOS) {
         try {
             Long id = checkJWT();
             AtomicInteger index = new AtomicInteger(0);
-            for (String name : cateName) {
+            for (CateDTO cateDTO : cateDTOS) {
                 int i = index.getAndIncrement();
-                //cateName이 중복인데 cateIdx가 다른 경우 바뀐 idx를 저장
-                if (cateRepository.findByCateName(name).isPresent()) {
-                    if (cateRepository.findByCateIdx(name) != i) {
-                        if (cateRepository.UpdateCateIdx(name, i) == 1) {
-                            log.info("cateIdx updated");
-                        }
+                Optional<Categories> existingCategory = cateRepository.findById(cateDTO.getCateUuid());
+                if (existingCategory.isPresent()) {
+                    Categories category = existingCategory.get();
+                    if (!category.getCateName().equals(cateDTO.getCateName())) {
+                        category.setCateName(cateDTO.getCateName());
+                        cateRepository.save(category);
+                    } else if (category.getCateIdx() != i) {
+                        category.setCateIdx(i);
+                        cateRepository.save(category);
                     }
                 } else {
-                    CateDTO cateDTO = CateDTO.builder()
-                            .cateName(name)
-                            .userUuid(id)
-                            .cateIdx(i)
-                            .build();
+                    cateDTO.setUserUuid(id);
+                    cateDTO.setCateIdx(i);
                     Categories categories = cateDTO.toEntity();
                     cateRepository.save(categories);
                 }
-
             }
             return ResponseEntity.ok("category created");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("create category error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> deleteCategory(Long cateUuid) {
+        try {
+            if (cateRepository.deleteByCategoriId(cateUuid) == 1) {
+                return ResponseEntity.status(200).body("category deleted");
+            } else {
+                return ResponseEntity.badRequest().body("category not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("delete category error");
         }
     }
 }

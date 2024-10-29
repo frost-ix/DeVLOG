@@ -1,5 +1,6 @@
 package io.devlog.blog.board.api;
 
+import io.devlog.blog.board.DTO.CateDTO;
 import io.devlog.blog.board.service.CategoryService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,12 @@ public class cateAPI {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createCategory(@RequestBody List<String> cateList) {
-        return categoryService.createCategory(cateList);
+    public ResponseEntity<?> createCategory(@RequestBody List<CateDTO> cateDTOS) {
+        return categoryService.createCategory(cateDTOS);
+    }
+
+    @DeleteMapping("/{cateUuid}")
+    public ResponseEntity<?> deleteCategory(@PathVariable Long cateUuid) {
+        return categoryService.deleteCategory(cateUuid);
     }
 }
