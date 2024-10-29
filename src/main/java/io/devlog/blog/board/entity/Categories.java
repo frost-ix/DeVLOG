@@ -3,6 +3,7 @@ package io.devlog.blog.board.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.devlog.blog.pblog.Entity.PBlog;
+import io.devlog.blog.team.entity.TeamBlog;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +27,11 @@ public class Categories {
     @JsonBackReference
     @JoinColumn(name = "pUuid")
     private PBlog pBlog;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonBackReference
+    @JoinColumn(name = "teamUuid")
+    private TeamBlog teamBlog;
 
     @OneToMany(mappedBy = "categories", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonManagedReference

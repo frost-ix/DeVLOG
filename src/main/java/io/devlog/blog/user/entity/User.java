@@ -1,7 +1,9 @@
 package io.devlog.blog.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.devlog.blog.pblog.Entity.PBlog;
+import io.devlog.blog.team.entity.TeamBlog;
 import io.devlog.blog.user.enums.AccessRole;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -47,6 +49,11 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonManagedReference
     private PBlog pbLog;
+
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @JsonBackReference
+    @JoinColumn(name = "teamUuid")
+    private TeamBlog team;
 
     public String getRoleKey() {
         return this.accessRole.getKey();
