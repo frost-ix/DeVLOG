@@ -1,7 +1,6 @@
 package io.devlog.blog.board.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +18,5 @@ public class Comments {
     private Board board;
     private String comments;
 
-    @Nullable
     private String imagePath;
 }

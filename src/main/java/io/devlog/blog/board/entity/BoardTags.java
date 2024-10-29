@@ -16,7 +16,7 @@ public class BoardTags {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JsonBackReference
     @JoinColumn(name = "boardUuid", referencedColumnName = "boardUuid")
     private Board board;

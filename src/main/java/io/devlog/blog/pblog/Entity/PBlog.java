@@ -23,7 +23,7 @@ public class PBlog {
     @JoinColumn(name = "userUuid")
     private User user;
 
-    @OneToMany(mappedBy = "pBlog", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "pBlog", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Categories> categories;
 

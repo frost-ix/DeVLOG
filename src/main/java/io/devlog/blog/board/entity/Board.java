@@ -40,11 +40,11 @@ public class Board {
     private List<BoardTags> boardTags;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
     private List<Comments> comments;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
     private List<Images> images;
 
 }

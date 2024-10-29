@@ -39,15 +39,15 @@ public class CateDTO {
                 .build();
     }
 
-    public static CateDTO ofPBlog(String cateName, Long userUuid, Long cateUuid, int cateIdx, PBlog pBlog, TBlog tBlog) {
+    public CateDTO ofPBlog(String cateName, Long userUuid, Long cateUuid, int cateIdx, PBlog pBlog, TBlog tBlog) {
         return new CateDTO(cateName, userUuid, cateUuid, cateIdx, pBlog, null);
     }
 
-    public static CateDTO ofTBlog(String cateName, Long userUuid, Long cateUuid, int cateIdx, PBlog pBlog, TBlog tBlog) {
+    public CateDTO ofTBlog(String cateName, Long userUuid, Long cateUuid, int cateIdx, PBlog pBlog, TBlog tBlog) {
         return new CateDTO(cateName, userUuid, cateUuid, cateIdx, null, tBlog);
     }
 
-    
+
     public Categories toEntity() {
         return Categories.builder()
                 .cateName(cateName)
