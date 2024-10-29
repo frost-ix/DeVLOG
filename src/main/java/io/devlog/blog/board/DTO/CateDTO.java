@@ -24,6 +24,15 @@ public class CateDTO {
         this.cateIdx = cateIdx;
     }
 
+    public static CateDTO toDTO(Categories categories) {
+        return CateDTO.builder()
+                .cateName(categories.getCateName())
+                .userUuid(categories.getUserUuid())
+                .cateUuid(categories.getCateUuid())
+                .cateIdx(categories.getCateIdx())
+                .build();
+    }
+
     public Categories toEntity() {
         return Categories.builder()
                 .cateName(cateName)

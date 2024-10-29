@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 @Log4j2
@@ -64,9 +65,13 @@ public class CategoryServiceImpl implements CategoryService {
     public ResponseEntity<?> getCategories() {
         try {
             Long id = checkJWT();
-            List<String> cateNames = cateRepository.findByUserCateName(id);
-            return ResponseEntity.ok(cateNames);
+            List<Categories> categories = cateRepository.findByUserCateName(id);
+            List<CateDTO> cateDTOS = categories.stream()
+                    .map(CateDTO::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(200).body(cateDTOS);
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.badRequest().body("get categories error");
         }
     }
