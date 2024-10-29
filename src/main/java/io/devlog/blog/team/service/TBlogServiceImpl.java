@@ -89,6 +89,7 @@ public class TBlogServiceImpl implements TBlogService {
 
     @Override
     public ResponseEntity<?> createTeamBlog(TBlogDTO tBlogDTO) {
+        Long id = jwtService.checkJwt();
         if (jwtService.checkJwt() == 0L) {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         } else {
@@ -99,8 +100,11 @@ public class TBlogServiceImpl implements TBlogService {
                         .tName(tBlogDTO.getTName())
                         .tSubject(tBlogDTO.getTSubject())
                         .build();
-                TBlog t = tBlogRepository.save(tBlog);
-                return ResponseEntity.ok().body(Status.OK);
+                if (tBlogRepository.findTBlogByUserUuid(id) == null) {
+                    TBlog t = tBlogRepository.save(tBlog);
+                    return ResponseEntity.ok().body(Status.OK);
+                }
+                return ResponseEntity.badRequest().body(ExceptionStatus.CONFLICT);
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
             }

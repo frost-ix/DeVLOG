@@ -54,6 +54,8 @@ public class CateDTO {
                 .userUuid(userUuid)
                 .cateUuid(cateUuid)
                 .cateIdx(cateIdx)
+                .pBlog(pBlog)
+                .tBlog(tBlog)
                 .build();
     }
 }
