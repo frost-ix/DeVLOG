@@ -8,7 +8,11 @@ import java.util.List;
 public interface CategoryService {
     ResponseEntity<?> getCategories();
 
-    ResponseEntity<?> createCategory(List<CateDTO> cateDTOS);
+    ResponseEntity<?> createCategory(CateDTO cateDTO);
+
+    ResponseEntity<?> updateCateName(CateDTO cateDTO);
+
+    ResponseEntity<?> updateCategory(List<CateDTO> cateDTOS);
 
     ResponseEntity<?> deleteCategory(Long cateUuid);
 

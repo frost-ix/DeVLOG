@@ -6,8 +6,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Log4j2
 @RestController
 @RequestMapping("/cate")
@@ -24,8 +22,14 @@ public class cateAPI {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createCategory(@RequestBody List<CateDTO> cateDTOS) {
-        return categoryService.createCategory(cateDTOS);
+    public ResponseEntity<?> createCategory(@RequestBody CateDTO cateDTO) {
+        log.info("Create category : {}", cateDTO);
+        return categoryService.createCategory(cateDTO);
+    }
+
+    @PatchMapping("")
+    public ResponseEntity<?> updateCateName(@RequestBody CateDTO cateDTO) {
+        return categoryService.updateCateName(cateDTO);
     }
 
     @DeleteMapping("/{cateUuid}")

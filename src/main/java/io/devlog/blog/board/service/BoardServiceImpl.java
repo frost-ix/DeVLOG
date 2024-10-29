@@ -55,24 +55,6 @@ public class BoardServiceImpl implements BoardService {
         this.httpServletRequest = httpServletRequest;
     }
 
-    public Long checkJwt() {
-        try {
-            String accessToken = httpServletRequest.getHeader("Authorization");
-            Long id = jwtService.getClaims(accessToken).get("id", Long.class);
-            if (accessToken == null || id == 0 || !jwtService.validateToken(accessToken)) {
-                return 0L;
-            } else {
-                // 2. accessToken이 있으나 expireDate가 지났으나 refreshToken이 만료 전 이면 accessToken 재발급 후 진행
-                if (userRepository.existsByUserUuid(id)) {
-                    return id;
-                } else {
-                    return 0L;
-                }
-            }
-        } catch (Exception e) {
-            return 0L;
-        }
-    }
 
     @Override
     public ResponseEntity<?> uploadPhoto(MultipartFile file) {
@@ -168,7 +150,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> getUserBoards() {
         try {
-            Optional<List<Board>> boards = boardRepository.findBoardByUserUuid(checkJwt());
+            Optional<List<Board>> boards = boardRepository.findBoardByUserUuid(jwtService.checkJwt());
             if (boards.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -302,8 +284,12 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> deleteAll() {
         try {
-            Long id = checkJwt();
-            boardRepository.deleteAll();
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token is invalid");
+            } else {
+                boardRepository.deleteAll();
+            }
             return ResponseEntity.status(200).body("200");
         } catch (Exception e) {
             log.error("delete all boards error", e);
