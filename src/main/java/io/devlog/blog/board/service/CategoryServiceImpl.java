@@ -64,8 +64,8 @@ public class CategoryServiceImpl implements CategoryService {
     public ResponseEntity<?> getCategories() {
         try {
             Long id = checkJWT();
-            List<String> cateNames = cateRepository.findByUserCateName(id);
-            return ResponseEntity.ok(cateNames);
+            List<CateDTO> CateDTOS = cateRepository.findByUserCateName(id);
+            return ResponseEntity.ok(CateDTOS);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("get categories error");
         }
