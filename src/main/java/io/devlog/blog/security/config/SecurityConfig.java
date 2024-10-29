@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((req) ->
                         req
                                 .requestMatchers("/").permitAll()
+                                .requestMatchers("/cate", "/cate/**").permitAll()
                                 .requestMatchers("/oauth/**").permitAll()
                                 .requestMatchers("/board", "/user", "/p").permitAll()
                                 .requestMatchers("/board/**", "/user/**", "/p/**").permitAll()
