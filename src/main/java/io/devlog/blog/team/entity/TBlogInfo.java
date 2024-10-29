@@ -8,22 +8,21 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "team_role")
+@Table(name = "tblog_info")
 @Builder(toBuilder = true)
-public class TeamRole {
+public class TBlogInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "team_role_uuid")
-    private Long teamRoleUuid;
-
-    @Column(name = "team_role")
-    private String teamRoleName;
-
-    @Column(name = "team_member")
-    private long userUuid;
+    private Long tInfoUuid;
 
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    @JsonBackReference
     @JoinColumn(name = "tUuid")
+    @JsonBackReference
     private TBlog tBlog;
+
+    private String tDomain;
+    private String tBanner;
+    private String tName;
+
+    private String tInfo;
 }

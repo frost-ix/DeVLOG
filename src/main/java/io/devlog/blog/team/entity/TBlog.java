@@ -29,13 +29,9 @@ public class TBlog {
     @JsonManagedReference
     private List<Categories> categories;
 
+    private String teamRole;
+
     @OneToOne(mappedBy = "tBlog", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private TeamRole teamRole;
-
-    private String tDomain;
-    private String tBanner;
-    private String tName;
-
-    private String tInfo;
+    private TBlogInfo tBlogInfo;
 }

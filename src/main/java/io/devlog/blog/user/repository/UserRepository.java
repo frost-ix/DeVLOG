@@ -21,6 +21,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u from User u where u.userUuid = :userUuid")
     Optional<User> findByUserUuid(Long userUuid);
 
+    @Query("select u from User u where u.name = :name")
+    Optional<User> findOneByName(String name);
+
     @Transactional
     @Modifying
     @Query("update User u " +

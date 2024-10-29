@@ -32,7 +32,7 @@ public class TBlogServiceImpl implements TBlogService {
                 Optional<List<TBlog>> tBlog = tBlogRepository.findTBlogByUserUuid(id);
                 List<TBlogDTO> tBlogDTO = new ArrayList<>();
                 tBlog.ifPresent(tBlogs -> tBlogs.forEach(t ->
-                        tBlogDTO.add(TBlogDTO.of(t))));
+                        tBlogDTO.add(TBlogDTO.of(t.getUser().getUserUuid()))));
                 if (tBlogDTO.isEmpty()) {
                     return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
                 } else {
