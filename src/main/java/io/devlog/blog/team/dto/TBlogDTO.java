@@ -14,6 +14,10 @@ public class TBlogDTO {
 
     private String tInfo;
 
+    public static TBlogDTO of(TBlog tBlog) {
+        return new TBlogDTO(tBlog.getTDomain(), tBlog.getTBanner(), tBlog.getTName(), tBlog.getTInfo());
+    }
+
     public TBlog toEntity() {
         return TBlog.builder()
                 .tDomain(tDomain)

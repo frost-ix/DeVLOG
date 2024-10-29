@@ -79,7 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
             AtomicInteger index = new AtomicInteger(0);
             for (CateDTO cateDTO : cateDTOS) {
                 int i = index.getAndIncrement();
-                Optional<Categories> existingCategory = cateRepository.findById(cateDTO.getCateUuid());
+                Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
                 if (existingCategory.isPresent()) {
                     Categories category = existingCategory.get();
                     if (!category.getCateName().equals(cateDTO.getCateName())) {

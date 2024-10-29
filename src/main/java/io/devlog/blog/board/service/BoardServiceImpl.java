@@ -72,7 +72,6 @@ public class BoardServiceImpl implements BoardService {
         } catch (Exception e) {
             return 0L;
         }
-
     }
 
     @Override
@@ -166,7 +165,6 @@ public class BoardServiceImpl implements BoardService {
     }
 
 
-
     @Override
     public ResponseEntity<?> getUserBoards() {
         try {
@@ -212,7 +210,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> create(BoardDTO boardDTO) {
         try {
-            Long id = checkJwt();
+            Long id = jwtService.checkJwt();
             if (id == 0) {
                 return ResponseEntity.badRequest().body("Token is invalid");
             }
