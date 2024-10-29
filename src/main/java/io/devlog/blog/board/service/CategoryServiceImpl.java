@@ -94,12 +94,10 @@ public class CategoryServiceImpl implements CategoryService {
         try {
             for (CateDTO cateDTO : cateDTOS) {
                 Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
-                if (existingCategory.isPresent()) {
+                if (!existingCategory.isEmpty()) {
                     Categories category = existingCategory.get();
-                    if (!category.getCateName().equals(cateDTO.getCateName())) {
-                        category.setCateName(cateDTO.getCateName());
-                        cateRepository.save(category);
-                    } else if (category.getCateIdx() != cateDTO.getCateIdx()) {
+                    // cateIdx가 변경됐을 경우 cateIdx 변경해서 저장
+                    if (category.getCateIdx() != cateDTO.getCateIdx()) {
                         category.setCateIdx(cateDTO.getCateIdx());
                         cateRepository.save(category);
                     }
@@ -122,6 +120,7 @@ public class CategoryServiceImpl implements CategoryService {
                 return ResponseEntity.badRequest().body("category not found");
             }
         } catch (Exception e) {
+            log.info(e.getMessage());
             return ResponseEntity.badRequest().body("delete category error");
         }
     }
