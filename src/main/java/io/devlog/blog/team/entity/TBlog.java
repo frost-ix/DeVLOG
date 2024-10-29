@@ -1,5 +1,6 @@
 package io.devlog.blog.team.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.devlog.blog.board.entity.Categories;
 import io.devlog.blog.user.entity.User;
@@ -12,15 +13,15 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "tBlog")
+@Table(name = "tblog")
 @Builder(toBuilder = true)
-public class TeamBlog {
+public class TBlog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "tUuid")
-    private Long teamUuid;
+    private Long tUuid;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name = "userUuid")
     private User user;
 

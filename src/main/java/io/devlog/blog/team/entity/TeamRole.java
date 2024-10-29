@@ -25,5 +25,5 @@ public class TeamRole {
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonBackReference
     @JoinColumn(name = "tUuid")
-    private TeamBlog team;
+    private TBlog tBlog;
 }
