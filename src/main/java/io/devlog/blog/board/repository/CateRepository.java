@@ -20,8 +20,9 @@ public interface CateRepository extends JpaRepository<Categories, String> {
     Optional<Categories> findByCateName(String cateName);
 
     @Query("select c.cateIdx from Categories c where c.cateName = :name")
-    int findByIdx(String name);
+    int findByCateIdx(String name);
 
+    @Modifying
     @Query("update Categories c set c.cateIdx = :cateIdx where c.cateName = :cateName")
     int UpdateCateIdx(String cateName, int cateIdx);
 

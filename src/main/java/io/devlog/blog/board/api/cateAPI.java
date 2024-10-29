@@ -22,7 +22,7 @@ public class cateAPI {
         return categoryService.getCategories();
     }
 
-    @PostMapping("/cate/create")
+    @PostMapping("")
     public ResponseEntity<?> createCategory(@RequestBody List<String> cateList) {
         return categoryService.createCategory(cateList);
     }
