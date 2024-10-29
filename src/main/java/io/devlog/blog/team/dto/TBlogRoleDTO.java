@@ -7,20 +7,22 @@ public class TBlogRoleDTO {
     private Long userUuid;
     private Long tUuid;
     private String role;
+    private String userIcon;
     private String description;
 
-    private TBlogRoleDTO(Long userUuid, Long tUuid, String role, String description) {
+    public TBlogRoleDTO(Long userUuid, Long tUuid, String role, String userIcon, String description) {
         this.userUuid = userUuid;
         this.tUuid = tUuid;
         this.role = role;
+        this.userIcon = userIcon;
         this.description = description;
     }
 
-    public static TBlogRoleDTO of(Long userUuid, Long tUuid, String role, String description) {
-        return new TBlogRoleDTO(userUuid, tUuid, role, description);
+    public static TBlogRoleDTO of(Long userUuid, Long tUuid, String role, String userIcon, String description) {
+        return new TBlogRoleDTO(userUuid, tUuid, role, userIcon, description);
     }
 
-    public static TBlogRoleDTO of(Long userUuid, Long tUuid, String role) {
-        return new TBlogRoleDTO(userUuid, tUuid, role, null);
+    public static TBlogRoleDTO of(Long userUuid, Long tUuid, String role, String userIcon) {
+        return new TBlogRoleDTO(userUuid, tUuid, role, userIcon, null);
     }
 }

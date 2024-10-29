@@ -1,15 +1,26 @@
 package io.devlog.blog.team.dto;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class TBlogDTO {
-    private Long userUuid;
+    private String tDomain;
+    private String tBanner;
+    private String tName;
+    private String tInfo;
 
-    public static TBlogDTO of(Long userUuid) {
-        return new TBlogDTO(userUuid);
+    private TBlogDTO(String tDomain, String tBanner, String tName, String tInfo) {
+        this.tDomain = tDomain;
+        this.tBanner = tBanner;
+        this.tName = tName;
+        this.tInfo = tInfo;
+    }
+
+    public static TBlogDTO of(String tDomain, String tBanner, String tName, String tInfo) {
+        return new TBlogDTO(tDomain, tBanner, tName, tInfo);
+    }
+
+    public static TBlogDTO of(String tDomain, String tBanner, String tName) {
+        return new TBlogDTO(tDomain, tBanner, tName, null);
     }
 }
