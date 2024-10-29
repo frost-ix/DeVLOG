@@ -1,5 +1,6 @@
 package io.devlog.blog.user.service;
 
+import io.devlog.blog.board.repository.BoardRepository;
 import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.ResponseCheck;
@@ -55,6 +56,8 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final GITHUB github;
     @Autowired
     private CateRepository cateRepository;
+    @Autowired
+    private BoardRepository boardRepository;
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
@@ -328,6 +331,8 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 log.error("Already deleted user");
                 return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
             } else {
+                boardRepository.deleteBoardsById(id);
+                cateRepository.deleteAllByUserUuid(id);
                 userInfoRepository.deleteByUserUuid(id);
                 subscribesRepository.deleteAllByUserUuid(id);
                 userRepository.deleteByUserUuid(id);
