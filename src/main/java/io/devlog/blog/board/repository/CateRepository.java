@@ -27,7 +27,9 @@ public interface CateRepository extends JpaRepository<Categories, String> {
     @Modifying
     @Query("update Categories c set c.cateIdx = :cateIdx where c.cateName = :cateName")
     int UpdateCateIdx(String cateName, int cateIdx);
-
+    
+    @Transactional
+    @Modifying
     @Query("delete from Categories c where c.cateUuid = :cateUuid")
     int deleteByCategoriId(Long cateUuid);
 

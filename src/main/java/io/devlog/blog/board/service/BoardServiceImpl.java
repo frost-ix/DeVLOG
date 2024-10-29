@@ -150,7 +150,11 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> getUserBoards() {
         try {
-            Optional<List<Board>> boards = boardRepository.findBoardByUserUuid(jwtService.checkJwt());
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
+            Optional<List<Board>> boards = boardRepository.findBoardByUserUuid(id);
             if (boards.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
@@ -235,7 +239,13 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> update(BoardDTO boardDTO) {
         try {
-
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
+            if (id != boardDTO.getUserUuID()) {
+                return ResponseEntity.badRequest().body("User is not match");
+            }
             Board originalBoard = boardRepository.findOneByBoardUuid(boardDTO.getBoardUuid())
                     .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
             Categories category = cateRepository.findByCateName(boardDTO.getCategories())
@@ -270,6 +280,13 @@ public class BoardServiceImpl implements BoardService {
     @Transactional
     public ResponseEntity<?> deleteBoard(Long id) {
         try {
+            Long userId = jwtService.checkJwt();
+            if (userId == 0) {
+                return ResponseEntity.badRequest().body("Token is invalid");
+            }
+            if (userId != boardRepository.findOneByBoardUuid(id).orElseThrow().getUserUuid()) {
+                return ResponseEntity.badRequest().body("User is not match");
+            }
             Board board = boardRepository.findOneByBoardUuid(id)
                     .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
             boardTagsRepository.deleteByBoard(board);
@@ -284,6 +301,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> deleteAll() {
         try {
+
             Long id = jwtService.checkJwt();
             if (id == 0) {
                 return ResponseEntity.badRequest().body("Token is invalid");

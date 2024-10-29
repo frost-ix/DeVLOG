@@ -42,7 +42,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ResponseEntity<?> getCategories() {
         try {
-            List<Categories> categories = cateRepository.findByUserCateName(jwtService.checkJwt());
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
+            List<Categories> categories = cateRepository.findByUserCateName(id);
             List<CateDTO> cateDTOS = categories.stream()
                     .map(CateDTO::toDTO)
                     .collect(Collectors.toList());
@@ -57,7 +61,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ResponseEntity<?> createCategory(CateDTO cateDTO) {
         try {
-            cateDTO.setUserUuid(jwtService.checkJwt());
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
+            cateDTO.setUserUuid(id);
             cateRepository.save(cateDTO.toEntity());
             Optional<Categories> category = cateRepository.findByCateName(cateDTO.getCateName());
             if (category.isEmpty()) {
@@ -73,6 +81,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ResponseEntity<?> updateCateName(CateDTO cateDTO) {
         try {
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
             Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
             if (existingCategory.isPresent()) {
                 Categories category = existingCategory.get();
@@ -92,14 +104,16 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ResponseEntity<?> updateCategory(List<CateDTO> cateDTOS) {
         try {
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
             for (CateDTO cateDTO : cateDTOS) {
                 Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
-                if (existingCategory.isPresent()) {
+                if (!existingCategory.isEmpty()) {
                     Categories category = existingCategory.get();
-                    if (!category.getCateName().equals(cateDTO.getCateName())) {
-                        category.setCateName(cateDTO.getCateName());
-                        cateRepository.save(category);
-                    } else if (category.getCateIdx() != cateDTO.getCateIdx()) {
+                    // cateIdx가 변경됐을 경우 cateIdx 변경해서 저장
+                    if (category.getCateIdx() != cateDTO.getCateIdx()) {
                         category.setCateIdx(cateDTO.getCateIdx());
                         cateRepository.save(category);
                     }
@@ -116,12 +130,17 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ResponseEntity<?> deleteCategory(Long cateUuid) {
         try {
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
             if (cateRepository.deleteByCategoriId(cateUuid) == 1) {
                 return ResponseEntity.status(200).body("category deleted");
             } else {
                 return ResponseEntity.badRequest().body("category not found");
             }
         } catch (Exception e) {
+            log.info(e.getMessage());
             return ResponseEntity.badRequest().body("delete category error");
         }
     }
