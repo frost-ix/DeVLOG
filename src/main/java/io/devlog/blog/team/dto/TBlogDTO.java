@@ -5,22 +5,22 @@ import lombok.Data;
 @Data
 public class TBlogDTO {
     private String tDomain;
-    private String tBanner;
+    private String tTitle;
     private String tName;
-    private String tInfo;
+    private String tSubject;
 
-    private TBlogDTO(String tDomain, String tBanner, String tName, String tInfo) {
+    public TBlogDTO(String tDomain, String tTitle, String tName, String tSubject) {
         this.tDomain = tDomain;
-        this.tBanner = tBanner;
+        this.tTitle = tTitle;
         this.tName = tName;
-        this.tInfo = tInfo;
+        this.tSubject = tSubject;
     }
 
-    public static TBlogDTO of(String tDomain, String tBanner, String tName, String tInfo) {
-        return new TBlogDTO(tDomain, tBanner, tName, tInfo);
+    public static TBlogDTO of(String tDomain, String tTitle, String tName, String tSubject) {
+        return new TBlogDTO(tDomain, tTitle, tName, tSubject);
     }
 
-    public static TBlogDTO of(String tDomain, String tBanner, String tName) {
-        return new TBlogDTO(tDomain, tBanner, tName, null);
+    public static TBlogDTO of(String tDomain, String tTitle, String tName) {
+        return new TBlogDTO(tDomain, tTitle, tName, null);
     }
 }

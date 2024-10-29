@@ -27,7 +27,7 @@ public interface CateRepository extends JpaRepository<Categories, String> {
     @Modifying
     @Query("update Categories c set c.cateIdx = :cateIdx where c.cateName = :cateName")
     int UpdateCateIdx(String cateName, int cateIdx);
-    
+
     @Transactional
     @Modifying
     @Query("delete from Categories c where c.cateUuid = :cateUuid")
@@ -37,4 +37,9 @@ public interface CateRepository extends JpaRepository<Categories, String> {
     @Modifying
     @Query("delete from Categories c where c.userUuid = :userUuid")
     void deleteAllByUserUuid(@Param("userUuid") Long userUuid);
+
+    @Transactional
+    @Modifying
+    @Query("delete from Categories c where c.pBlog.pUuid = :pUuid")
+    void deleteByPBlogUuid(@Param("pUuid") Long pUuid);
 }

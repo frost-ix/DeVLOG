@@ -1,6 +1,8 @@
 package io.devlog.blog.user.service;
 
+import io.devlog.blog.board.DTO.CateDTO;
 import io.devlog.blog.board.entity.Board;
+import io.devlog.blog.board.entity.Categories;
 import io.devlog.blog.board.repository.BoardRepository;
 import io.devlog.blog.board.repository.BoardTagsRepository;
 import io.devlog.blog.board.repository.CateRepository;
@@ -17,6 +19,7 @@ import io.devlog.blog.pblog.Entity.PBlog;
 import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.security.Jwt.JwtToken;
+import io.devlog.blog.team.repository.TBlogRepository;
 import io.devlog.blog.user.DTO.OAuthDTO;
 import io.devlog.blog.user.DTO.UserDTO;
 import io.devlog.blog.user.DTO.UserInfoDTO;
@@ -49,6 +52,10 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final HttpServletRequest httpServletRequest;
     private final SubscribesRepository subscribesRepository;
     private final PblogRepository pblogRepository;
+    private final CateRepository cateRepository;
+    private final BoardRepository boardRepository;
+    private final BoardTagsRepository boardTagsRepository;
+    private final TBlogRepository tBlogRepository;
 
     @Autowired
     private final NAVER naver;
@@ -56,17 +63,15 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final GOOGLE google;
     @Autowired
     private final GITHUB github;
-    @Autowired
-    private CateRepository cateRepository;
-    @Autowired
-    private BoardRepository boardRepository;
-    @Autowired
-    private BoardTagsRepository boardTagsRepository;
+
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
                            UserInfoRepository userInfoRepository, HttpServletRequest httpServletRequest,
-                           SubscribesRepository subscribesRepository, PblogRepository pblogRepository, NAVER naver, GOOGLE google, GITHUB github
+                           SubscribesRepository subscribesRepository, PblogRepository pblogRepository,
+                           CateRepository cateRepository, BoardRepository boardRepository,
+                           BoardTagsRepository boardTagsRepository, TBlogRepository tBlogRepository,
+                           NAVER naver, GOOGLE google, GITHUB github
     ) {
         super(User.class);
         this.userRepository = userRepository;
@@ -77,6 +82,10 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
         this.httpServletRequest = httpServletRequest;
         this.subscribesRepository = subscribesRepository;
         this.pblogRepository = pblogRepository;
+        this.cateRepository = cateRepository;
+        this.boardRepository = boardRepository;
+        this.boardTagsRepository = boardTagsRepository;
+        this.tBlogRepository = tBlogRepository;
         this.naver = naver;
         this.google = google;
         this.github = github;
@@ -287,7 +296,9 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 pb.setUser(check);
                 check.setPbLog(pb);
                 userRepository.save(check);
-                pblogRepository.save(pb);
+                PBlog p = pblogRepository.save(pb);
+                CateDTO cate = new CateDTO("기본 카테고리", check.getUserUuid(), null, 1, p, null);
+                cateRepository.save(cate.toEntity());
                 UserDTO returnData = UserDTO.toDTO(check);
                 log.info("Created user: {}", returnData);
                 return ResponseEntity.ok().body(new ResponseCheck(Status.CREATED));
@@ -341,13 +352,21 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 log.error("Already deleted user");
                 return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
             } else {
+                if (tBlogRepository.findTBlogByUserUuid(id) != null) {
+                    return ResponseEntity.badRequest().body("팀 블로그를 먼저 삭제 해 주세요 !");
+                }
                 Optional<List<Board>> board = boardRepository.findBoardByUserUuid(id);
                 if (board.isPresent()) {
                     for (Board b : board.get()) {
                         boardTagsRepository.deleteByBoardUuid(b.getBoardUuid());
                     }
                 }
-                boardRepository.deleteBoardsById(id);
+                List<Categories> categories = cateRepository.findByUserCateName(id);
+                if (!categories.isEmpty()) {
+                    for (Categories c : categories) {
+                        boardRepository.deleteBoardsByCateUuid(c.getCateUuid());
+                    }
+                }
                 cateRepository.deleteAllByUserUuid(id);
                 pblogRepository.deletePBlogByUserUuid(id);
                 userInfoRepository.deleteByUserUuid(id);

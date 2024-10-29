@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, String> {
     Optional<Board> findOneByBoardUuid(Long id);
-    
+
     @Query("SELECT b FROM Board b")
     List<Board> findBoardBy();
 
@@ -34,4 +34,9 @@ public interface BoardRepository extends JpaRepository<Board, String> {
     @Modifying
     @Query("delete from Board b where b.userUuid = :userUuid")
     void deleteBoardsById(@Param("userUuid") Long userUuid);
+
+    @Transactional
+    @Modifying
+    @Query("delete from Board b where b.categories.cateUuid = :cateUuid")
+    void deleteBoardsByCateUuid(@Param("cateUuid") Long cateUuid);
 }

@@ -41,7 +41,12 @@ public class TBlogServiceImpl implements TBlogService {
                 Optional<List<TBlog>> tBlog = tBlogRepository.findAllByByUserUuid(id);
                 List<TBlogDTO> tBlogDTO = new ArrayList<>();
                 tBlog.ifPresent(tBlogs -> tBlogs.forEach(t ->
-                        tBlogDTO.add(TBlogDTO.of(t.getTDomain(), t.getTBanner(), t.getTName(), t.getTInfo()))));
+                        tBlogDTO.add(TBlogDTO.of(
+                                t.getTDomain(),
+                                t.getTTitle(),
+                                t.getTName(),
+                                t.getTSubject()
+                        ))));
                 if (tBlogDTO.isEmpty()) {
                     return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
                 } else {
@@ -90,11 +95,11 @@ public class TBlogServiceImpl implements TBlogService {
             try {
                 TBlog tBlog = TBlog.builder()
                         .tDomain(tBlogDTO.getTDomain())
-                        .tBanner(tBlogDTO.getTBanner())
+                        .tTitle(tBlogDTO.getTTitle())
                         .tName(tBlogDTO.getTName())
-                        .tInfo(tBlogDTO.getTInfo())
+                        .tSubject(tBlogDTO.getTSubject())
                         .build();
-                tBlogRepository.save(tBlog);
+                TBlog t = tBlogRepository.save(tBlog);
                 return ResponseEntity.ok().body(Status.OK);
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
