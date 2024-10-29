@@ -15,4 +15,10 @@ public interface CateRepository extends JpaRepository<Categories, String> {
     List<String> findByUserCateName(Long userUuid);
 
     Optional<Categories> findByCateName(String cateName);
+
+    @Query("select c.cateIdx from Categories c where c.cateName = :name")
+    int findByIdx(String name);
+
+    @Query("update Categories c set c.cateIdx = :cateIdx where c.cateName = :cateName")
+    int UpdateCateIdx(String cateName, int cateIdx);
 }
