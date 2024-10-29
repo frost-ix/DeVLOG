@@ -9,11 +9,16 @@ import io.devlog.blog.board.repository.TagRepository;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
+@Log4j2
+@Service
 public class CategoryServiceImpl implements CategoryService {
     private final BoardRepository boardRepository;
     private final CateRepository cateRepository;
