@@ -160,8 +160,14 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                     return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
                 }
             }
-            find.ifPresent(user -> login(UserDTO.toDTO(user)));
-            return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            find.ifPresent((user) ->
+                    setCookie(Optional.of(user))
+            );
+            if (find.isPresent()) {
+                return responseLogin(UserDTO.toDTO(find.get()));
+            } else {
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            }
         } catch (Exception e) {
             log.error(e);
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
