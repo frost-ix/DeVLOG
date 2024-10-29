@@ -80,8 +80,10 @@ public class CategoryServiceImpl implements CategoryService {
                 int i = index.getAndIncrement();
                 //cateName이 중복인데 cateIdx가 다른 경우 바뀐 idx를 저장
                 if (cateRepository.findByCateName(name).isPresent()) {
-                    if (cateRepository.findByIdx(name) != i) {
-                        cateRepository.UpdateCateIdx(name, i);
+                    if (cateRepository.findByCateIdx(name) != i) {
+                        if (cateRepository.UpdateCateIdx(name, i) == 1) {
+                            log.info("cateIdx updated");
+                        }
                     }
                 } else {
                     CateDTO cateDTO = CateDTO.builder()
