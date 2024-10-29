@@ -21,6 +21,6 @@ public class Tags {
     private String tagName;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.PERSIST)
     private List<BoardTags> boardTags;
 }

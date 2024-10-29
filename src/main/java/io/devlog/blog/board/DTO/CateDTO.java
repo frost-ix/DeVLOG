@@ -17,6 +17,8 @@ public class CateDTO {
     private Long userUuid;
     private Long cateUuid;
     private int cateIdx;
+    private PBlog pBlog;
+    private TBlog tBlog;
 
     @Builder
     public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx, @Nullable PBlog pBlog, @Nullable TBlog tBlog) {
@@ -24,6 +26,9 @@ public class CateDTO {
         this.userUuid = userUuid;
         this.cateUuid = cateUuid;
         this.cateIdx = cateIdx;
+        this.pBlog = pBlog;
+        this.tBlog = tBlog;
+
     }
 
     public static CateDTO toDTO(Categories categories) {
@@ -33,6 +38,15 @@ public class CateDTO {
                 .cateIdx(categories.getCateIdx())
                 .build();
     }
+
+    public CateDTO ofPBlog(String cateName, Long userUuid, Long cateUuid, int cateIdx, PBlog pBlog, TBlog tBlog) {
+        return new CateDTO(cateName, userUuid, cateUuid, cateIdx, pBlog, null);
+    }
+
+    public CateDTO ofTBlog(String cateName, Long userUuid, Long cateUuid, int cateIdx, PBlog pBlog, TBlog tBlog) {
+        return new CateDTO(cateName, userUuid, cateUuid, cateIdx, null, tBlog);
+    }
+
 
     public Categories toEntity() {
         return Categories.builder()
