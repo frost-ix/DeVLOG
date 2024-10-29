@@ -1,6 +1,5 @@
 package io.devlog.blog.board.repository;
 
-import io.devlog.blog.board.DTO.CateDTO;
 import io.devlog.blog.board.entity.Categories;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,9 +15,9 @@ import java.util.Optional;
 public interface CateRepository extends JpaRepository<Categories, String> {
 
     @Query("select c from Categories c where c.userUuid = :userUuid")
-    List<CateDTO> findByUserCateName(Long userUuid);
+    List<Categories> findByUserCateName(Long userUuid);
 
-    Optional<Categories> findById(Long cateUuid);
+    Optional<Categories> findByCateUuid(Long cateUuid);
 
     Optional<Categories> findByCateName(String cateName);
 

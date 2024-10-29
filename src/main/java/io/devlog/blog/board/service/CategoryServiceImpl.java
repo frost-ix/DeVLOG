@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 @Log4j2
@@ -64,9 +65,13 @@ public class CategoryServiceImpl implements CategoryService {
     public ResponseEntity<?> getCategories() {
         try {
             Long id = checkJWT();
-            List<CateDTO> CateDTOS = cateRepository.findByUserCateName(id);
-            return ResponseEntity.ok(CateDTOS);
+            List<Categories> categories = cateRepository.findByUserCateName(id);
+            List<CateDTO> cateDTOS = categories.stream()
+                    .map(CateDTO::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(200).body(cateDTOS);
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity.badRequest().body("get categories error");
         }
     }
@@ -79,7 +84,7 @@ public class CategoryServiceImpl implements CategoryService {
             AtomicInteger index = new AtomicInteger(0);
             for (CateDTO cateDTO : cateDTOS) {
                 int i = index.getAndIncrement();
-                Optional<Categories> existingCategory = cateRepository.findById(cateDTO.getCateUuid());
+                Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
                 if (existingCategory.isPresent()) {
                     Categories category = existingCategory.get();
                     if (!category.getCateName().equals(cateDTO.getCateName())) {
