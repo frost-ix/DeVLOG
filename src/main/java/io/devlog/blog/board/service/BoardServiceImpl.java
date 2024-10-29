@@ -42,8 +42,7 @@ public class BoardServiceImpl implements BoardService {
     private final UserRepository userRepository;
     private final HttpServletRequest httpServletRequest;
 
-    //    @Value("/home/jungsonghun/image_server/")
-    @Value("D:\\image_server\\")
+    @Value("${file.upload-dir}")
     private String fileDir;
 
     public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest) {

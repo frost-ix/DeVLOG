@@ -1,5 +1,6 @@
 package io.devlog.blog.user.service;
 
+import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.ResponseCheck;
 import io.devlog.blog.config.enums.ExceptionStatus;
@@ -52,8 +53,8 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final GOOGLE google;
     @Autowired
     private final GITHUB github;
-
-    private OAuthHandler oAuthHandler;
+    @Autowired
+    private CateRepository cateRepository;
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
@@ -133,6 +134,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     @Override
     public ResponseEntity<?> loginOauth(OAuthDTO oauthDTO) {
         try {
+            OAuthHandler oAuthHandler = new OAuthHandler();
             Optional<User> find;
             switch (oauthDTO.getState()) {
                 case "naver" -> {

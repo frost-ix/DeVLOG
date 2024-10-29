@@ -68,7 +68,7 @@ public class UserAPI {
         return userService.loginOauth(user);
     }
 
-    @DeleteMapping("")
+    @DeleteMapping("/logout")
     public ResponseEntity<?> logout() {
         return userService.logout();
     }
@@ -106,7 +106,7 @@ public class UserAPI {
      *
      * @return ResponseEntity<?> ? Success : Error
      */
-    @DeleteMapping("/delete")
+    @DeleteMapping("")
     public ResponseEntity<?> deleteUser() {
         return userService.deleteUser();
     }
