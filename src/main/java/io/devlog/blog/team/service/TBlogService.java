@@ -8,6 +8,8 @@ public interface TBlogService {
 
     ResponseEntity<?> getTeamBlogMembers();
 
+    ResponseEntity<?> getMyTeamBlog();
+
     ResponseEntity<?> createTeamBlog(TBlogDTO tBlogDTO);
 
     ResponseEntity<?> deleteTeamBlog();

@@ -1,5 +1,7 @@
 package io.devlog.blog.team.service;
 
+import io.devlog.blog.board.entity.Categories;
+import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
 import io.devlog.blog.security.Jwt.JwtService;
@@ -11,6 +13,7 @@ import io.devlog.blog.team.repository.TBlogRepository;
 import io.devlog.blog.team.repository.TBlogRoleRepository;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.repository.UserRepository;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -19,20 +22,23 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Log4j2
 public class TBlogServiceImpl implements TBlogService {
     private final TBlogRepository tBlogRepository;
     private final JwtService jwtService;
     private final TBlogRoleRepository tBlogRoleRepository;
     private final UserRepository userRepository;
+    private final CateRepository cateRepository;
 
     public TBlogServiceImpl(
             TBlogRepository tBlogRepository,
             JwtService jwtService,
-            TBlogRoleRepository tBlogRoleRepository, UserRepository userRepository) {
+            TBlogRoleRepository tBlogRoleRepository, UserRepository userRepository, CateRepository cateRepository) {
         this.tBlogRepository = tBlogRepository;
         this.jwtService = jwtService;
         this.tBlogRoleRepository = tBlogRoleRepository;
         this.userRepository = userRepository;
+        this.cateRepository = cateRepository;
     }
 
     @Override
@@ -92,6 +98,20 @@ public class TBlogServiceImpl implements TBlogService {
     }
 
     @Override
+    public ResponseEntity<?> getMyTeamBlog() {
+        try {
+            Long id = jwtService.checkJwt();
+            if (id == 0L) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            } else {
+                return ResponseEntity.ok(tBlogRepository.findTBlogByUserUuid(id));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
     public ResponseEntity<?> createTeamBlog(TBlogDTO tBlogDTO) {
         Long id = jwtService.checkJwt();
         if (jwtService.checkJwt() == 0L) {
@@ -101,19 +121,31 @@ public class TBlogServiceImpl implements TBlogService {
                 Optional<User> u = userRepository.findByUserUuid(id);
                 if (u.isEmpty()) {
                     return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
-                }
-                TBlog tBlog = TBlog.builder()
-                        .tDomain(tBlogDTO.getTDomain())
-                        .tTitle(tBlogDTO.getTTitle())
-                        .tName(tBlogDTO.getTName())
-                        .tSubject(tBlogDTO.getTSubject())
-                        .user(u.get())
-                        .build();
-                if (tBlogRepository.findTBlogByUserUuid(id) == null) {
+                } else if (tBlogRepository.findTBlogByUserUuid(id) == null) {
+                    log.info("tBlogDTO: {}", tBlogDTO);
+                    TBlog tBlog = TBlog.builder()
+                            .tDomain(tBlogDTO.getTDomain())
+                            .tTitle(tBlogDTO.getTTitle())
+                            .tName(tBlogDTO.getTName())
+                            .tSubject(tBlogDTO.getTSubject())
+                            .user(u.get())
+                            .build();
+                    log.info("tBlog: {}", tBlog);
                     TBlog t = tBlogRepository.save(tBlog);
+                    TBlogRoleDTO tBlogRoleDTO = TBlogRoleDTO.of(id, t.getTUuid(), "LEADER", u.get().getUserInfo().getUserIcon(), "팀장 입니다.");
+                    TBlogRole tBlogRole = tBlogRoleDTO.toEntity(t);
+                    tBlogRoleRepository.save(tBlogRole);
+                    Categories categories = Categories.builder()
+                            .cateName("기본 카테고리")
+                            .userUuid(id)
+                            .cateIdx(0)
+                            .tBlog(t)
+                            .build();
+                    cateRepository.save(categories);
                     return ResponseEntity.ok().body(Status.OK);
+                } else {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.CONFLICT);
                 }
-                return ResponseEntity.badRequest().body(ExceptionStatus.CONFLICT);
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
             }

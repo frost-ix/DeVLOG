@@ -25,6 +25,9 @@ public class TBlog {
     private String tName;
     private String tSubject;
 
+    private String tBanner;
+    private String tInfo;
+
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonBackReference
     @JoinColumn(name = "userUuid")
