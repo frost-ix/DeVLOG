@@ -124,12 +124,12 @@ public class CategoryServiceImpl implements CategoryService {
                 return ResponseEntity.badRequest().body("Token error");
             }
             Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
-            if (existingCategory.isPresent()) {
+            if (!existingCategory.isEmpty()) {
                 Categories category = existingCategory.get();
                 if (!category.getCateName().equals(cateDTO.getCateName())) {
                     category.setCateName(cateDTO.getCateName());
-                    cateRepository.save(category);
                 }
+                cateRepository.save(category);
                 return ResponseEntity.ok("category updated");
             } else {
                 return ResponseEntity.badRequest().body("category not found");
