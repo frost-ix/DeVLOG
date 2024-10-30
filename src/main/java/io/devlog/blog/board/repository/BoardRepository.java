@@ -27,12 +27,10 @@ public interface BoardRepository extends JpaRepository<Board, String> {
                     b.board_content AS boardContent,
                     b.board_profilepath AS boardProfilepath,
                     b.visit_count AS visitCount,
-                    GROUP_CONCAT(DISTINCT t.tag_name) AS tags,
-                    GROUP_CONCAT(DISTINCT c.comments) AS comments
+                    GROUP_CONCAT(DISTINCT t.tag_name) AS tags
                 FROM board b
                 LEFT JOIN board_tags bt ON b.board_uuid = bt.board_uuid
                 LEFT JOIN tags t ON bt.taguid = t.taguid 
-                LEFT JOIN comments c ON b.board_uuid = c.board_uuid
                 WHERE b.board_uuid = :boardUuid
                 GROUP BY b.board_uuid
             """, nativeQuery = true)

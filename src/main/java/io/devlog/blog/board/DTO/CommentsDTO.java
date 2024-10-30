@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentsDTO {
+    private Long commentUuid;
     private String comments;
     private String imagePath;
     private Long boardUuid;
@@ -17,7 +18,8 @@ public class CommentsDTO {
     private String userName;
 
     @Builder
-    public CommentsDTO(@Nullable String comments, @Nullable String imagePath, @Nullable Long boardUuid, @Nullable Long userUuid, @Nullable String userName) {
+    public CommentsDTO(@Nullable Long commentUuid, @Nullable String comments, @Nullable String imagePath, @Nullable Long boardUuid, @Nullable Long userUuid, @Nullable String userName) {
+        this.commentUuid = commentUuid;
         this.comments = comments;
         this.imagePath = imagePath;
         this.boardUuid = boardUuid;
@@ -27,16 +29,17 @@ public class CommentsDTO {
 
     public static CommentsDTO toDTO(Comments comments) {
         return CommentsDTO.builder()
+                .commentUuid(comments.getCommentUuid())
                 .comments(comments.getComments())
                 .imagePath(comments.getImagePath())
                 .boardUuid(comments.getBoard().getBoardUuid())
-                .userUuid(comments.getUserUuid())
                 .userName(comments.getUserName())
                 .build();
     }
 
     public Comments toEntity() {
         return Comments.builder()
+                .commentUuid(commentUuid)
                 .comments(comments)
                 .imagePath(imagePath)
                 .userUuid(userUuid)

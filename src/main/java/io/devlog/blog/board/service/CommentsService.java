@@ -10,5 +10,7 @@ public interface CommentsService {
     ResponseEntity<?> createComment(CommentsDTO commentsDTO);
 
     ResponseEntity<?> updateComment(CommentsDTO commentsDTO);
-    
+
+    ResponseEntity<?> deleteComment(Long commentUuid);
+
 }
