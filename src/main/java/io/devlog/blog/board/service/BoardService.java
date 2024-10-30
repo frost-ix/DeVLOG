@@ -1,6 +1,7 @@
 package io.devlog.blog.board.service;
 
 import io.devlog.blog.board.DTO.BoardDTO;
+import io.devlog.blog.board.DTO.CateDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +19,9 @@ public interface BoardService {
 
     ResponseEntity<?> getBoard(Long id);
 
+    ResponseEntity<?> getCateBoardList(CateDTO cateDTO);
+
+    ResponseEntity<?> getTagBoardList(String tagName);
 
     ResponseEntity<?> create(BoardDTO boardDTO);
 

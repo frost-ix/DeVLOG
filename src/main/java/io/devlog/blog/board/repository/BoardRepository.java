@@ -44,6 +44,18 @@ public interface BoardRepository extends JpaRepository<Board, String> {
     @Query("select b from Board b where b.userUuid = ?1")
     Optional<List<Board>> findBoardByUserUuid(Long userUuid);
 
+    @Query("select b from Board b where b.categories.cateUuid = ?1")
+    List<Board> findBoardByUserUuidAndCategoriesCateUuid(Long cateUuid);
+
+    @Query(value = """
+            select b.*
+            FROM board b
+            LEFT JOIN board_tags bt ON b.board_uuid = bt.board_uuid
+            LEFT JOIN tags t ON bt.taguid = t.taguid
+               WHERE t.tag_name= :tagName
+            """, nativeQuery = true)
+    List<Board> findBoardByTagsTagName(@Param("tagName") String tagName);
+
     @Modifying
     @Transactional
     @Query("delete from Board b where b.boardUuid = ?1")
