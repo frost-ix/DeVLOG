@@ -49,6 +49,7 @@ public class boardAPI {
         return boardService.getUserBoards();
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getBoard(@PathVariable Long id) {
         log.info("Get board : {}", id);
