@@ -26,8 +26,13 @@ public class TeamAPI {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createTeamBlog(TBlogDTO tBlogDTO) {
+    public ResponseEntity<?> createTeamBlog(@RequestBody TBlogDTO tBlogDTO) {
         return tBlogService.createTeamBlog(tBlogDTO);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyTeamBlog() {
+        return tBlogService.getMyTeamBlog();
     }
 
     @PostMapping("/{teamName}")

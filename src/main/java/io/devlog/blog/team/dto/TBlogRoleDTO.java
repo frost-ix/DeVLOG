@@ -1,5 +1,7 @@
 package io.devlog.blog.team.dto;
 
+import io.devlog.blog.team.entity.TBlog;
+import io.devlog.blog.team.entity.TBlogRole;
 import lombok.Data;
 
 @Data
@@ -24,5 +26,19 @@ public class TBlogRoleDTO {
 
     public static TBlogRoleDTO of(Long userUuid, Long tUuid, String role, String userIcon) {
         return new TBlogRoleDTO(userUuid, tUuid, role, userIcon, null);
+    }
+
+    public static TBlogRoleDTO of(Long userUuid, Long tUuid, String role) {
+        return new TBlogRoleDTO(userUuid, tUuid, role, null, null);
+    }
+
+    public TBlogRole toEntity(TBlog tBlog) {
+        return TBlogRole.builder()
+                .userUuid(userUuid)
+                .tBlog(tBlog)
+                .teamRole(role)
+                .userIcon(userIcon)
+                .memberDescription(description)
+                .build();
     }
 }
