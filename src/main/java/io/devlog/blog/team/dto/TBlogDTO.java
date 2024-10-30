@@ -14,13 +14,14 @@ public class TBlogDTO {
     private String tTitle;
     private String tName;
     private String tSubject;
+    private String tInfo;
 
-    public static TBlogDTO of(long tUuid, String tDomain, String tTitle, String tName, String tSubject) {
-        return new TBlogDTO(tUuid, tDomain, tTitle, tName, tSubject);
+    public static TBlogDTO of(long tUuid, String tDomain, String tTitle, String tName, String tSubject, String tInfo) {
+        return new TBlogDTO(tUuid, tDomain, tTitle, tName, tSubject, tInfo);
     }
 
-    public static TBlogDTO of(String tDomain, String tTitle, String tName, String tSubject) {
-        return new TBlogDTO(0, tDomain, tTitle, tName, tSubject);
+    public static TBlogDTO of(String tDomain, String tTitle, String tName, String tSubject, String tInfo) {
+        return new TBlogDTO(0, tDomain, tTitle, tName, tSubject, tInfo);
     }
 
     public TBlog toEntity(User user) {

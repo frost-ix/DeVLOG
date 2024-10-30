@@ -40,8 +40,8 @@ public class TeamAPI {
         return tBlogService.updateTeamBlog(tBlogDTO);
     }
 
-    @PostMapping("/{teamName}")
-    public ResponseEntity<?> updateTeamBlog(@PathVariable String teamName) {
-        return null;
+    @DeleteMapping("")
+    public ResponseEntity<?> deleteTeamBlog() {
+        return tBlogService.deleteTeamBlog();
     }
 }

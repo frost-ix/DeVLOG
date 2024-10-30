@@ -43,28 +43,24 @@ public class TBlogServiceImpl implements TBlogService {
 
     @Override
     public ResponseEntity<?> getTeamBlog() {
-        Long id = jwtService.checkJwt();
-        if (jwtService.checkJwt() == 0L) {
-            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
-        } else {
-            try {
-                List<TBlog> tBlog = tBlogRepository.findAll();
-                List<TBlogDTO> tBlogDTO = new ArrayList<>();
-                tBlog.forEach(t -> tBlogDTO.add(TBlogDTO.of(
-                        t.getTUuid(),
-                        t.getTDomain(),
-                        t.getTTitle(),
-                        t.getTName(),
-                        t.getTSubject()
-                )));
-                if (tBlogDTO.isEmpty()) {
-                    return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
-                } else {
-                    return ResponseEntity.ok(tBlogDTO);
-                }
-            } catch (Exception e) {
-                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        try {
+            List<TBlog> tBlog = tBlogRepository.findAll();
+            List<TBlogDTO> tBlogDTO = new ArrayList<>();
+            tBlog.forEach(t -> tBlogDTO.add(TBlogDTO.of(
+                    t.getTUuid(),
+                    t.getTDomain(),
+                    t.getTTitle(),
+                    t.getTName(),
+                    t.getTSubject(),
+                    t.getTInfo()
+            )));
+            if (tBlogDTO.isEmpty()) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
+            } else {
+                return ResponseEntity.ok(tBlogDTO);
             }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
     }
 
@@ -114,7 +110,8 @@ public class TBlogServiceImpl implements TBlogService {
                         t.getTDomain(),
                         t.getTTitle(),
                         t.getTName(),
-                        t.getTSubject()
+                        t.getTSubject(),
+                        t.getTInfo()
                 )));
                 return ResponseEntity.ok(tBlogDTO);
             }
@@ -136,7 +133,7 @@ public class TBlogServiceImpl implements TBlogService {
                 } else if (tBlogRepository.findTBlogByUserUuid(id) == null) {
                     log.info("tBlogDTO: {}", tBlogDTO);
                     TBlog tBlog = TBlog.builder()
-                            .tDomain(tBlogDTO.getTDomain())
+                            .tDomain("#" + tBlogDTO.getTDomain())
                             .tTitle(tBlogDTO.getTTitle())
                             .tName(tBlogDTO.getTName())
                             .tSubject(tBlogDTO.getTSubject())
@@ -154,7 +151,7 @@ public class TBlogServiceImpl implements TBlogService {
                             .tBlog(t)
                             .build();
                     cateRepository.save(categories);
-                    return ResponseEntity.ok().body(Status.OK);
+                    return ResponseEntity.ok().body(Status.CREATED);
                 } else {
                     return ResponseEntity.badRequest().body(ExceptionStatus.CONFLICT);
                 }
@@ -178,6 +175,7 @@ public class TBlogServiceImpl implements TBlogService {
                     tBlog.setTTitle(tBlogDTO.getTTitle());
                     tBlog.setTName(tBlogDTO.getTName());
                     tBlog.setTSubject(tBlogDTO.getTSubject());
+                    tBlog.setTInfo(tBlogDTO.getTInfo());
                     tBlogRepository.save(tBlog);
                     return ResponseEntity.ok().body(Status.OK);
                 } else {
