@@ -75,6 +75,7 @@ public class BoardServiceImpl implements BoardService {
                         .boardDate(board.getBoardDate())
                         .pdomain(pblogRepository.findbyPDomain(board.getUserUuid()))
                         .commentCont(commentsRepository.countByBoard_BoardUuid(board.getBoardUuid()))
+                        .userIcon(userInfoRepository.findUserInfoByUserUuid(board.getUserUuid()))
                         .build())
                 .collect(Collectors.toList());
     }

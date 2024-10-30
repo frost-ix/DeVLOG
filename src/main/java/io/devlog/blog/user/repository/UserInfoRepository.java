@@ -20,6 +20,9 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
     @Query("SELECT u FROM UserInfo u WHERE u.user.userUuid = :userUuid")
     UserInfo findByUserUuid(@Param("userUuid") long userUuid);
 
+    @Query("SELECT u.userIcon FROM UserInfo u WHERE u.user.userUuid = :userUuid")
+    String findUserInfoByUserUuid(@Param("userUuid") long userUuid);
+
     @Transactional
     @Modifying
     @Query("DELETE FROM UserInfo u WHERE u.user.userUuid = :userUuid")
