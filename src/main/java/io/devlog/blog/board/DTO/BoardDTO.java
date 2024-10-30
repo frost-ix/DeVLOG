@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,10 +24,11 @@ public class BoardDTO {
     private String userName;
     private Long userUuID;
     private String boardProfilepath;
+    private LocalDateTime boardDate;
     private int visitCount;
 
     @Builder
-    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath, @Nullable int visitCount) {
+    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath, @Nullable int visitCount, @Nullable LocalDateTime boardDate) {
         this.boardUuid = boardUuid;
         this.title = title;
         this.content = content;
@@ -35,6 +37,7 @@ public class BoardDTO {
         this.userUuID = userUuID;
         this.categories = categories;
         this.boardProfilepath = boardProfilepath;
+        this.boardDate = boardDate;
         this.visitCount = visitCount;
 
     }
@@ -48,6 +51,7 @@ public class BoardDTO {
                 .tags(board.getBoardTags().stream()
                         .map(boardTag -> boardTag.getTag().getTagName())
                         .collect(Collectors.toList()))
+                .boardDate(board.getBoardDate())
                 .userName(board.getUserName())
                 .boardProfilepath(board.getBoardProfilepath())
                 .visitCount(board.getVisitCount())
@@ -61,6 +65,7 @@ public class BoardDTO {
                 .boardContent(content)
                 .boardProfilepath(boardProfilepath)
                 .visitCount(visitCount)
+                .boardDate(LocalDateTime.now())
                 .categories(categories)
                 .boardTags(boardTags)
                 .userName(userName)

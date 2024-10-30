@@ -93,6 +93,7 @@ public class BoardServiceImpl implements BoardService {
                         .tags(board.getBoardTags().stream()
                                 .map(boardTag -> boardTag.getTag().getTagName())
                                 .collect(Collectors.toList()))
+                        .boardDate(board.getBoardDate())
                         .build())
                 .collect(Collectors.toList());
     }
