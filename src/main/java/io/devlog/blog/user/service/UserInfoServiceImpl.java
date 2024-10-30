@@ -35,9 +35,8 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
 
     @Override
     public ResponseEntity<?> getUserInfo() {
-        String accessToken = httpServletRequest.getHeader("Authorization");
-        if (jwtService.validateToken(accessToken)) {
-            long id = jwtService.getClaims(accessToken).get("id", Long.class);
+        long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
+        if (id != 0) {
             return ResponseEntity.ok(userInfoRepository.findByUserUuid(id));
         } else {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
@@ -48,16 +47,7 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
     @Override
     public ResponseEntity<?> updateUserInfo(UserInfoDTO info) {
         try {
-            long userUuid = 0;
-            String accessToken = httpServletRequest.getHeader("Authorization");
-            log.info("accessToken : {}", accessToken);
-            if (jwtService.validateToken(accessToken)) {
-                long id = jwtService.getClaims(accessToken).get("id", Long.class);
-                log.debug("id : {}", id);
-                if (id != 0) {
-                    userUuid = id;
-                }
-            }
+            long userUuid = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
             if (info == null || userUuid == 0) {
                 log.error("Cannot find data");
                 throw new CustomException(ExceptionStatus.NO_CONTENT);

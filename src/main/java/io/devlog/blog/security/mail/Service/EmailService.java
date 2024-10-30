@@ -57,6 +57,9 @@ public class EmailService {
         if (sender.isEmpty()) {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
+        if (sender.get().getName().equals(receiver.get().getName())) {
+            return ResponseEntity.badRequest().body("자신을 초대할 수 없습니다.");
+        }
         log.info("sender: {}", sender.get().getMail());
         log.info("receiver: {}", receiver.get().getMail());
         Invitation i = new Invitation();

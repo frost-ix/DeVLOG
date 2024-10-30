@@ -23,7 +23,7 @@ public class Subscribes {
     @JsonBackReference
     private User user;
 
-    private Long subUser;
+    private String subUserId;
 
     @CreationTimestamp
     @Builder.Default

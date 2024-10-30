@@ -15,11 +15,8 @@ public interface SubscribesRepository extends JpaRepository<Subscribes, Long> {
     @Query("SELECT s FROM Subscribes s WHERE s.user.userUuid =:userUuid")
     List<Subscribes> findByUserUuid(@Param("userUuid") long userUuid);
 
-    boolean existsBySubUser(long subUser);
-
-    @Transactional
-    void deleteBySubUser(long subUser);
-
+    @Query("SELECT s FROM Subscribes s WHERE s.subUserId =:subUserId")
+    Subscribes findBySubUser(@Param("subUserId") String subUserId);
 
     @Transactional
     @Modifying

@@ -1,6 +1,5 @@
 package io.devlog.blog.user.service;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
 import io.devlog.blog.security.Jwt.JwtService;
@@ -25,15 +24,13 @@ import java.util.Optional;
 public class UserSubServiceImpl extends QuerydslRepositorySupport implements UserSubService {
     private final SubscribesRepository sbRepo;
     private final UserRepository userRepo;
-    private final JPAQueryFactory jpaqf;
     private final JwtService jwtService;
     private final HttpServletRequest httpServletRequest;
 
-    public UserSubServiceImpl(final SubscribesRepository sbRepo, final UserRepository userRepo, final JPAQueryFactory jpaqf, JwtService jwtService, HttpServletRequest httpServletRequest) {
+    public UserSubServiceImpl(final SubscribesRepository sbRepo, final UserRepository userRepo, JwtService jwtService, HttpServletRequest httpServletRequest) {
         super(Subscribes.class);
         this.sbRepo = sbRepo;
         this.userRepo = userRepo;
-        this.jpaqf = jpaqf;
         this.jwtService = jwtService;
         this.httpServletRequest = httpServletRequest;
     }
@@ -69,7 +66,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
             } else {
                 HashMap<Long, UserDTO> subUsers = new HashMap<>();
                 finds.forEach((s) -> {
-                    Optional<User> i = userRepo.findByUserUuid(s.getSubUser());
+                    Optional<User> i = userRepo.findByUserId(s.getSubUserId());
                     if (i.isPresent()) {
                         UserDTO e = UserDTO.toDTO(i.get());
                         e.setPw(null);
@@ -90,14 +87,23 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
     public ResponseEntity<?> addUserSub(SubscribesDTO sbDTO) {
         try {
             long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
-            if (id == sbDTO.getSubUser()) {
-                return ResponseEntity.badRequest().body(ExceptionStatus.CONFLICT);
+            Optional<List<User>> user = userRepo.findAllByUserUuid(id);
+            if (user.isEmpty()) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
             }
-            if (sbRepo.existsBySubUser(sbDTO.getSubUser())) {
+            Subscribes s = sbRepo.findBySubUser(sbDTO.getSubUserId());
+            if (s != null) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.CONFLICT);
             } else {
-                sbDTO.setUserUuid(id);
-                sbRepo.save(sbDTO.toEntity());
+                Optional<User> i = userRepo.findByUserUuid(id);
+                if (i.isEmpty()) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
+                }
+                Subscribes sb = Subscribes.builder()
+                        .user(i.get())
+                        .subUserId(sbDTO.getSubUserId())
+                        .build();
+                sbRepo.save(sb);
                 return ResponseEntity.ok(Status.CREATED);
             }
         } catch (Exception e) {
@@ -111,12 +117,16 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
     public ResponseEntity<?> deleteUserSub(SubscribesDTO sbDTO) {
         try {
             long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
-            sbDTO.setUserUuid(id);
-            if (!sbRepo.existsBySubUser(sbDTO.getSubUser())) {
-                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
+            if (id == 0) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             } else {
-                sbRepo.deleteBySubUser(sbDTO.getSubUser());
-                return ResponseEntity.ok(Status.OK);
+                Subscribes s = sbRepo.findBySubUser(sbDTO.getSubUserId());
+                if (s == null) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
+                } else {
+                    sbRepo.delete(s);
+                    return ResponseEntity.ok(Status.OK);
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage());
