@@ -78,10 +78,22 @@ public class boardAPI {
         return commentsService.createComment(commentsDTO);
     }
 
-    @PatchMapping("comment")
+    @PatchMapping("/comment")
     public ResponseEntity<?> updateComment(@RequestBody CommentsDTO commentsDTO) {
         log.info("Update board : {}", commentsDTO);
         return commentsService.updateComment(commentsDTO);
+    }
+
+    @GetMapping("/comment/{boardUuid}")
+    public ResponseEntity<?> getComments(@PathVariable Long boardUuid) {
+        log.info("Get comments : {}", boardUuid);
+        return commentsService.getComments(boardUuid);
+    }
+
+    @DeleteMapping("/comment/{commentUuid}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long commentUuid) {
+        log.info("Delete comment : {}", commentUuid);
+        return commentsService.deleteComment(commentUuid);
     }
 
 }

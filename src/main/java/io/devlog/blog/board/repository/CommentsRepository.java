@@ -11,6 +11,12 @@ import java.util.List;
 public interface CommentsRepository extends JpaRepository<Comments, Long> {
     List<Comments> findByBoard_BoardUuid(Long boardUuid);
 
+    @Query("select c.userUuid from Comments c where c.commentUuid = ?1")
+    Long findByUserUuid(Long commentUuid);
+
+    @Query("select c from Comments c where c.userUuid = ?1 and c.board.boardUuid = ?2 and c.commentUuid = ?3")
+    Comments findByUserUuidAndBoard_BoardUuid(Long userUuid, Long boardUuid, Long commentUuid);
+
     @Query("select count(c) from Comments c where c.board.boardUuid = :boardUuid")
     int countByBoard_BoardUuid(Long boardUuid);
 }

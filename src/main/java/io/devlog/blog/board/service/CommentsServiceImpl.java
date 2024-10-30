@@ -10,6 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Log4j2
 @Service
 public class CommentsServiceImpl implements CommentsService {
@@ -26,9 +29,22 @@ public class CommentsServiceImpl implements CommentsService {
         this.boardRepository = boardRepository;
     }
 
+    public static List<CommentsDTO> toDTO(List<Comments> commentsList) {
+        return commentsList.stream()
+                .map(CommentsDTO::toDTO)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public ResponseEntity<?> getComments(Long boardUuid) {
-        return null;
+        try {
+            List<Comments> comments = commentsRepository.findByBoard_BoardUuid(boardUuid);
+            List<CommentsDTO> commentsDTOS = toDTO(comments);
+            return ResponseEntity.ok().body(commentsDTOS);
+        } catch (Exception e) {
+            log.error("Get comments error : {}", e.getMessage());
+            return ResponseEntity.badRequest().body("Get comments error");
+        }
     }
 
     @Override
@@ -63,10 +79,37 @@ public class CommentsServiceImpl implements CommentsService {
             if (id == 0) {
                 return ResponseEntity.badRequest().body("Token error");
             }
-            return ResponseEntity.ok().body("Update comment");
+            if (id == commentsRepository.findByUserUuid(commentsDTO.getCommentUuid())) {
+                Comments comments = commentsRepository.findByUserUuidAndBoard_BoardUuid(id, commentsDTO.getBoardUuid(), commentsDTO.getCommentUuid());
+                comments.setComments(commentsDTO.getComments());
+                comments.setImagePath(commentsDTO.getImagePath());
+                commentsRepository.save(comments);
+                return ResponseEntity.ok().body("Update comment");
+            }
+            return ResponseEntity.badRequest().body("Update comment error");
+
         } catch (Exception e) {
             log.error("Update comment error : {}", e.getMessage());
             return ResponseEntity.badRequest().body("Update comment error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> deleteComment(Long commentUuid) {
+        try {
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
+            if (id == commentsRepository.findByUserUuid(commentUuid)) {
+                commentsRepository.deleteById(commentUuid);
+                return ResponseEntity.ok().body("Delete comment");
+            }
+            return ResponseEntity.badRequest().body("Delete comment error");
+
+        } catch (Exception e) {
+            log.error("Delete comment error : {}", e.getMessage());
+            return ResponseEntity.badRequest().body("Delete comment error");
         }
     }
 }
