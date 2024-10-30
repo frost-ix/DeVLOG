@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((req) ->
                         req
-                                .requestMatchers("/").permitAll()
+                                .requestMatchers("/", "/photo").permitAll()
                                 .requestMatchers("/cate", "/cate/**").permitAll()
                                 .requestMatchers("/mail", "/mail/**").permitAll()
                                 .requestMatchers("/team", "/team/**").permitAll()

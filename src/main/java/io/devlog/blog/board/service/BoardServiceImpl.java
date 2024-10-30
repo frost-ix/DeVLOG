@@ -21,13 +21,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -58,31 +55,6 @@ public class BoardServiceImpl implements BoardService {
         this.userInfoRepository = userInfoRepository;
         this.pblogRepository = pblogRepository;
         this.commentsRepository = commentsRepository;
-    }
-
-
-    @Override
-    public ResponseEntity<?> uploadPhoto(MultipartFile file) {
-        try {
-            if (file.getOriginalFilename() == null ||
-                    file.getContentType() == null ||
-                    !file.getContentType().startsWith("image/") ||
-                    file.isEmpty()) {
-                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
-            } else {
-                String ogFileName = file.getOriginalFilename();
-                String ext = ogFileName.substring(ogFileName.lastIndexOf("."));
-                String uuid = UUID.randomUUID().toString();
-                String fileName = uuid + ext;
-                file.transferTo(new File(fileDir + fileName));
-                log.info("upload photo success : {}", fileName);
-                return ResponseEntity.ok().body(fileName);
-
-            }
-        } catch (Exception e) {
-            log.error("upload photo error", e);
-            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
-        }
     }
 
     private List<BoardDTO> streamBoards(List<Board> boardList) {

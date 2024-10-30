@@ -290,7 +290,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 ui.setUser(check);
                 userInfoRepository.save(ui);
                 check.setUserInfo(ui);
-                PblogDTO pblog = new PblogDTO(check.getName(), null, check.getName());
+                PblogDTO pblog = new PblogDTO("@" + check.getName(), null, check.getName());
                 PBlog pb = pblog.toEntity();
                 pb.setUser(check);
                 check.setPbLog(pb);

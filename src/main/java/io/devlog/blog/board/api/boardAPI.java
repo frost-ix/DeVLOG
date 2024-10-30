@@ -7,7 +7,6 @@ import io.devlog.blog.board.service.CommentsService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Log4j2
 @RestController
@@ -19,11 +18,6 @@ public class boardAPI {
     public boardAPI(BoardService boardService, CommentsService commentsService) {
         this.boardService = boardService;
         this.commentsService = commentsService;
-    }
-
-    @PostMapping(value = "/photo", consumes = "multipart/form-data")
-    public ResponseEntity<?> uploadPhoto(@RequestParam("image") MultipartFile file) {
-        return boardService.uploadPhoto(file);
     }
 
     @GetMapping("/all")

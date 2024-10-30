@@ -24,7 +24,6 @@ public class PblogAPI {
 
     @PatchMapping("")
     public ResponseEntity<?> updatePblog(@RequestBody PblogDTO pblogDTO) {
-        log.info("Update pblog : {}, {}, {}", pblogDTO.getDomain(), pblogDTO.getName(), pblogDTO.getBanner());
         return pblogService.update(pblogDTO);
     }
 }
