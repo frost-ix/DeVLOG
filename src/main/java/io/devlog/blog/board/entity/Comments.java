@@ -12,11 +12,18 @@ import lombok.*;
 @Builder(toBuilder = true)
 public class Comments {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long commentUuid;
+
     @ManyToOne
-    @JoinColumn(name = "boardUuid")
+    @JoinColumn(name = "boardUuid", referencedColumnName = "boardUuid")
     @JsonBackReference
     private Board board;
+
     private String comments;
 
     private String imagePath;
+
+    private Long userUuid;
+    private String userName;
 }

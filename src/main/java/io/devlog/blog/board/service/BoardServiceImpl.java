@@ -5,10 +5,7 @@ import io.devlog.blog.board.entity.Board;
 import io.devlog.blog.board.entity.BoardTags;
 import io.devlog.blog.board.entity.Categories;
 import io.devlog.blog.board.entity.Tags;
-import io.devlog.blog.board.repository.BoardRepository;
-import io.devlog.blog.board.repository.BoardTagsRepository;
-import io.devlog.blog.board.repository.CateRepository;
-import io.devlog.blog.board.repository.TagRepository;
+import io.devlog.blog.board.repository.*;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
@@ -45,11 +42,12 @@ public class BoardServiceImpl implements BoardService {
     private final HttpServletRequest httpServletRequest;
     private final UserInfoRepository userInfoRepository;
     private final PblogRepository pblogRepository;
+    private final CommentsRepository commentsRepository;
 
     @Value("${file.upload-dir}")
     private String fileDir;
 
-    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository, PblogRepository pblogRepository) {
+    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository, PblogRepository pblogRepository, CommentsRepository commentsRepository) {
         this.boardRepository = boardRepository;
         this.cateRepository = cateRepository;
         this.tagRepository = tagRepository;
@@ -59,6 +57,7 @@ public class BoardServiceImpl implements BoardService {
         this.httpServletRequest = httpServletRequest;
         this.userInfoRepository = userInfoRepository;
         this.pblogRepository = pblogRepository;
+        this.commentsRepository = commentsRepository;
     }
 
 
@@ -101,6 +100,7 @@ public class BoardServiceImpl implements BoardService {
                                 .collect(Collectors.toList()))
                         .boardDate(board.getBoardDate())
                         .pdomain(pblogRepository.findbyPDomain(board.getUserUuid()))
+                        .commentCont(commentsRepository.countByBoard_BoardUuid(board.getBoardUuid()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -190,10 +190,10 @@ public class BoardServiceImpl implements BoardService {
                         boardRepository.save(board);
                     });
             log.info("get board by id: {}", id);
-            Optional<Board> board = boardRepository.findOneByBoardUuid(id);
+            Optional<Board> board = boardRepository.getBoard(id);
+            System.out.println(board);
             if (board.isPresent()) {
-                BoardDTO boardDTO = BoardDTO.fromEntity(board.get());
-                return ResponseEntity.ok().body(boardDTO);
+                return ResponseEntity.ok().body(board);
             } else {
                 return ResponseEntity.noContent().build();
             }
@@ -219,7 +219,9 @@ public class BoardServiceImpl implements BoardService {
                 return ResponseEntity.badRequest().body("Token is invalid");
             }
             System.out.println(boardDTO);
-            Optional<Categories> category = cateRepository.findByCateNameAndUserUuid(boardDTO.getCategories(), id);
+            Long pUuid = pblogRepository.findPBlogByUserUuid(id).getPUuid();
+            Optional<Categories> category = cateRepository.findByPCateNameAndUserUuid(boardDTO.getCategories(), id, pUuid);
+
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
 
