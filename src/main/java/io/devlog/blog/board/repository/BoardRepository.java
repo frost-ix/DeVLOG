@@ -17,10 +17,7 @@ import java.util.Optional;
 public interface BoardRepository extends JpaRepository<Board, String> {
     Optional<Board> findOneByBoardUuid(Long id);
 
-    @Query("select b.boardUuid, b.userName, b.boardDate, b.boardTitle, b.boardContent, b.visitCount, b.boardProfilepath,c,b" +
-            " from Board b join Categories c on b.categories.cateUuid = c.cateUuid" +
-            " join Comments com on b.boardUuid = com.board.boardUuid" +
-            " where b.boardUuid = :boardUuid")
+    @Query("select b from Board b where b.boardUuid = :boardUuid")
     Optional<Board> getBoard(@Param("boardUuid") Long boardUuid);
 
     Board findBoardByBoardUuid(Long boardUuid);
