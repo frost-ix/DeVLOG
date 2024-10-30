@@ -184,16 +184,18 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> getBoard(Long id) {
         try {
-            boardRepository.findOneByBoardUuid(id)
-                    .ifPresent(board -> {
-                        board.setVisitCount(board.getVisitCount() + 1);
-                        boardRepository.save(board);
-                    });
+            // 방문 횟수 업데이트를 별도로 처리
+            boardRepository.findOneByBoardUuid(id).ifPresent(board -> {
+                board.setVisitCount(board.getVisitCount() + 1);
+                boardRepository.save(board);
+            });
+
             log.info("get board by id: {}", id);
             Optional<Board> board = boardRepository.getBoard(id);
-            System.out.println(board);
+            BoardDTO boardDTO = board.map(BoardDTO::fromEntity).orElse(null);
+
             if (board.isPresent()) {
-                return ResponseEntity.ok().body(board);
+                return ResponseEntity.ok().body(boardDTO);
             } else {
                 return ResponseEntity.noContent().build();
             }
