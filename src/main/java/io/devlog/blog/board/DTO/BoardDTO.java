@@ -23,9 +23,10 @@ public class BoardDTO {
     private String userName;
     private Long userUuID;
     private String boardProfilepath;
+    private int visitCount;
 
     @Builder
-    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath) {
+    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath, @Nullable int visitCount) {
         this.boardUuid = boardUuid;
         this.title = title;
         this.content = content;
@@ -34,6 +35,8 @@ public class BoardDTO {
         this.userUuID = userUuID;
         this.categories = categories;
         this.boardProfilepath = boardProfilepath;
+        this.visitCount = visitCount;
+
     }
 
     public static BoardDTO fromEntity(Board board) {
@@ -47,6 +50,7 @@ public class BoardDTO {
                         .collect(Collectors.toList()))
                 .userName(board.getUserName())
                 .boardProfilepath(board.getBoardProfilepath())
+                .visitCount(board.getVisitCount())
                 .build();
     }
 
@@ -56,6 +60,7 @@ public class BoardDTO {
                 .boardTitle(title)
                 .boardContent(content)
                 .boardProfilepath(boardProfilepath)
+                .visitCount(visitCount)
                 .categories(categories)
                 .boardTags(boardTags)
                 .userName(userName)
