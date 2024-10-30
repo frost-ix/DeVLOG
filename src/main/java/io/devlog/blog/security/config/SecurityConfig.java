@@ -33,6 +33,7 @@ public class SecurityConfig {
                                 .requestMatchers("/").permitAll()
                                 .requestMatchers("/cate", "/cate/**").permitAll()
                                 .requestMatchers("/mail", "/mail/**").permitAll()
+                                .requestMatchers("/team", "/team/**").permitAll()
                                 .requestMatchers("/oauth/**").permitAll()
                                 .requestMatchers("/board", "/user", "/p").permitAll()
                                 .requestMatchers("/board/**", "/user/**", "/p/**").permitAll()

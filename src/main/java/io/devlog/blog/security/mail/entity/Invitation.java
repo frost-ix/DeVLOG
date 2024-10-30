@@ -19,4 +19,7 @@ public class Invitation {
 
     @Enumerated(EnumType.STRING)
     private InvitationStatus status;
+
+    public Invitation() {
+    }
 }

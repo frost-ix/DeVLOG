@@ -361,7 +361,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                         boardTagsRepository.deleteByBoardUuid(b.getBoardUuid());
                     }
                 }
-                List<Categories> categories = cateRepository.findByUserCateName(id);
+                List<Categories> categories = cateRepository.findByUserUuid(id);
                 if (!categories.isEmpty()) {
                     for (Categories c : categories) {
                         boardRepository.deleteBoardsByCateUuid(c.getCateUuid());

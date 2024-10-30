@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface CateRepository extends JpaRepository<Categories, String> {
 
     @Query("select c from Categories c where c.userUuid = :userUuid")
-    List<Categories> findByUserCateName(Long userUuid);
+    List<Categories> findByUserUuid(Long userUuid);
 
     Optional<Categories> findByCateUuid(Long cateUuid);
 

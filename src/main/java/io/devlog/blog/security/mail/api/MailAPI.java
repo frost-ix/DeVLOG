@@ -1,8 +1,8 @@
 package io.devlog.blog.security.mail.api;
 
+import io.devlog.blog.security.mail.DTO.InvitationDTO;
 import io.devlog.blog.security.mail.DTO.VerifyCode;
 import io.devlog.blog.security.mail.Service.EmailService;
-import io.devlog.blog.security.mail.entity.Invitation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +16,7 @@ public class MailAPI {
     }
 
     @GetMapping("/invite")
-    public ResponseEntity<?> invite(@RequestBody Invitation invitation) {
+    public ResponseEntity<?> invite(@RequestBody InvitationDTO invitation) {
         return emailService.sendEmail(invitation);
     }
 
