@@ -25,14 +25,19 @@ public class TeamAPI {
         return tBlogService.getTeamBlogMembers();
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyTeamBlog() {
+        return tBlogService.getMyTeamBlog();
+    }
+
     @PostMapping("")
     public ResponseEntity<?> createTeamBlog(@RequestBody TBlogDTO tBlogDTO) {
         return tBlogService.createTeamBlog(tBlogDTO);
     }
 
-    @GetMapping("/my")
-    public ResponseEntity<?> getMyTeamBlog() {
-        return tBlogService.getMyTeamBlog();
+    @PatchMapping("")
+    public ResponseEntity<?> updateTeamBlog(@RequestBody TBlogDTO tBlogDTO) {
+        return tBlogService.updateTeamBlog(tBlogDTO);
     }
 
     @PostMapping("/{teamName}")

@@ -12,5 +12,7 @@ public interface TBlogService {
 
     ResponseEntity<?> createTeamBlog(TBlogDTO tBlogDTO);
 
+    ResponseEntity<?> updateTeamBlog(TBlogDTO tBlogDTO);
+
     ResponseEntity<?> deleteTeamBlog();
 }

@@ -9,17 +9,18 @@ import lombok.Data;
 @Data
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class TBlogDTO {
+    private long tUuid;
     private String tDomain;
     private String tTitle;
     private String tName;
     private String tSubject;
 
-    public static TBlogDTO of(String tDomain, String tTitle, String tName, String tSubject) {
-        return new TBlogDTO(tDomain, tTitle, tName, tSubject);
+    public static TBlogDTO of(long tUuid, String tDomain, String tTitle, String tName, String tSubject) {
+        return new TBlogDTO(tUuid, tDomain, tTitle, tName, tSubject);
     }
 
-    public static TBlogDTO of(String tDomain, String tTitle, String tName) {
-        return null;
+    public static TBlogDTO of(String tDomain, String tTitle, String tName, String tSubject) {
+        return new TBlogDTO(0, tDomain, tTitle, tName, tSubject);
     }
 
     public TBlog toEntity(User user) {

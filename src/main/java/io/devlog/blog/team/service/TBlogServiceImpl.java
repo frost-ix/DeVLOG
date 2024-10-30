@@ -51,6 +51,7 @@ public class TBlogServiceImpl implements TBlogService {
                 List<TBlog> tBlog = tBlogRepository.findAll();
                 List<TBlogDTO> tBlogDTO = new ArrayList<>();
                 tBlog.forEach(t -> tBlogDTO.add(TBlogDTO.of(
+                        t.getTUuid(),
                         t.getTDomain(),
                         t.getTTitle(),
                         t.getTName(),
@@ -104,7 +105,18 @@ public class TBlogServiceImpl implements TBlogService {
                 return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             } else {
                 Optional<List<TBlog>> tBlogs = tBlogRepository.findAllByByUserUuid(id);
-                return ResponseEntity.ok(tBlogRepository.findTBlogByUserUuid(id));
+                if (tBlogs.isEmpty()) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
+                }
+                List<TBlogDTO> tBlogDTO = new ArrayList<>();
+                tBlogs.get().forEach(t -> tBlogDTO.add(TBlogDTO.of(
+                        t.getTUuid(),
+                        t.getTDomain(),
+                        t.getTTitle(),
+                        t.getTName(),
+                        t.getTSubject()
+                )));
+                return ResponseEntity.ok(tBlogDTO);
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
@@ -153,6 +165,31 @@ public class TBlogServiceImpl implements TBlogService {
     }
 
     @Override
+    public ResponseEntity<?> updateTeamBlog(TBlogDTO tBlogDTO) {
+        Long id = jwtService.checkJwt();
+        if (jwtService.checkJwt() == 0L) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        } else {
+            try {
+                TBlog tBlog = tBlogRepository.findTBlogByUserUuid(id);
+                String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
+                if (role.equals("LEADER")) {
+                    tBlog.setTDomain(tBlogDTO.getTDomain());
+                    tBlog.setTTitle(tBlogDTO.getTTitle());
+                    tBlog.setTName(tBlogDTO.getTName());
+                    tBlog.setTSubject(tBlogDTO.getTSubject());
+                    tBlogRepository.save(tBlog);
+                    return ResponseEntity.ok().body(Status.OK);
+                } else {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+                }
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            }
+        }
+    }
+
+    @Override
     public ResponseEntity<?> deleteTeamBlog() {
         Long id = jwtService.checkJwt();
         if (jwtService.checkJwt() == 0L) {
@@ -165,7 +202,7 @@ public class TBlogServiceImpl implements TBlogService {
                     tBlogRepository.delete(tBlog);
                     return ResponseEntity.ok().body(Status.OK);
                 } else {
-                    return ResponseEntity.badRequest().body(ExceptionStatus.FORBIDDEN);
+                    return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
                 }
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
