@@ -1,6 +1,7 @@
 package io.devlog.blog.board.service;
 
 import io.devlog.blog.board.DTO.BoardDTO;
+import io.devlog.blog.board.DTO.CateDTO;
 import io.devlog.blog.board.entity.Board;
 import io.devlog.blog.board.entity.BoardTags;
 import io.devlog.blog.board.entity.Categories;
@@ -132,6 +133,31 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
+    @Override
+    public ResponseEntity<?> getCateBoardList(CateDTO cateDTO) {
+        try {
+            List<Board> boardList = boardRepository.findBoardByUserUuidAndCategoriesCateUuid(cateDTO.getCateUuid());
+            List<BoardDTO> boardDTOS = streamBoards(boardList);
+            return ResponseEntity.ok().body(boardDTOS);
+
+        } catch (Exception e) {
+            log.error("Server error : ", e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getTagBoardList(String tagName) {
+        try {
+            System.out.println();
+            List<Board> boardList = boardRepository.findBoardByTagsTagName(tagName);
+            List<BoardDTO> boardDTOS = streamBoards(boardList);
+            return ResponseEntity.ok().body(boardDTOS);
+        } catch (Exception e) {
+            log.error("Server error : ", e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
 
     @Override
     public ResponseEntity<?> getUserBoards() {
