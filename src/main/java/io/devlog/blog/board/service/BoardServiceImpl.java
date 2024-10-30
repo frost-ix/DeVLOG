@@ -176,7 +176,6 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> getBoard(Long id) {
         try {
-            //visitCount 증가
             boardRepository.findOneByBoardUuid(id)
                     .ifPresent(board -> {
                         board.setVisitCount(board.getVisitCount() + 1);
@@ -211,7 +210,8 @@ public class BoardServiceImpl implements BoardService {
             if (id == 0) {
                 return ResponseEntity.badRequest().body("Token is invalid");
             }
-            Optional<Categories> category = cateRepository.findByCateName(boardDTO.getCategories());
+            System.out.println(boardDTO);
+            Optional<Categories> category = cateRepository.findByCateNameAndUserUuid(boardDTO.getCategories(), id);
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
 

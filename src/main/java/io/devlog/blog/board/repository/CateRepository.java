@@ -21,6 +21,8 @@ public interface CateRepository extends JpaRepository<Categories, String> {
 
     Optional<Categories> findByCateName(String cateName);
 
+    Optional<Categories> findByCateNameAndUserUuid(String cateName, Long id);
+
     @Query("select c.cateIdx from Categories c where c.cateName = :name")
     int findByCateIdx(String name);
 
