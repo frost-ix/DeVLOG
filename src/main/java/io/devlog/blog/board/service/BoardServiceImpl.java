@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -163,11 +164,11 @@ public class BoardServiceImpl implements BoardService {
             });
 
             log.info("get board by id: {}", id);
-            Optional<Board> board = boardRepository.getBoard(id);
-            BoardDTO boardDTO = board.map(BoardDTO::fromEntity).orElse(null);
-
-            if (board.isPresent()) {
-                return ResponseEntity.ok().body(boardDTO);
+            Map<String, Object> board = boardRepository.getBoard(id);
+//            BoardDTO boardDTO = board.map(BoardDTO::fromEntity).orElse(null);
+//
+            if (!board.isEmpty()) {
+                return ResponseEntity.ok().body(board);
             } else {
                 return ResponseEntity.noContent().build();
             }

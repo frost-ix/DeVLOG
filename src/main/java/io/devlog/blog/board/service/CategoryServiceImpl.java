@@ -48,13 +48,30 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ResponseEntity<?> getCategories() {
+    public ResponseEntity<?> getPCategories() {
         try {
             Long id = jwtService.checkJwt();
             if (id == 0) {
                 return ResponseEntity.badRequest().body("Token error");
             }
-            List<Categories> categories = cateRepository.findByUserUuid(id);
+            List<Categories> categories = cateRepository.findByPUserUuid(id);
+            List<CateDTO> cateDTOS = categories.stream()
+                    .map(CateDTO::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(200).body(cateDTOS);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body("get categories error");
+        }
+    }
+
+    public ResponseEntity<?> getTCategories() {
+        try {
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
+            List<Categories> categories = cateRepository.findByTUserUuid(id);
             List<CateDTO> cateDTOS = categories.stream()
                     .map(CateDTO::toDTO)
                     .collect(Collectors.toList());
@@ -117,7 +134,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ResponseEntity<?> updateCateName(CateDTO cateDTO) {
+    public ResponseEntity<?> updatePCateName(CateDTO cateDTO) {
         try {
             Long id = jwtService.checkJwt();
             if (id == 0) {
@@ -140,7 +157,58 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ResponseEntity<?> updateCategory(List<CateDTO> cateDTOS) {
+    public ResponseEntity<?> updatePCategory(List<CateDTO> cateDTOS) {
+        try {
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
+            for (CateDTO cateDTO : cateDTOS) {
+                Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
+                if (!existingCategory.isEmpty()) {
+                    Categories category = existingCategory.get();
+                    // cateIdx가 변경됐을 경우 cateIdx 변경해서 저장
+                    if (category.getCateIdx() != cateDTO.getCateIdx() || !category.getCateName().equals(cateDTO.getCateName())) {
+                        category.setCateIdx(cateDTO.getCateIdx());
+                        category.setCateName(cateDTO.getCateName());
+                        cateRepository.save(category);
+                    }
+                } else {
+                    cateDTO.setUserUuid(id);
+                    cateRepository.save(cateDTO.toEntity());
+                }
+            }
+            return ResponseEntity.ok("category updated");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("delete category error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateTCateName(CateDTO cateDTO) {
+        try {
+            Long id = jwtService.checkJwt();
+            if (id == 0) {
+                return ResponseEntity.badRequest().body("Token error");
+            }
+            Optional<Categories> existingCategory = cateRepository.findByCateUuid(cateDTO.getCateUuid());
+            if (!existingCategory.isEmpty()) {
+                Categories category = existingCategory.get();
+                if (!category.getCateName().equals(cateDTO.getCateName())) {
+                    category.setCateName(cateDTO.getCateName());
+                }
+                cateRepository.save(category);
+                return ResponseEntity.ok("category updated");
+            } else {
+                return ResponseEntity.badRequest().body("category not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("delete category error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateTCategory(List<CateDTO> cateDTOS) {
         try {
             Long id = jwtService.checkJwt();
             if (id == 0) {

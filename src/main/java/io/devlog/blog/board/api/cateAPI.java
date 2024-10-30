@@ -18,25 +18,25 @@ public class cateAPI {
         this.categoryService = categoryService;
     }
 
-    @GetMapping("")
+    @GetMapping("/pBlog")
     public ResponseEntity<?> getCategories() {
-        return categoryService.getCategories();
+        return categoryService.getPCategories();
     }
 
-    @PostMapping("")
+    @PostMapping("/pBlog")
     public ResponseEntity<?> createCategory(@RequestBody CateDTO cateDTO) {
         log.info("Create category : {}", cateDTO);
         return categoryService.createPCategory(cateDTO);
     }
 
-    @PatchMapping("/name")
+    @PatchMapping("/pBlog/name")
     public ResponseEntity<?> updateCateName(@RequestBody CateDTO cateDTO) {
-        return categoryService.updateCateName(cateDTO);
+        return categoryService.updatePCateName(cateDTO);
     }
 
-    @PatchMapping("")
+    @PatchMapping("/pBlog")
     public ResponseEntity<?> updateCategory(@RequestBody List<CateDTO> cateDTO) {
-        return categoryService.updateCategory(cateDTO);
+        return categoryService.updatePCategory(cateDTO);
     }
 
     @DeleteMapping("/{cateUuid}")
@@ -44,9 +44,26 @@ public class cateAPI {
         return categoryService.deleteCategory(cateUuid);
     }
 
+
+    @GetMapping("/tBlog")
+    public ResponseEntity<?> getTCategories() {
+        return categoryService.getTCategories();
+    }
+
     @PostMapping("/tBlog")
     public ResponseEntity<?> createTCategory(@RequestBody CateDTO cateDTO) {
         log.info("Create category : {}", cateDTO);
         return categoryService.createTCategory(cateDTO);
     }
+
+    @PatchMapping("/tBlog/name")
+    public ResponseEntity<?> updateTCateName(@RequestBody CateDTO cateDTO) {
+        return categoryService.updateTCateName(cateDTO);
+    }
+
+    @PatchMapping("/tBlog")
+    public ResponseEntity<?> updateTCategory(@RequestBody List<CateDTO> cateDTO) {
+        return categoryService.updateTCategory(cateDTO);
+    }
+
 }

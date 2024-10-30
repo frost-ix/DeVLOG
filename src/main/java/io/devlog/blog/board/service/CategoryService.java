@@ -6,16 +6,22 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface CategoryService {
-    ResponseEntity<?> getCategories();
+    ResponseEntity<?> getPCategories();
+
+    ResponseEntity<?> getTCategories();
 
     ResponseEntity<?> createPCategory(CateDTO cateDTO);
 
 
     ResponseEntity<?> createTCategory(CateDTO cateDTO);
 
-    ResponseEntity<?> updateCateName(CateDTO cateDTO);
+    ResponseEntity<?> updatePCateName(CateDTO cateDTO);
 
-    ResponseEntity<?> updateCategory(List<CateDTO> cateDTOS);
+    ResponseEntity<?> updatePCategory(List<CateDTO> cateDTOS);
+
+    ResponseEntity<?> updateTCateName(CateDTO cateDTO);
+
+    ResponseEntity<?> updateTCategory(List<CateDTO> cateDTOS);
 
     ResponseEntity<?> deleteCategory(Long cateUuid);
 

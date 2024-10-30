@@ -17,21 +17,22 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BoardDTO {
     private Long boardUuid;
-    private String categories;
     private String title;
     private String content;
-    private List<String> tags;
     private String userName;
     private Long userUuID;
     private String boardProfilepath;
     private LocalDateTime boardDate;
     private int visitCount;
-    private int commentCount;
-    private String pdomain;
+    private String categories;
+    private List<String> tags;
     private List<String> comments;
+    private List<String> boardTags;
+    private String pdomain;
+    private int commentCount;
 
     @Builder
-    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath, @Nullable int visitCount, @Nullable LocalDateTime boardDate, @Nullable String pdomain, @Nullable int commentCont, @Nullable List<String> comments) {
+    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath, @Nullable int visitCount, @Nullable LocalDateTime boardDate, @Nullable String pdomain, @Nullable int commentCont, @Nullable List<String> comments, @Nullable List<String> boardTags) {
         this.boardUuid = boardUuid;
         this.title = title;
         this.content = content;
@@ -44,6 +45,8 @@ public class BoardDTO {
         this.visitCount = visitCount;
         this.pdomain = pdomain;
         this.commentCount = commentCont;
+        this.comments = comments;
+        this.boardTags = boardTags;
 
 
     }
