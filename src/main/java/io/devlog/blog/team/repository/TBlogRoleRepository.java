@@ -16,5 +16,11 @@ public interface TBlogRoleRepository extends JpaRepository<TBlogRole, String> {
     @Query("select tbr from TBlogRole tbr where tbr.tBlog.tUuid = :tUuid")
     List<TBlogRole> findByTUuid(@Param("tUuid") long tUuid);
 
+    @Query("select tbr.teamRole from TBlogRole tbr where tbr.userUuid = :userUuid and tbr.tBlog.tUuid = :tUuid")
+    String findTeamRole(@Param("userUuid") long userUuid, @Param("tUuid") long tUuid);
+
+    @Query("select count(tbr) > 0 from TBlogRole tbr where tbr.tBlog.tUuid = :tUuid")
+    int countMember(@Param("tUuid") long tUuid);
+
     boolean existsTBlogRoleByUserUuid(long userUuid);
 }

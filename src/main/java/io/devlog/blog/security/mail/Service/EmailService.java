@@ -2,6 +2,7 @@ package io.devlog.blog.security.mail.Service;
 
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
+import io.devlog.blog.security.mail.DTO.InvitationDTO;
 import io.devlog.blog.security.mail.DTO.VerifyCode;
 import io.devlog.blog.security.mail.entity.Invitation;
 import io.devlog.blog.security.mail.enums.InvitationStatus;
@@ -47,28 +48,34 @@ public class EmailService {
         return UUID.randomUUID().toString();
     }
 
-    public ResponseEntity<?> sendEmail(Invitation invitation) {
-        invitation.setCode(generateCode());
-        Optional<User> sender = userRepository.findOneByName(invitation.getSender());
-        Optional<User> receiver = userRepository.findOneByName(invitation.getReceiver());
-        if (sender.isEmpty() || receiver.isEmpty()) {
+    public ResponseEntity<?> sendEmail(InvitationDTO invitation) {
+        Optional<User> sender = userRepository.findOneByUserId(invitation.getSender());
+        Optional<User> receiver = userRepository.findOneByUserId(invitation.getReceiver());
+        if (receiver.isEmpty()) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
+        }
+        if (sender.isEmpty()) {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         }
         log.info("sender: {}", sender.get().getMail());
         log.info("receiver: {}", receiver.get().getMail());
+        Invitation i = new Invitation();
+        i.setCode(generateCode());
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
         try {
             helper.setFrom(sender.get().getMail());
             helper.setTo(receiver.get().getMail());
-            helper.setSubject("초대 메일 입니다.");
-            helper.setText("승인 코드 : " + invitation.getCode(), true);
+            helper.setSubject("DeVLOOG 팀 초대 메일 입니다.");
+            helper.setText("팀 블로그 이름 : " + tBlogRepository.findTBlogByUserUuid(sender.get().getUserUuid()).getTName() + "\n" +
+                    "초대 한 사람 : " + sender.get().getName() + "\n" +
+                    "승인 코드 : " + i.getCode(), true);
             mailSender.send(message);
-            invitation.setStatus(InvitationStatus.PENDING);
-            Invitation i = invitationRepository.save(invitation);
-            i.setSender(sender.get().getName());
-            i.setReceiver(receiver.get().getName());
-            invitationRepository.save(i);
+            i.setStatus(InvitationStatus.PENDING);
+            Invitation io = invitationRepository.save(i);
+            io.setSender(sender.get().getName());
+            io.setReceiver(receiver.get().getName());
+            invitationRepository.save(io);
             return ResponseEntity.ok().body(Status.OK);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);

@@ -22,6 +22,14 @@ public interface TBlogRepository extends JpaRepository<TBlog, String> {
 
     @Transactional
     @Modifying
+    @Query("update TBlog tb set tb.tTitle = :tTitle, tb.tSubject = :tSubject, tb.tName = :tName where tb.user.userUuid = :userUuid")
+    int updateTBlog(@Param("userUuid") long userUuid,
+                    @Param("tTitle") String tTitle,
+                    @Param("tSubject") String tSubject,
+                    @Param("tName") String tName);
+
+    @Transactional
+    @Modifying
     @Query("delete from TBlog tb where tb.user.userUuid = :userUuid")
     void deleteTBlogByUserUuid(@Param("userUuid") long userUuid);
 }
