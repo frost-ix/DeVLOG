@@ -1,7 +1,9 @@
 package io.devlog.blog.board.api;
 
 import io.devlog.blog.board.DTO.BoardDTO;
+import io.devlog.blog.board.DTO.CommentsDTO;
 import io.devlog.blog.board.service.BoardService;
+import io.devlog.blog.board.service.CommentsService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/board")
 public class boardAPI {
     private final BoardService boardService;
+    private final CommentsService commentsService;
 
-    public boardAPI(BoardService boardService) {
+    public boardAPI(BoardService boardService, CommentsService commentsService) {
         this.boardService = boardService;
+        this.commentsService = commentsService;
     }
 
     @PostMapping(value = "/photo", consumes = "multipart/form-data")
@@ -72,6 +76,18 @@ public class boardAPI {
     public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
         log.info("Delete board : {}", id);
         return boardService.deleteBoard(id);
+    }
+
+    @PostMapping("/comment")
+    public ResponseEntity<?> createComment(@RequestBody CommentsDTO commentsDTO) {
+        log.info("Create comment : {}", commentsDTO);
+        return commentsService.createComment(commentsDTO);
+    }
+
+    @PatchMapping("comment")
+    public ResponseEntity<?> updateComment(@RequestBody CommentsDTO commentsDTO) {
+        log.info("Update board : {}", commentsDTO);
+        return commentsService.updateComment(commentsDTO);
     }
 
 }

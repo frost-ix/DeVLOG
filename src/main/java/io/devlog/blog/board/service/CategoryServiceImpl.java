@@ -83,7 +83,7 @@ public class CategoryServiceImpl implements CategoryService {
                     .tBlog(null)
                     .build();
             cateRepository.save(categories);
-            Optional<Categories> category = cateRepository.findByCateNameAndUserUuid(cateDTO.getCateName(), id);
+            Optional<Categories> category = cateRepository.findByPCateNameAndUserUuid(cateDTO.getCateName(), id, p.getPUuid());
             return ResponseEntity.ok(CateDTO.toDTO(category.get()));
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -108,7 +108,7 @@ public class CategoryServiceImpl implements CategoryService {
                     .tBlog(t)
                     .build();
             cateRepository.save(categories);
-            Optional<Categories> category = cateRepository.findByCateNameAndUserUuid(cateDTO.getCateName(), id);
+            Optional<Categories> category = cateRepository.findByTCateNameAndUserUuid(cateDTO.getCateName(), id, t.getTUuid());
             return ResponseEntity.ok(CateDTO.toDTO(category.get()));
         } catch (Exception e) {
             log.error(e.getMessage());

@@ -26,10 +26,12 @@ public class BoardDTO {
     private String boardProfilepath;
     private LocalDateTime boardDate;
     private int visitCount;
+    private int commentCount;
     private String pdomain;
+    private List<String> comments;
 
     @Builder
-    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath, @Nullable int visitCount, @Nullable LocalDateTime boardDate, @Nullable String pdomain) {
+    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath, @Nullable int visitCount, @Nullable LocalDateTime boardDate, @Nullable String pdomain, @Nullable int commentCont, @Nullable List<String> comments) {
         this.boardUuid = boardUuid;
         this.title = title;
         this.content = content;
@@ -41,6 +43,8 @@ public class BoardDTO {
         this.boardDate = boardDate;
         this.visitCount = visitCount;
         this.pdomain = pdomain;
+        this.commentCount = commentCont;
+
 
     }
 
@@ -58,6 +62,7 @@ public class BoardDTO {
                 .boardProfilepath(board.getBoardProfilepath())
                 .visitCount(board.getVisitCount())
                 .pdomain(null)
+                .commentCont(board.getComments().size())
                 .build();
     }
 
