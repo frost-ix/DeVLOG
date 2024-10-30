@@ -4,8 +4,6 @@ import io.devlog.blog.board.DTO.BoardDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 public interface BoardService {
     ResponseEntity<?> uploadPhoto(MultipartFile file);
 
@@ -20,7 +18,9 @@ public interface BoardService {
 
     ResponseEntity<?> getBoard(Long id);
 
+
     ResponseEntity<?> create(BoardDTO boardDTO);
+
     ResponseEntity<?> update(BoardDTO boardDTO);
 
     ResponseEntity<?> deleteBoard(Long id);

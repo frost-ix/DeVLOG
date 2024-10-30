@@ -23,6 +23,9 @@ public interface PblogRepository extends JpaRepository<PBlog, Long> {
                     @Param("pDomain") String pDomain,
                     @Param("pName") String pName);
 
+    @Query("select p.pDomain from PBlog p where p.user.userUuid = :userUuid")
+    String findbyPDomain(Long userUuid);
+
     @Transactional
     @Modifying
     @Query("delete from PBlog p where p.user.userUuid = :userUuid")

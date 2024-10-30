@@ -16,15 +16,13 @@ public class CateDTO {
     private Long userUuid;
     private Long cateUuid;
     private int cateIdx;
-    private Long pUuid;
 
     @Builder
-    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx, @Nullable Long pUuid) {
+    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx) {
         this.cateName = cateName;
         this.userUuid = userUuid;
         this.cateUuid = cateUuid;
         this.cateIdx = cateIdx;
-        this.pUuid = pUuid;
 
     }
 

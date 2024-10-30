@@ -10,7 +10,9 @@ import io.devlog.blog.board.repository.BoardTagsRepository;
 import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.board.repository.TagRepository;
 import io.devlog.blog.config.enums.ExceptionStatus;
+import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
+import io.devlog.blog.user.repository.UserInfoRepository;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -41,11 +43,13 @@ public class BoardServiceImpl implements BoardService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final HttpServletRequest httpServletRequest;
+    private final UserInfoRepository userInfoRepository;
+    private final PblogRepository pblogRepository;
 
     @Value("${file.upload-dir}")
     private String fileDir;
 
-    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest) {
+    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository, PblogRepository pblogRepository) {
         this.boardRepository = boardRepository;
         this.cateRepository = cateRepository;
         this.tagRepository = tagRepository;
@@ -53,6 +57,8 @@ public class BoardServiceImpl implements BoardService {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.httpServletRequest = httpServletRequest;
+        this.userInfoRepository = userInfoRepository;
+        this.pblogRepository = pblogRepository;
     }
 
 
@@ -94,6 +100,7 @@ public class BoardServiceImpl implements BoardService {
                                 .map(boardTag -> boardTag.getTag().getTagName())
                                 .collect(Collectors.toList()))
                         .boardDate(board.getBoardDate())
+                        .pdomain(pblogRepository.findbyPDomain(board.getUserUuid()))
                         .build())
                 .collect(Collectors.toList());
     }
