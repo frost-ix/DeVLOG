@@ -11,14 +11,32 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, String> {
     Optional<Board> findOneByBoardUuid(Long id);
 
-    @Query("select b from Board b where b.boardUuid = :boardUuid")
-    Optional<Board> getBoard(@Param("boardUuid") Long boardUuid);
+    @Query(value = """
+                SELECT
+                    b.board_uuid AS boardUuid,
+                    b.user_name AS userName,
+                    b.board_date AS boardDate,
+                    b.board_title AS boardTitle,
+                    b.board_content AS boardContent,
+                    b.board_profilepath AS boardProfilepath,
+                    b.visit_count AS visitCount,
+                    GROUP_CONCAT(DISTINCT t.tag_name) AS tags,
+                    GROUP_CONCAT(DISTINCT c.comments) AS comments
+                FROM board b
+                LEFT JOIN board_tags bt ON b.board_uuid = bt.board_uuid
+                LEFT JOIN tags t ON bt.taguid = t.taguid 
+                LEFT JOIN comments c ON b.board_uuid = c.board_uuid
+                WHERE b.board_uuid = :boardUuid
+                GROUP BY b.board_uuid
+            """, nativeQuery = true)
+    Map<String, Object> getBoard(@Param("boardUuid") Long boardUuid);
 
     Board findBoardByBoardUuid(Long boardUuid);
 
