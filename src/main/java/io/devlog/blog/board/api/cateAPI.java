@@ -26,7 +26,7 @@ public class cateAPI {
     @PostMapping("")
     public ResponseEntity<?> createCategory(@RequestBody CateDTO cateDTO) {
         log.info("Create category : {}", cateDTO);
-        return categoryService.createCategory(cateDTO);
+        return categoryService.createPCategory(cateDTO);
     }
 
     @PatchMapping("/name")
@@ -42,5 +42,11 @@ public class cateAPI {
     @DeleteMapping("/{cateUuid}")
     public ResponseEntity<?> deleteCategory(@PathVariable Long cateUuid) {
         return categoryService.deleteCategory(cateUuid);
+    }
+
+    @PostMapping("/tBlog")
+    public ResponseEntity<?> createTCategory(@RequestBody CateDTO cateDTO) {
+        log.info("Create category : {}", cateDTO);
+        return categoryService.createTCategory(cateDTO);
     }
 }

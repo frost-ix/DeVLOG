@@ -2,8 +2,6 @@ package io.devlog.blog.board.DTO;
 
 
 import io.devlog.blog.board.entity.Categories;
-import io.devlog.blog.pblog.Entity.PBlog;
-import io.devlog.blog.team.entity.TBlog;
 import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,22 +10,21 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+
 public class CateDTO {
     private String cateName;
     private Long userUuid;
     private Long cateUuid;
     private int cateIdx;
-    private PBlog pBlog;
-    private TBlog tBlog;
+    private Long pUuid;
 
     @Builder
-    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx, @Nullable PBlog pBlog, @Nullable TBlog tBlog) {
+    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx, @Nullable Long pUuid) {
         this.cateName = cateName;
         this.userUuid = userUuid;
         this.cateUuid = cateUuid;
         this.cateIdx = cateIdx;
-        this.pBlog = pBlog;
-        this.tBlog = tBlog;
+        this.pUuid = pUuid;
 
     }
 
@@ -39,14 +36,6 @@ public class CateDTO {
                 .build();
     }
 
-    public CateDTO ofPBlog(String cateName, Long userUuid, Long cateUuid, int cateIdx, PBlog pBlog, TBlog tBlog) {
-        return new CateDTO(cateName, userUuid, cateUuid, cateIdx, pBlog, null);
-    }
-
-    public CateDTO ofTBlog(String cateName, Long userUuid, Long cateUuid, int cateIdx, PBlog pBlog, TBlog tBlog) {
-        return new CateDTO(cateName, userUuid, cateUuid, cateIdx, null, tBlog);
-    }
-
 
     public Categories toEntity() {
         return Categories.builder()
@@ -54,8 +43,6 @@ public class CateDTO {
                 .userUuid(userUuid)
                 .cateUuid(cateUuid)
                 .cateIdx(cateIdx)
-                .pBlog(pBlog)
-                .tBlog(tBlog)
                 .build();
     }
 }

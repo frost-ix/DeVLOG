@@ -1,6 +1,5 @@
 package io.devlog.blog.user.service;
 
-import io.devlog.blog.board.DTO.CateDTO;
 import io.devlog.blog.board.entity.Board;
 import io.devlog.blog.board.entity.Categories;
 import io.devlog.blog.board.repository.BoardRepository;
@@ -297,8 +296,14 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 check.setPbLog(pb);
                 userRepository.save(check);
                 PBlog p = pblogRepository.save(pb);
-                CateDTO cate = new CateDTO("기본 카테고리", check.getUserUuid(), null, 1, p, null);
-                cateRepository.save(cate.toEntity());
+                Categories categories = Categories.builder()
+                        .cateName("기본 카테고리")
+                        .cateIdx(0)
+                        .userUuid(check.getUserUuid())
+                        .pBlog(p)
+                        .tBlog(null)
+                        .build();
+                cateRepository.save(categories);
                 UserDTO returnData = UserDTO.toDTO(check);
                 log.info("Created user: {}", returnData);
                 return ResponseEntity.ok().body(new ResponseCheck(Status.CREATED));

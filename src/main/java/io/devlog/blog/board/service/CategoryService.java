@@ -8,7 +8,10 @@ import java.util.List;
 public interface CategoryService {
     ResponseEntity<?> getCategories();
 
-    ResponseEntity<?> createCategory(CateDTO cateDTO);
+    ResponseEntity<?> createPCategory(CateDTO cateDTO);
+
+
+    ResponseEntity<?> createTCategory(CateDTO cateDTO);
 
     ResponseEntity<?> updateCateName(CateDTO cateDTO);
 

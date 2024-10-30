@@ -1,6 +1,5 @@
 package io.devlog.blog.board.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.devlog.blog.pblog.Entity.PBlog;
 import io.devlog.blog.team.entity.TBlog;
@@ -24,13 +23,14 @@ public class Categories {
     private Long userUuid;
     private int cateIdx;
 
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JsonBackReference
+    @JsonManagedReference
     @JoinColumn(name = "pUuid")
     private PBlog pBlog;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JsonBackReference
+    @JsonManagedReference
     @JoinColumn(name = "tUuid")
     private TBlog tBlog;
 
