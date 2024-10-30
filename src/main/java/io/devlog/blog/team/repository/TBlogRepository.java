@@ -19,6 +19,7 @@ public interface TBlogRepository extends JpaRepository<TBlog, String> {
     @Query("select tb from TBlog tb where tb.user.userUuid = :userUuid")
     TBlog findTBlogByUserUuid(@Param("userUuid") long userUuid);
 
+
     @Transactional
     @Modifying
     @Query("update TBlog tb set tb.tTitle = :tTitle, tb.tSubject = :tSubject, tb.tName = :tName where tb.user.userUuid = :userUuid")

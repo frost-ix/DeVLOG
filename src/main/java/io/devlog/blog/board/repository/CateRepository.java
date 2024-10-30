@@ -35,6 +35,7 @@ public interface CateRepository extends JpaRepository<Categories, String> {
     @Query("delete from Categories c where c.cateUuid = :cateUuid")
     int deleteByCategoriId(Long cateUuid);
 
+
     @Transactional
     @Modifying
     @Query("delete from Categories c where c.userUuid = :userUuid")
