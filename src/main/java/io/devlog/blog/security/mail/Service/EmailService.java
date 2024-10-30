@@ -97,6 +97,7 @@ public class EmailService {
                     .tBlog(tBlog)
                     .userUuid(receiver.get().getUserUuid())
                     .teamRole("팀원")
+                    .userIcon(receiver.get().getUserInfo().getUserIcon())
                     .memberDescription("팀원 입니다.")
                     .build();
             tBlogRoleRepository.save(tBlogRole);

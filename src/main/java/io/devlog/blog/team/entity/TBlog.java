@@ -21,9 +21,9 @@ public class TBlog {
     private Long tUuid;
 
     private String tDomain;
-    private String tBanner;
+    private String tTitle;
     private String tName;
-    private String tInfo;
+    private String tSubject;
 
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonBackReference

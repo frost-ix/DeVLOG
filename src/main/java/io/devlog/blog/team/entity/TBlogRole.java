@@ -22,6 +22,8 @@ public class TBlogRole {
 
     private String teamRole;
 
+    private String userIcon;
+
     private String memberDescription;
 
     @Column(unique = true)
