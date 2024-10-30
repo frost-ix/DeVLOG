@@ -19,7 +19,7 @@ public class TBlogDTO {
     }
 
     public static TBlogDTO of(String tDomain, String tTitle, String tName) {
-        return new TBlogDTO(tDomain, tTitle, tName, null);
+        return null;
     }
 
     public TBlog toEntity(User user) {

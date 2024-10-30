@@ -48,15 +48,14 @@ public class TBlogServiceImpl implements TBlogService {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         } else {
             try {
-                Optional<List<TBlog>> tBlog = tBlogRepository.findAllByByUserUuid(id);
+                List<TBlog> tBlog = tBlogRepository.findAll();
                 List<TBlogDTO> tBlogDTO = new ArrayList<>();
-                tBlog.ifPresent(tBlogs -> tBlogs.forEach(t ->
-                        tBlogDTO.add(TBlogDTO.of(
-                                t.getTDomain(),
-                                t.getTTitle(),
-                                t.getTName(),
-                                t.getTSubject()
-                        ))));
+                tBlog.forEach(t -> tBlogDTO.add(TBlogDTO.of(
+                        t.getTDomain(),
+                        t.getTTitle(),
+                        t.getTName(),
+                        t.getTSubject()
+                )));
                 if (tBlogDTO.isEmpty()) {
                     return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
                 } else {
@@ -104,6 +103,7 @@ public class TBlogServiceImpl implements TBlogService {
             if (id == 0L) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             } else {
+                Optional<List<TBlog>> tBlogs = tBlogRepository.findAllByByUserUuid(id);
                 return ResponseEntity.ok(tBlogRepository.findTBlogByUserUuid(id));
             }
         } catch (Exception e) {
