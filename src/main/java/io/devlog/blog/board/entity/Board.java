@@ -30,6 +30,7 @@ public class Board {
     private String boardTitle;
     private String boardContent;
     private String boardProfilepath;
+    private int visitCount;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JsonBackReference
@@ -47,5 +48,6 @@ public class Board {
     @JsonManagedReference
     @OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
     private List<Images> images;
+
 
 }

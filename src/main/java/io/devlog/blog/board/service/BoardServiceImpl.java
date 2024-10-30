@@ -87,7 +87,13 @@ public class BoardServiceImpl implements BoardService {
                         .categories(board.getCategories().getCateName())
                         .title(board.getBoardTitle())
                         .content(board.getBoardContent())
-                        .userUuID(board.getUserUuid())
+                        .visitCount(board.getVisitCount())
+                        .userName(board.getUserName())
+                        .boardProfilepath(board.getBoardProfilepath())
+                        .tags(board.getBoardTags().stream()
+                                .map(boardTag -> boardTag.getTag().getTagName())
+                                .collect(Collectors.toList()))
+                        .boardDate(board.getBoardDate())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -171,6 +177,11 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ResponseEntity<?> getBoard(Long id) {
         try {
+            boardRepository.findOneByBoardUuid(id)
+                    .ifPresent(board -> {
+                        board.setVisitCount(board.getVisitCount() + 1);
+                        boardRepository.save(board);
+                    });
             log.info("get board by id: {}", id);
             Optional<Board> board = boardRepository.findOneByBoardUuid(id);
             if (board.isPresent()) {
@@ -200,7 +211,8 @@ public class BoardServiceImpl implements BoardService {
             if (id == 0) {
                 return ResponseEntity.badRequest().body("Token is invalid");
             }
-            Optional<Categories> category = cateRepository.findByCateName(boardDTO.getCategories());
+            System.out.println(boardDTO);
+            Optional<Categories> category = cateRepository.findByCateNameAndUserUuid(boardDTO.getCategories(), id);
             List<String> tagNames = boardDTO.getTags();
             List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
 
@@ -216,7 +228,7 @@ public class BoardServiceImpl implements BoardService {
                 tagRepository.saveAll(newTags);
             }
             recvtags.addAll(newTags);
-
+            boardDTO.setVisitCount(0);
             Board board = boardDTO.toEntity(category.orElse(null), null);
             boardRepository.save(board);
 
