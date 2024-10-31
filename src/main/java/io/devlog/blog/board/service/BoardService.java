@@ -14,6 +14,8 @@ public interface BoardService {
 
     ResponseEntity<?> getPDomainBoardList(String domain);
 
+    ResponseEntity<?> getTDomainBoardList(String domain);
+
     ResponseEntity<?> getBoard(Long id);
 
     ResponseEntity<?> getCateBoardList(String pDomain, String cateName);

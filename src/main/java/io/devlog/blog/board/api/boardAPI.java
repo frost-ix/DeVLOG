@@ -77,6 +77,12 @@ public class boardAPI {
         return boardService.getPDomainBoardList(pDomain);
     }
 
+    @GetMapping("/t/{tDomain}")
+    public ResponseEntity<?> getTBoard(@PathVariable String tDomain) {
+        log.info("Get board : {}", tDomain);
+        return boardService.getTDomainBoardList(tDomain);
+    }
+
     @PostMapping("")
     public ResponseEntity<?> createBoard(@RequestBody BoardDTO boardDTO) {
         log.info("Create board : {}", boardDTO);
