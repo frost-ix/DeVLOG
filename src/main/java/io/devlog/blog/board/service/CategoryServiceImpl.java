@@ -89,7 +89,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private ResponseEntity<?> getCategories(List<Categories> categories, Long id) {
+    private ResponseEntity<?> getCategories(List<Categories> categories) {
         try {
             List<CateDTO> cateDTOS = categories.stream()
                     .map(Categories -> CateDTO.builder()
@@ -112,11 +112,11 @@ public class CategoryServiceImpl implements CategoryService {
             if (state.equals("p")) {
                 Long id = pblogRepository.getPBlogCategories(domain);
                 List<Categories> categories = cateRepository.findByPUserUuid(id);
-                return getCategories(categories, id);
+                return getCategories(categories);
             } else if (state.equals("t")) {
                 Long id = tblogRepository.getTBlogCategories(domain);
                 List<Categories> categories = cateRepository.findByTUserUuid(id);
-                return getCategories(categories, id);
+                return getCategories(categories);
             } else {
                 return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
             }

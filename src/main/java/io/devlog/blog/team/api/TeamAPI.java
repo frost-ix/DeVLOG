@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/team")
+@RequestMapping(value = "/t")
 public class TeamAPI {
     private final TBlogService tBlogService;
 
@@ -18,6 +18,11 @@ public class TeamAPI {
     @GetMapping("")
     public ResponseEntity<?> getTeamBlog() {
         return tBlogService.getTeamBlog();
+    }
+
+    @GetMapping("/{tDomain}")
+    public ResponseEntity<?> getTeamBlog(@PathVariable String tDomain) {
+        return tBlogService.getTeamBlog(tDomain);
     }
 
     @GetMapping("/members")

@@ -343,7 +343,8 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                 String pw = pwEncoder.encode(user.getPw());
                 user.setPw(pw);
                 int e = userRepository.updateUserByUserUuid(id, pw, user.getName(), user.getMail());
-                if (e == 0) {
+                int isOk = boardRepository.updateUserName(user.getName(), id);
+                if (e == 0 || isOk == 0) {
                     log.error("Update failed");
                     return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
                 }

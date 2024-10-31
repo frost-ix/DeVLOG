@@ -15,7 +15,6 @@ import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -42,9 +41,6 @@ public class BoardServiceImpl implements BoardService {
     private final UserInfoRepository userInfoRepository;
     private final PblogRepository pblogRepository;
     private final CommentsRepository commentsRepository;
-
-    @Value("${file.upload-dir}")
-    private String fileDir;
 
     public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository, PblogRepository pblogRepository, CommentsRepository commentsRepository) {
         this.boardRepository = boardRepository;
@@ -141,6 +137,18 @@ public class BoardServiceImpl implements BoardService {
             List<BoardDTO> boardDTOS = streamBoards(boardList);
             return ResponseEntity.ok().body(boardDTOS);
 
+        } catch (Exception e) {
+            log.error("Server error : ", e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getPDomainBoardList(String pDomain) {
+        try {
+            List<Board> boardList = boardRepository.findBoardByPDomain(pDomain);
+            List<BoardDTO> boardDTOS = streamBoards(boardList);
+            return ResponseEntity.ok().body(boardDTOS);
         } catch (Exception e) {
             log.error("Server error : ", e);
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);

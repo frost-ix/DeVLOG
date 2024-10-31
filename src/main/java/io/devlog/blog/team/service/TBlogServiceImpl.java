@@ -66,6 +66,20 @@ public class TBlogServiceImpl implements TBlogService {
     }
 
     @Override
+    public ResponseEntity<?> getTeamBlog(String domain) {
+        try {
+            Optional<TBlog> tBlog = tBlogRepository.findByTDomain(domain);
+            if (tBlog.isEmpty()) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
+            } else {
+                return ResponseEntity.ok(TBlogDTO.toDTO(tBlog.get()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
     public ResponseEntity<?> getTeamBlogMembers(TBlogDTO tBlogDTO) {
         try {
             List<TBlogRole> tBlogRole = tBlogRoleRepository.findByTUuid(tBlogDTO.getTUuid());

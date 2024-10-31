@@ -15,6 +15,9 @@ public interface TBlogRepository extends JpaRepository<TBlog, String> {
     @Query("select tb from TBlog tb where tb.tUuid = :tUuid")
     Optional<TBlog> findByTUuid(@Param("tUuid") long tUuid);
 
+    @Query("select tb from TBlog tb where tb.tDomain = :tDomain")
+    Optional<TBlog> findByTDomain(@Param("tDomain") String tDomain);
+
     @Query("select p.user.userUuid from PBlog p where p.pDomain = :tDomain")
     Long getTBlogCategories(@Param("tDomain") String tDomain);
 

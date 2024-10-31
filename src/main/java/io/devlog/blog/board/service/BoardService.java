@@ -13,6 +13,8 @@ public interface BoardService {
 
     ResponseEntity<?> getUserBoards();
 
+    ResponseEntity<?> getPDomainBoardList(String domain);
+
     ResponseEntity<?> getBoard(Long id);
 
     ResponseEntity<?> getCateBoardList(CateDTO cateDTO);

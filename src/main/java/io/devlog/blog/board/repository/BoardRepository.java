@@ -40,6 +40,9 @@ public interface BoardRepository extends JpaRepository<Board, String> {
 
     Board findBoardByBoardUuid(Long boardUuid);
 
+    @Query("select b from Board b where b.categories.pBlog.pDomain = :pDomain order by b.boardDate desc")
+    List<Board> findBoardByPDomain(@Param("pDomain") String pDomain);
+
     @Query("SELECT b FROM Board b")
     List<Board> findBoardBy();
 
@@ -74,6 +77,11 @@ public interface BoardRepository extends JpaRepository<Board, String> {
     @Modifying
     @Query("delete from Board b where b.categories.cateUuid = :cateUuid")
     void deleteBoardsByCateUuid(@Param("cateUuid") Long cateUuid);
+
+    @Transactional
+    @Modifying
+    @Query("update Board b set b.userName = :userName where b.userUuid = :userUuid")
+    int updateUserName(@Param("userName") String userName, @Param("userUuid") Long userUuid);
 
     @Query("select count(b) from Board b where b.categories.cateUuid = ?1")
     int countByCateUuid(Long cateUuid);
