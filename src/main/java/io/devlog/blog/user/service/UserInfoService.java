@@ -15,4 +15,8 @@ public interface UserInfoService {
     ResponseEntity<?> updateGithub(UserInfoDTO info);
 
     ResponseEntity<?> updateInstagram(UserInfoDTO info);
+
+    ResponseEntity<?> updateSummary(UserInfoDTO info);
+
+    ResponseEntity<?> updateIcon(UserInfoDTO info);
 }

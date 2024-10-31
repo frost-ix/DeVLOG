@@ -38,10 +38,19 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
     int updateTwitter(@Param("userUuid") long userUuid, @Param("userTwitter") String userTwitter);
 
     @Transactional
-
     @Modifying
     @Query("update UserInfo u set u.userInsta = :userInsta where u.user.userUuid = :userUuid")
     int updateInstagram(@Param("userUuid") long userUuid, @Param("userInsta") String userInsta);
+
+    @Transactional
+    @Modifying
+    @Query("update UserInfo u set u.userSummary = :userSummary where u.user.userUuid = :userUuid")
+    int updateSummary(@Param("userUuid") long userUuid, @Param("userSummary") String userSummary);
+
+    @Transactional
+    @Modifying
+    @Query("update UserInfo u set u.userIcon = :userIcon where u.user.userUuid = :userUuid")
+    int updateIcon(@Param("userUuid") long userUuid, @Param("userIcon") String userIcon);
 
 
     @Transactional

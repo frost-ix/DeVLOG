@@ -68,4 +68,14 @@ public class UserInfoAPI {
     public ResponseEntity<?> updateInstagram(@RequestBody UserInfoDTO info) {
         return userInfoService.updateInstagram(info);
     }
+
+    @PatchMapping("/summary")
+    public ResponseEntity<?> updateSummary(@RequestBody UserInfoDTO info) {
+        return userInfoService.updateSummary(info);
+    }
+
+    @PatchMapping("/icon")
+    public ResponseEntity<?> updateIcon(@RequestBody UserInfoDTO info) {
+        return userInfoService.updateIcon(info);
+    }
 }

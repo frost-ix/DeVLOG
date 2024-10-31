@@ -31,4 +31,19 @@ public class PblogAPI {
     public ResponseEntity<?> updatePblog(@RequestBody PblogDTO pblogDTO) {
         return pblogService.update(pblogDTO);
     }
+
+    @PatchMapping("/name")
+    public ResponseEntity<?> updatePblogName(@RequestBody PblogDTO pblogDTO) {
+        return pblogService.updateName(pblogDTO);
+    }
+
+    @PatchMapping("/domain")
+    public ResponseEntity<?> updatePblogDomain(@RequestBody PblogDTO pblogDTO) {
+        return pblogService.updateDomain(pblogDTO);
+    }
+
+    @PatchMapping("/banner")
+    public ResponseEntity<?> updatePblogBanner(@RequestBody PblogDTO pblogDTO) {
+        return pblogService.updateBanner(pblogDTO);
+    }
 }

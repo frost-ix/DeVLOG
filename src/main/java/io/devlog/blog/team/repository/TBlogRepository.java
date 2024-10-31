@@ -41,6 +41,42 @@ public interface TBlogRepository extends JpaRepository<TBlog, String> {
 
     @Transactional
     @Modifying
+    @Query("update TBlog tb set tb.tDomain = :tDomain where tb.user.userUuid = :userUuid")
+    int updateTBlogDomain(@Param("userUuid") long userUuid,
+                          @Param("tDomain") String tDomain);
+
+    @Transactional
+    @Modifying
+    @Query("update TBlog tb set tb.tBanner = :tBanner where tb.user.userUuid = :userUuid")
+    int updateTBlogBanner(@Param("userUuid") long userUuid,
+                          @Param("tBanner") String tBanner);
+
+    @Transactional
+    @Modifying
+    @Query("update TBlog tb set tb.tTitle = :tTitle where tb.user.userUuid = :userUuid")
+    int updateTBlogTitle(@Param("userUuid") long userUuid,
+                         @Param("tTitle") String tTitle);
+
+    @Transactional
+    @Modifying
+    @Query("update TBlog tb set tb.tName = :tName where tb.user.userUuid = :userUuid")
+    int updateTBlogName(@Param("userUuid") long userUuid,
+                        @Param("tName") String tName);
+
+    @Transactional
+    @Modifying
+    @Query("update TBlog tb set tb.tSubject = :tSubject where tb.user.userUuid = :userUuid")
+    int updateTBlogSubject(@Param("userUuid") long userUuid,
+                           @Param("tSubject") String tSubject);
+
+    @Transactional
+    @Modifying
+    @Query("update TBlog tb set tb.tInfo = :tInfo where tb.user.userUuid = :userUuid")
+    int updateTBlogInfo(@Param("userUuid") long userUuid,
+                        @Param("tInfo") String tInfo);
+
+    @Transactional
+    @Modifying
     @Query("delete from TBlog tb where tb.user.userUuid = :userUuid")
     void deleteTBlogByUserUuid(@Param("userUuid") long userUuid);
 }

@@ -157,4 +157,44 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
             return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
+
+    @Override
+    public ResponseEntity<?> updateIcon(UserInfoDTO info) {
+        try {
+            long userUuid = jwtService.checkJwt();
+            if (userUuid == 0) {
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+            } else {
+                int c = userInfoRepository.updateIcon(userUuid, info.getUserIcon());
+                if (c == 0) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
+                } else {
+                    return ResponseEntity.ok().body(Status.OK);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateSummary(UserInfoDTO info) {
+        try {
+            long userUuid = jwtService.checkJwt();
+            if (userUuid == 0) {
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+            } else {
+                int c = userInfoRepository.updateSummary(userUuid, info.getUserSummary());
+                if (c == 0) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
+                } else {
+                    return ResponseEntity.ok().body(Status.OK);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
 }

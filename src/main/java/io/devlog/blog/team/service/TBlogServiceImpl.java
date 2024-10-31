@@ -197,6 +197,131 @@ public class TBlogServiceImpl implements TBlogService {
     }
 
     @Override
+    public ResponseEntity<?> updateTeamBlogDomain(TBlogDTO tBlogDTO) {
+        Long id = jwtService.checkJwt();
+        if (jwtService.checkJwt() == 0L) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        } else {
+            try {
+                TBlog tBlog = tBlogRepository.findTBlogByUserUuid(id);
+                String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
+                if (role.equals("LEADER")) {
+                    tBlog.setTDomain(tBlogDTO.getTDomain());
+                    int result = tBlogRepository.updateTBlogDomain(tBlog.getTUuid(), tBlog.getTDomain());
+                    if (result == 1) {
+                        return ResponseEntity.ok().body(Status.OK);
+                    } else {
+                        return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+                    }
+                } else {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+                }
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            }
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateTeamBlogTitle(TBlogDTO tBlogDTO) {
+        Long id = jwtService.checkJwt();
+        if (jwtService.checkJwt() == 0L) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        } else {
+            try {
+                TBlog tBlog = tBlogRepository.findTBlogByUserUuid(id);
+                String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
+                if (role.equals("LEADER")) {
+                    tBlog.setTTitle(tBlogDTO.getTTitle());
+                    int result = tBlogRepository.updateTBlogTitle(tBlog.getTUuid(), tBlog.getTTitle());
+                    if (result == 1) {
+                        return ResponseEntity.ok().body(Status.OK);
+                    } else {
+                        return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+                    }
+                } else {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+                }
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            }
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateTeamBlogBanner(TBlogDTO tBlogDTO) {
+        Long id = jwtService.checkJwt();
+        if (jwtService.checkJwt() == 0L) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        } else {
+            try {
+                TBlog tBlog = tBlogRepository.findTBlogByUserUuid(id);
+                String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
+                if (role.equals("LEADER")) {
+                    int result = tBlogRepository.updateTBlogBanner(tBlog.getTUuid(), tBlog.getTBanner());
+                    if (result == 1) {
+                        return ResponseEntity.ok().body(Status.OK);
+                    } else {
+                        return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+                    }
+                } else {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+                }
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            }
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateTeamBlogInfo(TBlogDTO tBlogDTO) {
+        Long id = jwtService.checkJwt();
+        if (jwtService.checkJwt() == 0L) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        } else {
+            try {
+                TBlog tBlog = tBlogRepository.findTBlogByUserUuid(id);
+                String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
+                if (role.equals("LEADER")) {
+                    tBlog.setTInfo(tBlogDTO.getTInfo());
+                    tBlogRepository.save(tBlog);
+                    return ResponseEntity.ok().body(Status.OK);
+                } else {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+                }
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            }
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateTeamBlogName(TBlogDTO tBlogDTO) {
+        Long id = jwtService.checkJwt();
+        if (jwtService.checkJwt() == 0L) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        } else {
+            try {
+                TBlog tBlog = tBlogRepository.findTBlogByUserUuid(id);
+                String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
+                if (role.equals("LEADER")) {
+                    tBlog.setTName(tBlogDTO.getTName());
+                    int result = tBlogRepository.updateTBlogName(tBlog.getTUuid(), tBlog.getTName());
+                    if (result == 1) {
+                        return ResponseEntity.ok().body(Status.OK);
+                    } else {
+                        return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+                    }
+                } else {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+                }
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            }
+        }
+    }
+
+    @Override
     public ResponseEntity<?> deleteTeamBlog() {
         Long id = jwtService.checkJwt();
         if (jwtService.checkJwt() == 0L) {

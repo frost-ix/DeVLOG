@@ -45,6 +45,31 @@ public class TeamAPI {
         return tBlogService.updateTeamBlog(tBlogDTO);
     }
 
+    @PatchMapping("/domain")
+    public ResponseEntity<?> updateTeamBlogDomain(@RequestBody TBlogDTO tBlogDTO) {
+        return tBlogService.updateTeamBlogDomain(tBlogDTO);
+    }
+
+    @PatchMapping("/title")
+    public ResponseEntity<?> updateTeamBlogTitle(@RequestBody TBlogDTO tBlogDTO) {
+        return tBlogService.updateTeamBlogTitle(tBlogDTO);
+    }
+
+    @PatchMapping("/banner")
+    public ResponseEntity<?> updateTeamBlogBanner(@RequestBody TBlogDTO tBlogDTO) {
+        return tBlogService.updateTeamBlogBanner(tBlogDTO);
+    }
+
+    @PatchMapping("/info")
+    public ResponseEntity<?> updateTeamBlogInfo(@RequestBody TBlogDTO tBlogDTO) {
+        return tBlogService.updateTeamBlogInfo(tBlogDTO);
+    }
+
+    @PatchMapping("/name")
+    public ResponseEntity<?> updateTeamBlogName(@RequestBody TBlogDTO tBlogDTO) {
+        return tBlogService.updateTeamBlogName(tBlogDTO);
+    }
+
     @DeleteMapping("")
     public ResponseEntity<?> deleteTeamBlog() {
         return tBlogService.deleteTeamBlog();

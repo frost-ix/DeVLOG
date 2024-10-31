@@ -85,4 +85,76 @@ public class PblogServiceImpl implements PblogService {
             return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
+
+    @Override
+    public ResponseEntity<?> updateBanner(PblogDTO pblogDTO) {
+        try {
+            if (jwtService.validateToken(httpServletRequest.getHeader("Authorization"))) {
+                long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
+                if (pblogDTO.getBanner() == null) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
+                } else {
+                    int res = pblogRepository.updatePBlogBanner(id, pblogDTO.getBanner());
+                    if (res == 1) {
+                        return ResponseEntity.ok().body(Status.OK);
+                    } else {
+                        return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
+                    }
+                }
+            } else {
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateDomain(PblogDTO pblogDTO) {
+        try {
+            if (jwtService.validateToken(httpServletRequest.getHeader("Authorization"))) {
+                long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
+                if (pblogDTO.getDomain() == null) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
+                } else {
+                    int res = pblogRepository.updatePBlogDomain(id, "@" + pblogDTO.getDomain());
+                    if (res == 1) {
+                        return ResponseEntity.ok().body(Status.OK);
+                    } else {
+                        return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
+                    }
+                }
+            } else {
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateName(PblogDTO pblogDTO) {
+        try {
+            if (jwtService.validateToken(httpServletRequest.getHeader("Authorization"))) {
+                long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
+                if (pblogDTO.getName() == null) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
+                } else {
+                    int res = pblogRepository.updatePBlogName(id, pblogDTO.getName());
+                    if (res == 1) {
+                        return ResponseEntity.ok().body(Status.OK);
+                    } else {
+                        return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
+                    }
+                }
+            } else {
+                return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
 }

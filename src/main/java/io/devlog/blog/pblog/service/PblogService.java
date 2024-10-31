@@ -9,4 +9,10 @@ public interface PblogService {
     ResponseEntity<?> getPblog(String domain);
 
     ResponseEntity<?> update(PblogDTO pblogDTO);
+
+    ResponseEntity<?> updateName(PblogDTO pblogDTO);
+
+    ResponseEntity<?> updateDomain(PblogDTO pblogDTO);
+
+    ResponseEntity<?> updateBanner(PblogDTO pblogDTO);
 }
