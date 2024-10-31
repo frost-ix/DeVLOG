@@ -24,8 +24,13 @@ public class cateAPI {
     }
 
     @GetMapping("/pBlog/{pDomain}")
-    public ResponseEntity<?> getCategories(@PathVariable String pDomain) {
-        return categoryService.getPBlogCategories(pDomain);
+    public ResponseEntity<?> getPCategories(@PathVariable String pDomain) {
+        return categoryService.getBlogCategories(pDomain, "p");
+    }
+
+    @GetMapping("/tBlog/{tDomain}")
+    public ResponseEntity<?> getTCategories(@PathVariable String tDomain) {
+        return categoryService.getBlogCategories(tDomain, "t");
     }
 
     @PostMapping("/pBlog")
