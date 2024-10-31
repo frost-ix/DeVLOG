@@ -1,7 +1,6 @@
 package io.devlog.blog.board.api;
 
 import io.devlog.blog.board.DTO.BoardDTO;
-import io.devlog.blog.board.DTO.CateDTO;
 import io.devlog.blog.board.DTO.CommentsDTO;
 import io.devlog.blog.board.service.BoardService;
 import io.devlog.blog.board.service.CommentsService;
@@ -27,10 +26,10 @@ public class boardAPI {
         return boardService.getBoards();
     }
 
-    @GetMapping("/cateboard")
-    public ResponseEntity<?> getCateBoardList(@RequestBody CateDTO cateDTO) {
+    @GetMapping("/{pDomain}/{cateName}")
+    public ResponseEntity<?> getCateBoardList(@PathVariable String pDomain, @PathVariable String cateName) {
         log.info("Get cate");
-        return boardService.getCateBoardList(cateDTO);
+        return boardService.getCateBoardList(pDomain, cateName);
     }
 
     @GetMapping("/tagboard/{tagName}")

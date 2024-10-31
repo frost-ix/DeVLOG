@@ -46,8 +46,8 @@ public interface BoardRepository extends JpaRepository<Board, String> {
     @Query("select b from Board b where b.userUuid = ?1")
     Optional<List<Board>> findBoardByUserUuid(Long userUuid);
 
-    @Query("select b from Board b where b.categories.cateUuid = ?1")
-    List<Board> findBoardByUserUuidAndCategoriesCateUuid(Long cateUuid);
+    @Query("select b from Board b where b.categories.pBlog.pDomain = ?1 and b.categories.cateName = ?2")
+    List<Board> findBoardByUserUuidAndCategoriesCateUuid(String pDomain, String cateName);
 
     @Query(value = """
             select b.*
