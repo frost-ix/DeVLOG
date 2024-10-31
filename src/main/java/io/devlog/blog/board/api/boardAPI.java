@@ -40,7 +40,7 @@ public class boardAPI {
     public ResponseEntity<?> getTCateBoardList(@PathVariable String tDomain, @PathVariable String category) {
         log.info("cateName : {}", category);
         category = URLDecoder.decode(category, StandardCharsets.UTF_8);
-        return boardService.getCateBoardList(tDomain, category);
+        return boardService.getTCateBoardList(tDomain, category);
     }
 
 
