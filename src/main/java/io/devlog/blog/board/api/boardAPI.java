@@ -8,6 +8,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 @Log4j2
 @RestController
 @RequestMapping("/board")
@@ -26,15 +29,17 @@ public class boardAPI {
         return boardService.getBoards();
     }
 
-    @GetMapping("/{pDomain}/{cateName}")
-    public ResponseEntity<?> getCateBoardList(@PathVariable String pDomain, @PathVariable String cateName) {
-        log.info("Get cate");
-        return boardService.getCateBoardList(pDomain, cateName);
+    @GetMapping("/p/{pDomain}/{category}")
+    public ResponseEntity<?> getCateBoardList(@PathVariable String pDomain, @PathVariable String category) {
+        log.info("cateName : {}", category);
+        category = URLDecoder.decode(category, StandardCharsets.UTF_8);
+        return boardService.getCateBoardList(pDomain, category);
     }
 
     @GetMapping("/tagboard/{tagName}")
     public ResponseEntity<?> getTagBoardList(@PathVariable String tagName) {
         log.info("Get cate");
+        tagName = URLDecoder.decode(tagName, StandardCharsets.UTF_8);
         return boardService.getTagBoardList(tagName);
     }
 
@@ -49,6 +54,7 @@ public class boardAPI {
             @PathVariable String cateName,
             @PathVariable Long cateUuid,
             @RequestParam("p") int page, @RequestParam("s") int size) {
+        cateName = URLDecoder.decode(cateName, StandardCharsets.UTF_8);
         log.info("Paging cate boards : {} {} {} {}", cateName, cateUuid, page, size);
         return boardService.pagingCateBoards(cateUuid, page, size);
     }
