@@ -6,5 +6,7 @@ import org.springframework.http.ResponseEntity;
 public interface UserInfoService {
     ResponseEntity<?> getUserInfo();
 
+    ResponseEntity<?> getPBlogUserInfo(String domain);
+
     ResponseEntity<?> updateUserInfo(UserInfoDTO info);
 }

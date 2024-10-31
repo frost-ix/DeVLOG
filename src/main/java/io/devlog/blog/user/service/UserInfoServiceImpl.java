@@ -43,6 +43,21 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
         }
     }
 
+    @Override
+    public ResponseEntity<?> getPBlogUserInfo(String domain) {
+        try {
+            UserInfo userInfo = userInfoRepository.findByPDomain(domain);
+            if (userInfo == null) {
+                return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
+            } else {
+                return ResponseEntity.ok().body(userInfo);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
+
 
     @Override
     public ResponseEntity<?> updateUserInfo(UserInfoDTO info) {

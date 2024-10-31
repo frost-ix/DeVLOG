@@ -9,7 +9,6 @@ import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +18,6 @@ public class PblogServiceImpl implements PblogService {
     private final PblogRepository pblogRepository;
     private final HttpServletRequest httpServletRequest;
     private final JwtService jwtService;
-
-    @Value("${file.upload-dir}")
-    private String fileDir;
 
     public PblogServiceImpl(PblogRepository pblogRepository, HttpServletRequest httpServletRequest, JwtService jwtService) {
         this.pblogRepository = pblogRepository;
@@ -43,6 +39,22 @@ public class PblogServiceImpl implements PblogService {
                 }
             } else {
                 return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getPblog(String domain) {
+        try {
+            PBlog pBlog = pblogRepository.findPBlogByPDomain(domain);
+            if (pBlog != null) {
+                PblogDTO pblogDTO = new PblogDTO(pBlog.getPDomain(), pBlog.getPBanner(), pBlog.getPName());
+                return ResponseEntity.ok().body(pblogDTO);
+            } else {
+                return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
             }
         } catch (Exception e) {
             log.error(e.getMessage());

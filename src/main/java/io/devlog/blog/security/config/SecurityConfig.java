@@ -31,11 +31,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests((req) ->
                         req
                                 .requestMatchers("/", "/photo").permitAll()
-                                .requestMatchers("/cate", "/cate/**").permitAll()
+                                .requestMatchers("/cate", "/cate/**", "/cate/pBlog/**", "/cate/tBlog/**").permitAll()
                                 .requestMatchers("/mail", "/mail/**").permitAll()
                                 .requestMatchers("/team", "/team/**").permitAll()
                                 .requestMatchers("/oauth/**").permitAll()
-                                .requestMatchers("/board", "/user", "/p").permitAll()
+                                .requestMatchers("/board", "/user").permitAll()
+                                .requestMatchers("/p", "/p/**").permitAll()
                                 .requestMatchers("/board/**", "/user/**", "/p/**").permitAll()
                                 .requestMatchers("/user/*/**").permitAll()
                                 .requestMatchers("/oauth/**").permitAll()

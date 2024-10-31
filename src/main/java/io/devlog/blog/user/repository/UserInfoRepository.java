@@ -20,6 +20,9 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
     @Query("SELECT u FROM UserInfo u WHERE u.user.userUuid = :userUuid")
     UserInfo findByUserUuid(@Param("userUuid") long userUuid);
 
+    @Query("select u from UserInfo u where u.user.pbLog.pDomain = :pDomain")
+    UserInfo findByPDomain(@Param("pDomain") String pDomain);
+
     @Query("SELECT u.userIcon FROM UserInfo u WHERE u.user.userUuid = :userUuid")
     String findUserInfoByUserUuid(@Param("userUuid") long userUuid);
 

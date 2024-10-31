@@ -37,6 +37,11 @@ public class UserInfoAPI {
         return userInfoService.getUserInfo();
     }
 
+    @GetMapping("/{pDomain}")
+    public ResponseEntity<?> getPBlogUserInfo(@PathVariable String pDomain) {
+        return userInfoService.getPBlogUserInfo(pDomain);
+    }
+
     /**
      * <h1>Update user information</h1>
      * <ul>Patch /user/i/{userUuid} : Update user information</ul>

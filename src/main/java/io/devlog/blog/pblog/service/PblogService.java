@@ -6,5 +6,7 @@ import org.springframework.http.ResponseEntity;
 public interface PblogService {
     ResponseEntity<?> getPblog();
 
+    ResponseEntity<?> getPblog(String domain);
+
     ResponseEntity<?> update(PblogDTO pblogDTO);
 }

@@ -22,6 +22,11 @@ public class PblogAPI {
         return pblogService.getPblog();
     }
 
+    @GetMapping("/{pDomain}")
+    public ResponseEntity<?> getPblog(@PathVariable String pDomain) {
+        return pblogService.getPblog(pDomain);
+    }
+
     @PatchMapping("")
     public ResponseEntity<?> updatePblog(@RequestBody PblogDTO pblogDTO) {
         return pblogService.update(pblogDTO);
