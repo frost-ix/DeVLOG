@@ -56,7 +56,12 @@ public class CategoryServiceImpl implements CategoryService {
             }
             List<Categories> categories = cateRepository.findByPUserUuid(id);
             List<CateDTO> cateDTOS = categories.stream()
-                    .map(CateDTO::toDTO)
+                    .map(Categories -> CateDTO.builder()
+                            .cateUuid(Categories.getCateUuid())
+                            .cateName(Categories.getCateName())
+                            .cateIdx(Categories.getCateIdx())
+                            .boardCount(boardRepository.countByCateUuid(Categories.getCateUuid()))
+                            .build())
                     .collect(Collectors.toList());
             return ResponseEntity.status(200).body(cateDTOS);
         } catch (Exception e) {
@@ -88,7 +93,12 @@ public class CategoryServiceImpl implements CategoryService {
             Long id = pblogRepository.getPBlogCategories(pDomain);
             List<Categories> categories = cateRepository.findByPUserUuid(id);
             List<CateDTO> cateDTOS = categories.stream()
-                    .map(CateDTO::toDTO)
+                    .map(Categories -> CateDTO.builder()
+                            .cateUuid(Categories.getCateUuid())
+                            .cateName(Categories.getCateName())
+                            .cateIdx(Categories.getCateIdx())
+                            .boardCount(boardRepository.countByCateUuid(Categories.getCateUuid()))
+                            .build())
                     .collect(Collectors.toList());
             return ResponseEntity.status(200).body(cateDTOS);
         } catch (Exception e) {
