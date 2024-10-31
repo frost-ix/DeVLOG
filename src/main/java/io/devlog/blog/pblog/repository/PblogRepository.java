@@ -19,6 +19,7 @@ public interface PblogRepository extends JpaRepository<PBlog, Long> {
     @Query("select p.user.userUuid from PBlog p where p.pDomain = :pDomain")
     Long getPBlogCategories(String pDomain);
 
+
     @Transactional
     @Modifying
     @Query("update PBlog p set p.pBanner = :pBanner, p.pDomain = :pDomain" +
