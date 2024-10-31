@@ -38,7 +38,6 @@ public class CommentsServiceImpl implements CommentsService {
                 .map(Comments -> CommentsDTO.builder()
                         .commentUuid(Comments.getCommentUuid())
                         .comments(Comments.getComments())
-                        .imagePath(Comments.getImagePath())
                         .boardUuid(Comments.getBoard().getBoardUuid())
                         .userName(Comments.getUserName())
                         .commentDate(Comments.getCommentDate())
@@ -70,7 +69,6 @@ public class CommentsServiceImpl implements CommentsService {
             commentsDTO.setUserName(userRepository.findByUserName(id));
             Comments comments = Comments.builder()
                     .comments(commentsDTO.getComments())
-                    .imagePath(commentsDTO.getImagePath())
                     .userUuid(id)
                     .userName(userRepository.findByUserName(id))
                     .board(boardRepository.findBoardByBoardUuid(commentsDTO.getBoardUuid()))
@@ -95,7 +93,6 @@ public class CommentsServiceImpl implements CommentsService {
             if (id == commentsRepository.findByUserUuid(commentsDTO.getCommentUuid())) {
                 Comments comments = commentsRepository.findByUserUuidAndBoard_BoardUuid(id, commentsDTO.getBoardUuid(), commentsDTO.getCommentUuid());
                 comments.setComments(commentsDTO.getComments());
-                comments.setImagePath(commentsDTO.getImagePath());
                 comments.setCommentDate(LocalDateTime.now());
                 commentsRepository.save(comments);
                 return ResponseEntity.ok().body("Update comment");

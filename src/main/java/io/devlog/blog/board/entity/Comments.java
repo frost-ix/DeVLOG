@@ -24,7 +24,6 @@ public class Comments {
 
     private String comments;
     private LocalDateTime commentDate;
-    private String imagePath;
 
     private Long userUuid;
     private String userName;
