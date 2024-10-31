@@ -16,13 +16,17 @@ public class CateDTO {
     private Long userUuid;
     private Long cateUuid;
     private int cateIdx;
+    private int boardCount;
+
 
     @Builder
-    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx) {
+    public CateDTO(@Nullable String cateName, @Nullable Long userUuid, @Nullable Long cateUuid, @Nullable int cateIdx, @Nullable int boardCount) {
         this.cateName = cateName;
         this.userUuid = userUuid;
         this.cateUuid = cateUuid;
         this.cateIdx = cateIdx;
+        this.boardCount = boardCount;
+
 
     }
 
@@ -31,6 +35,7 @@ public class CateDTO {
                 .cateName(categories.getCateName())
                 .cateUuid(categories.getCateUuid())
                 .cateIdx(categories.getCateIdx())
+                .boardCount(0)
                 .build();
     }
 

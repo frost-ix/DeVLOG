@@ -74,4 +74,7 @@ public interface BoardRepository extends JpaRepository<Board, String> {
     @Modifying
     @Query("delete from Board b where b.categories.cateUuid = :cateUuid")
     void deleteBoardsByCateUuid(@Param("cateUuid") Long cateUuid);
+
+    @Query("select count(b) from Board b where b.categories.cateUuid = ?1")
+    int countByCateUuid(Long cateUuid);
 }
