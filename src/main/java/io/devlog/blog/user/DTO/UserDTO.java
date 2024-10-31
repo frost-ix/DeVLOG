@@ -15,6 +15,7 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserDTO {
+    private UserInfoDTO userInfo;
     private String id;
     private String pw;
     private String bender;
@@ -26,7 +27,9 @@ public class UserDTO {
 
     // Normal Create
     @Builder
-    public UserDTO(@Nullable String id, @Nullable String pw, @Nullable String bender, @Nullable String benderUuid, @Nullable String name, @Nullable String mail) {
+    public UserDTO(@Nullable String id, @Nullable String pw,
+                   @Nullable String bender, @Nullable String benderUuid,
+                   @Nullable String name, @Nullable String mail) {
         this.id = id;
         this.pw = pw;
         this.bender = bender;
@@ -36,8 +39,40 @@ public class UserDTO {
         this.accessRole = AccessRole.CLIENT;
     }
 
+    // Normal Create
+    @Builder
+    public UserDTO(@Nullable String id, @Nullable String pw,
+                   @Nullable String bender, @Nullable String benderUuid,
+                   @Nullable String name, @Nullable String mail,
+                   @Nullable UserInfoDTO userInfo) {
+        this.id = id;
+        this.pw = pw;
+        this.bender = bender;
+        this.benderUuid = benderUuid;
+        this.name = name;
+        this.mail = mail;
+        this.accessRole = AccessRole.CLIENT;
+        this.userInfo = userInfo;
+    }
+
+    @Builder
+    public UserDTO(UserInfoDTO userInfo) {
+        this.userInfo = userInfo;
+    }
+
     // Entity to DTO
     public static UserDTO toDTO(User user) {
+        return UserDTO.builder()
+                .id(Objects.requireNonNull(user.getUserId()))
+                .pw(Objects.requireNonNull(user.getUserPw()))
+                .bender(user.getBender())
+                .benderUuid(user.getBenderUuid())
+                .name(user.getName())
+                .mail(user.getMail())
+                .build();
+    }
+
+    public static UserDTO toDTO(User user, UserInfoDTO userInfo) {
         return UserDTO.builder()
                 .id(Objects.requireNonNull(user.getUserId()))
                 .pw(Objects.requireNonNull(user.getUserPw()))

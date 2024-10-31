@@ -31,12 +31,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,13 +56,9 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     private final BoardTagsRepository boardTagsRepository;
     private final TBlogRepository tBlogRepository;
 
-    @Autowired
     private final NAVER naver;
-    @Autowired
     private final GOOGLE google;
-    @Autowired
     private final GITHUB github;
-
 
     public UserServiceImpl(final UserRepository userRepository, PasswordEncoder pwEncoder,
                            JwtService jwtService, HttpServletResponse httpServletResponse,
@@ -98,16 +94,32 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     @Override
     public ResponseEntity<?> getUsers() {
         try {
-            List<User> finds = userRepository.findAll();
+            List<User> finds = userRepository.findUserBy();
             if (finds.isEmpty()) {
                 log.error("No user");
                 return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
             } else {
-                return ResponseEntity.ok().body(finds);
+                if (finds.size() == 1) {
+                    finds.get(0).setUserPw(null);
+                    finds.get(0).setBenderUuid(null);
+                    finds.get(0).setBender(null);
+                    return ResponseEntity.ok().body(UserDTO.toDTO(finds.get(0)));
+                } else {
+                    List<UserDTO> dto = new ArrayList<>();
+                    log.info("user : {}", finds.get(0));
+                    finds.forEach((u) -> {
+                        u.setUserPw(null);
+                        u.setBenderUuid(null);
+                        u.setBender(null);
+                        dto.add(UserDTO.toDTO(u));
+                    });
+                    log.info("Response");
+                    return ResponseEntity.ok().body(dto);
+                }
             }
         } catch (Exception e) {
             log.error(e);
-            throw new CustomException(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
 

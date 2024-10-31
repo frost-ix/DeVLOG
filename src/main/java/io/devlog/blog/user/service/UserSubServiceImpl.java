@@ -1,13 +1,17 @@
 package io.devlog.blog.user.service;
 
+import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.DTO.SubscribesDTO;
 import io.devlog.blog.user.DTO.UserDTO;
+import io.devlog.blog.user.DTO.UserInfoDTO;
 import io.devlog.blog.user.entity.Subscribes;
 import io.devlog.blog.user.entity.User;
+import io.devlog.blog.user.entity.UserInfo;
 import io.devlog.blog.user.repository.SubscribesRepository;
+import io.devlog.blog.user.repository.UserInfoRepository;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
@@ -26,32 +30,25 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
     private final UserRepository userRepo;
     private final JwtService jwtService;
     private final HttpServletRequest httpServletRequest;
+    private final UserInfoRepository userInfoRepository;
 
-    public UserSubServiceImpl(final SubscribesRepository sbRepo, final UserRepository userRepo, JwtService jwtService, HttpServletRequest httpServletRequest) {
+    public UserSubServiceImpl(final SubscribesRepository sbRepo, final UserRepository userRepo, JwtService jwtService, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository) {
         super(Subscribes.class);
         this.sbRepo = sbRepo;
         this.userRepo = userRepo;
         this.jwtService = jwtService;
         this.httpServletRequest = httpServletRequest;
-    }
-
-    @Override
-    public ResponseEntity<?> getUsersSub() {
-        try {
-            return ResponseEntity.ok(sbRepo.findAll());
-        } catch (Exception e) {
-            log.error(e);
-            return ResponseEntity.badRequest().body(e);
-        }
+        this.userInfoRepository = userInfoRepository;
     }
 
     @Override
     public ResponseEntity<?> getUsersSubCount() {
         long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
-        long count = sbRepo.findByUserUuid(id).size();
-        if (count == 0) {
-            return ResponseEntity.noContent().build();
+        User user = userRepo.findByUserUuid(id).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
         } else {
+            int count = sbRepo.countBySubUserId(user.getUserId());
             return ResponseEntity.ok(count);
         }
     }
@@ -67,19 +64,22 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
                 HashMap<Long, UserDTO> subUsers = new HashMap<>();
                 finds.forEach((s) -> {
                     Optional<User> i = userRepo.findByUserId(s.getSubUserId());
-                    if (i.isPresent()) {
-                        UserDTO e = UserDTO.toDTO(i.get());
-                        e.setPw(null);
-                        e.setMail(null);
-                        e.setBender(null);
-                        e.setBenderUuid(null);
-                        subUsers.put(i.get().getUserUuid(), e);
+                    if (i.isEmpty()) {
+                    } else {
+                        long iUuid = i.get().getUserUuid();
+                        if (iUuid != 0) {
+                            UserInfo uI = userInfoRepository.findByUserUuid(iUuid);
+                            UserDTO e = new UserDTO(
+                                    i.get().getUserId(), null, null, null,
+                                    i.get().getName(), i.get().getMail(), UserInfoDTO.toDTO(uI));
+                            subUsers.put(i.get().getUserUuid(), e);
+                        }
                     }
                 });
                 return ResponseEntity.ok(subUsers);
             }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
 
@@ -108,7 +108,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
 
@@ -130,7 +130,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
 
@@ -142,7 +142,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
             sbRepo.deleteAllByUserUuid(id);
             return ResponseEntity.ok(Status.OK);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
 }

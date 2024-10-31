@@ -5,7 +5,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public class CustomException extends RuntimeException {
+public class CustomException {
     private final ExceptionStatus es;
     private final String message;
     private final HttpStatus status;

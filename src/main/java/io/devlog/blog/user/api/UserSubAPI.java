@@ -35,18 +35,6 @@ public class UserSubAPI {
     }
 
     /**
-     * <h1>Get usr Subscribes</h1>
-     * <ul>GET /user/s : Get all user subscribes</ul>
-     *
-     * @return ResponseEntity<?> ? User Subscribes : Error
-     */
-    @GetMapping("/all")
-    public ResponseEntity<?> getUsersSub() {
-        log.info("test");
-        return userSubService.getUsersSub();
-    }
-
-    /**
      * <h1>Get user subscribe count</h1>
      * <ul>GET /user/s/{userUuid}/count : Get user subscribe count</ul>
      *

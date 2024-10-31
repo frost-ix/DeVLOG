@@ -24,6 +24,18 @@ public class TBlogDTO {
         return new TBlogDTO(0, tDomain, tTitle, tName, tSubject, tInfo);
     }
 
+    public static TBlogDTO of(long tUuid) {
+        return new TBlogDTO(tUuid, null, null, null, null, null);
+    }
+
+    public static TBlogDTO toDTO(TBlog tBlog) {
+        return TBlogDTO.of(
+                tBlog.getTUuid(), tBlog.getTDomain(),
+                tBlog.getTTitle(), tBlog.getTName(),
+                tBlog.getTSubject(), tBlog.getTInfo()
+        );
+    }
+
     public TBlog toEntity(User user) {
         return TBlog.builder()
                 .user(user)

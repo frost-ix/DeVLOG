@@ -18,6 +18,8 @@ public interface SubscribesRepository extends JpaRepository<Subscribes, Long> {
     @Query("SELECT s FROM Subscribes s WHERE s.subUserId =:subUserId")
     Subscribes findBySubUser(@Param("subUserId") String subUserId);
 
+    int countBySubUserId(String subUserId);
+
     @Transactional
     @Modifying
     @Query("DELETE FROM Subscribes s WHERE s.user.userUuid =:userUuid")

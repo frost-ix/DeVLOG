@@ -39,7 +39,7 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
         if (id != 0) {
             return ResponseEntity.ok(userInfoRepository.findByUserUuid(id));
         } else {
-            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
         }
     }
 
@@ -50,14 +50,14 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
             long userUuid = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
             if (info == null || userUuid == 0) {
                 log.error("Cannot find data");
-                throw new CustomException(ExceptionStatus.NO_CONTENT);
+                return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
             }
             UserInfo u = userInfoRepository.findByUserUuid(userUuid);
             if (u == null) {
                 Optional<User> user = userRepository.findByUserUuid(userUuid);
                 if (user.isEmpty()) {
                     log.error("Cannot find user");
-                    throw new CustomException(ExceptionStatus.USER_NOT_FOUND);
+                    return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
                 }
                 UserInfo ui = info.toEntity();
                 ui.setUser(user.get());
@@ -72,14 +72,14 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
                 );
                 if (c == 0) {
                     log.error("Cannot update user information");
-                    throw new CustomException(ExceptionStatus.NOT_MODIFIED);
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
                 } else {
                     return ResponseEntity.ok().body(Status.OK);
                 }
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
 }

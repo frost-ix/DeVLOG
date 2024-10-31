@@ -13,6 +13,9 @@ public interface TBlogRoleRepository extends JpaRepository<TBlogRole, String> {
     @Query("select tbr from TBlogRole tbr where tbr.userUuid = :userUuid")
     TBlogRole findByUserUuid(@Param("userUuid") long userUuid);
 
+    @Query("select tbr from TBlogRole  tbr where tbr.userUuid = :userUuid")
+    List<TBlogRole> findAllByUserUuid(@Param("userUuid") long userUuid);
+
     @Query("select tbr from TBlogRole tbr where tbr.tBlog.tUuid = :tUuid")
     List<TBlogRole> findByTUuid(@Param("tUuid") long tUuid);
 

@@ -21,8 +21,8 @@ public class TeamAPI {
     }
 
     @GetMapping("/members")
-    public ResponseEntity<?> getTeamBlogMembers() {
-        return tBlogService.getTeamBlogMembers();
+    public ResponseEntity<?> getTeamBlogMembers(@RequestBody TBlogDTO tBlogDTO) {
+        return tBlogService.getTeamBlogMembers(tBlogDTO);
     }
 
     @GetMapping("/my")

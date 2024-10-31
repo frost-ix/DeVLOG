@@ -59,7 +59,6 @@ public class UserAPI {
 
     @PostMapping("/login/r")
     public ResponseEntity<?> login(@CookieValue(value = "refreshToken", required = false) Cookie token) {
-        log.debug("Second login : {}", token);
         return userService.login(token != null ? token.getValue() : null);
     }
 
