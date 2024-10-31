@@ -138,6 +138,18 @@ public class UserDTO {
         this.pBlogDTO = pBlogDTO;
     }
 
+    public UserDTO(UserDTO userDTO, UserInfoDTO dto) {
+        this.id = userDTO.getId();
+        this.pw = userDTO.getPw();
+        this.bender = userDTO.getBender();
+        this.benderUuid = userDTO.getBenderUuid();
+        this.subCount = userDTO.getSubCount();
+        this.name = userDTO.getName();
+        this.mail = userDTO.getMail();
+        this.accessRole = userDTO.getAccessRole();
+        this.userInfo = dto;
+    }
+
     // Entity to DTO
     public static UserDTO toDTO(User user) {
         return UserDTO.builder()
