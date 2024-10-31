@@ -1,7 +1,6 @@
 package io.devlog.blog.board.service;
 
 import io.devlog.blog.board.DTO.BoardDTO;
-import io.devlog.blog.board.DTO.CateDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface BoardService {
@@ -17,7 +16,7 @@ public interface BoardService {
 
     ResponseEntity<?> getBoard(Long id);
 
-    ResponseEntity<?> getCateBoardList(CateDTO cateDTO);
+    ResponseEntity<?> getCateBoardList(String pDomain, String cateName);
 
     ResponseEntity<?> getTagBoardList(String tagName);
 

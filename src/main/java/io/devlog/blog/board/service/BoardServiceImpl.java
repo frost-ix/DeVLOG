@@ -1,7 +1,6 @@
 package io.devlog.blog.board.service;
 
 import io.devlog.blog.board.DTO.BoardDTO;
-import io.devlog.blog.board.DTO.CateDTO;
 import io.devlog.blog.board.entity.Board;
 import io.devlog.blog.board.entity.BoardTags;
 import io.devlog.blog.board.entity.Categories;
@@ -131,9 +130,9 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public ResponseEntity<?> getCateBoardList(CateDTO cateDTO) {
+    public ResponseEntity<?> getCateBoardList(String pDomain, String cateName) {
         try {
-            List<Board> boardList = boardRepository.findBoardByUserUuidAndCategoriesCateUuid(cateDTO.getCateUuid());
+            List<Board> boardList = boardRepository.findBoardByUserUuidAndCategoriesCateUuid(pDomain, cateName);
             List<BoardDTO> boardDTOS = streamBoards(boardList);
             return ResponseEntity.ok().body(boardDTOS);
 
