@@ -6,6 +6,8 @@ import io.devlog.blog.board.repository.BoardRepository;
 import io.devlog.blog.board.repository.BoardTagsRepository;
 import io.devlog.blog.board.repository.CateRepository;
 import io.devlog.blog.board.repository.TagRepository;
+import io.devlog.blog.config.CustomException;
+import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.pblog.Entity.PBlog;
 import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
