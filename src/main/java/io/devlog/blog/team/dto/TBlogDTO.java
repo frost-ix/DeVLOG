@@ -14,25 +14,26 @@ public class TBlogDTO {
     private String tTitle;
     private String tName;
     private String tSubject;
+    private String tBanner;
     private String tInfo;
 
-    public static TBlogDTO of(long tUuid, String tDomain, String tTitle, String tName, String tSubject, String tInfo) {
-        return new TBlogDTO(tUuid, tDomain, tTitle, tName, tSubject, tInfo);
+    public static TBlogDTO of(long tUuid, String tDomain, String tTitle, String tName, String tSubject, String tInfo, String tBanner) {
+        return new TBlogDTO(tUuid, tDomain, tTitle, tName, tSubject, tInfo, tBanner);
     }
 
-    public static TBlogDTO of(String tDomain, String tTitle, String tName, String tSubject, String tInfo) {
-        return new TBlogDTO(0, tDomain, tTitle, tName, tSubject, tInfo);
+    public static TBlogDTO of(String tDomain, String tTitle, String tName, String tSubject, String tInfo, String tBanner) {
+        return new TBlogDTO(0, tDomain, tTitle, tName, tSubject, tInfo, tBanner);
     }
 
     public static TBlogDTO of(long tUuid) {
-        return new TBlogDTO(tUuid, null, null, null, null, null);
+        return new TBlogDTO(tUuid, null, null, null, null, null, null);
     }
 
     public static TBlogDTO toDTO(TBlog tBlog) {
         return TBlogDTO.of(
                 tBlog.getTUuid(), tBlog.getTDomain(),
                 tBlog.getTTitle(), tBlog.getTName(),
-                tBlog.getTSubject(), tBlog.getTInfo()
+                tBlog.getTSubject(), tBlog.getTInfo(), tBlog.getTBanner()
         );
     }
 
@@ -43,6 +44,7 @@ public class TBlogDTO {
                 .tTitle(tTitle)
                 .tName(tName)
                 .tSubject(tSubject)
+                .tBanner(tBanner)
                 .build();
     }
 }

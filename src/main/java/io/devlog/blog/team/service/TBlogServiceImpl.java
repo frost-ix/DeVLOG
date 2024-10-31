@@ -52,6 +52,7 @@ public class TBlogServiceImpl implements TBlogService {
                     t.getTDomain(),
                     t.getTTitle(),
                     t.getTName(),
+                    t.getTBanner(),
                     t.getTSubject(),
                     t.getTInfo()
             )));
