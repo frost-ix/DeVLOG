@@ -81,7 +81,12 @@ public class CategoryServiceImpl implements CategoryService {
             TBlog t = tblogRepository.findTBlogByUserUuid(id);
             List<Categories> categories = cateRepository.findByTUserUuid(t.getTUuid());
             List<CateDTO> cateDTOS = categories.stream()
-                    .map(CateDTO::toDTO)
+                    .map(Categories -> CateDTO.builder()
+                            .cateUuid(Categories.getCateUuid())
+                            .cateName(Categories.getCateName())
+                            .cateIdx(Categories.getCateIdx())
+                            .boardCount(boardRepository.countByCateUuid(Categories.getCateUuid()))
+                            .build())
                     .collect(Collectors.toList());
             return ResponseEntity.status(200).body(cateDTOS);
         } catch (Exception e) {

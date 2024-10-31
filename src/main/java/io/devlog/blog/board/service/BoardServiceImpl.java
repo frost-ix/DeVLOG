@@ -284,35 +284,63 @@ public class BoardServiceImpl implements BoardService {
                 return ResponseEntity.badRequest().body("Token is invalid");
             }
             System.out.println(boardDTO);
-            Long pUuid = pblogRepository.findPBlogByUserUuid(id).getPUuid();
-            Optional<Categories> category = cateRepository.findByPCateNameAndUserUuid(boardDTO.getCategories(), id, pUuid);
+            if (boardDTO.getPdomain() == null) {
+                //tblog board create
+                Long tUuid = tblogRepository.findTBlogByUserUuid(id).getTUuid();
+                Optional<Categories> category = cateRepository.findByTCateNameAndUserUuid(boardDTO.getCategories(), id, tUuid);
 
-            List<String> tagNames = boardDTO.getTags();
-            List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
+                List<String> tagNames = boardDTO.getTags();
+                List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
 
-            userRepository.findByUserUuid(id)
-                    .ifPresent((user) -> {
-                        boardDTO.setUserUuID(user.getUserUuid());
-                        boardDTO.setUserName(user.getName());
-                    });
+                userRepository.findByUserUuid(id)
+                        .ifPresent((user) -> {
+                            boardDTO.setUserUuID(user.getUserUuid());
+                            boardDTO.setUserName(user.getName());
+                        });
 
-            List<Tags> newTags = streamTags(tagNames, recvtags);
+                List<Tags> newTags = streamTags(tagNames, recvtags);
 
-            if (!newTags.isEmpty()) {
-                tagRepository.saveAll(newTags);
+                if (!newTags.isEmpty()) {
+                    tagRepository.saveAll(newTags);
+                }
+                recvtags.addAll(newTags);
+                boardDTO.setVisitCount(0);
+                Board board = boardDTO.toEntity(category.orElse(null), null);
+                boardRepository.save(board);
+
+                return ResponseEntity.status(200).body("create board success");
+            } else {
+                Long pUuid = pblogRepository.findPBlogByUserUuid(id).getPUuid();
+                Optional<Categories> category = cateRepository.findByPCateNameAndUserUuid(boardDTO.getCategories(), id, pUuid);
+
+                List<String> tagNames = boardDTO.getTags();
+                List<Tags> recvtags = tagRepository.findByTagNameIn(tagNames);
+
+                userRepository.findByUserUuid(id)
+                        .ifPresent((user) -> {
+                            boardDTO.setUserUuID(user.getUserUuid());
+                            boardDTO.setUserName(user.getName());
+                        });
+
+                List<Tags> newTags = streamTags(tagNames, recvtags);
+
+                if (!newTags.isEmpty()) {
+                    tagRepository.saveAll(newTags);
+                }
+                recvtags.addAll(newTags);
+                boardDTO.setVisitCount(0);
+                Board board = boardDTO.toEntity(category.orElse(null), null);
+                boardRepository.save(board);
+
+                List<BoardTags> boardTags = recvtags.stream()
+                        .map(tag -> new BoardTags(null, board, tag))
+                        .collect(Collectors.toList());
+
+                boardTagsRepository.saveAll(boardTags);
+
+                return ResponseEntity.status(200).body("create board success");
             }
-            recvtags.addAll(newTags);
-            boardDTO.setVisitCount(0);
-            Board board = boardDTO.toEntity(category.orElse(null), null);
-            boardRepository.save(board);
 
-            List<BoardTags> boardTags = recvtags.stream()
-                    .map(tag -> new BoardTags(null, board, tag))
-                    .collect(Collectors.toList());
-
-            boardTagsRepository.saveAll(boardTags);
-
-            return ResponseEntity.status(200).body("create board success");
         } catch (Exception e) {
             log.error("create board error", e);
             return ResponseEntity.badRequest().body("create board error");
