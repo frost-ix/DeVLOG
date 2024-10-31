@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "comments")
 @Data
@@ -21,7 +23,7 @@ public class Comments {
     private Board board;
 
     private String comments;
-
+    private LocalDateTime commentDate;
     private String imagePath;
 
     private Long userUuid;

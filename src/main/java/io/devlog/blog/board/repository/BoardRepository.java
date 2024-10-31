@@ -23,6 +23,7 @@ public interface BoardRepository extends JpaRepository<Board, String> {
                     b.board_uuid AS boardUuid,
                     b.user_name AS userName,
                     b.board_date AS boardDate,
+                    c.cate_name AS cateName,
                     b.board_title AS boardTitle,
                     b.board_content AS boardContent,
                     b.board_profilepath AS boardProfilepath,
@@ -31,6 +32,7 @@ public interface BoardRepository extends JpaRepository<Board, String> {
                 FROM board b
                 LEFT JOIN board_tags bt ON b.board_uuid = bt.board_uuid
                 LEFT JOIN tags t ON bt.taguid = t.taguid 
+                LEFT JOIN categories c ON b.cate_uuid = c.cate_uuid
                 WHERE b.board_uuid = :boardUuid
                 GROUP BY b.board_uuid
             """, nativeQuery = true)

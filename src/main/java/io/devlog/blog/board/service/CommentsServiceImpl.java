@@ -5,11 +5,13 @@ import io.devlog.blog.board.entity.Comments;
 import io.devlog.blog.board.repository.BoardRepository;
 import io.devlog.blog.board.repository.CommentsRepository;
 import io.devlog.blog.security.Jwt.JwtService;
+import io.devlog.blog.user.repository.UserInfoRepository;
 import io.devlog.blog.user.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,17 +23,27 @@ public class CommentsServiceImpl implements CommentsService {
     private final UserRepository userRepository;
     private final CommentsRepository commentsRepository;
     private final BoardRepository boardRepository;
+    private final UserInfoRepository userInfoRepository;
 
-    public CommentsServiceImpl(JwtService jwtService, UserRepository userRepository, CommentsRepository commentsRepository, BoardRepository boardRepository) {
+    public CommentsServiceImpl(JwtService jwtService, UserRepository userRepository, CommentsRepository commentsRepository, BoardRepository boardRepository, UserInfoRepository userInfoRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.commentsRepository = commentsRepository;
         this.boardRepository = boardRepository;
+        this.userInfoRepository = userInfoRepository;
     }
 
-    public static List<CommentsDTO> toDTO(List<Comments> commentsList) {
+    public List<CommentsDTO> toDTO(List<Comments> commentsList) {
         return commentsList.stream()
-                .map(CommentsDTO::toDTO)
+                .map(Comments -> CommentsDTO.builder()
+                        .commentUuid(Comments.getCommentUuid())
+                        .comments(Comments.getComments())
+                        .imagePath(Comments.getImagePath())
+                        .boardUuid(Comments.getBoard().getBoardUuid())
+                        .userName(Comments.getUserName())
+                        .commentDate(Comments.getCommentDate())
+                        .userIcon(userInfoRepository.findByUserUuid(Comments.getUserUuid()).getUserIcon())
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -62,6 +74,7 @@ public class CommentsServiceImpl implements CommentsService {
                     .userUuid(id)
                     .userName(userRepository.findByUserName(id))
                     .board(boardRepository.findBoardByBoardUuid(commentsDTO.getBoardUuid()))
+                    .commentDate(LocalDateTime.now())
                     .build();
             commentsRepository.save(comments);
             return ResponseEntity.ok().body("Create comment");
@@ -83,6 +96,7 @@ public class CommentsServiceImpl implements CommentsService {
                 Comments comments = commentsRepository.findByUserUuidAndBoard_BoardUuid(id, commentsDTO.getBoardUuid(), commentsDTO.getCommentUuid());
                 comments.setComments(commentsDTO.getComments());
                 comments.setImagePath(commentsDTO.getImagePath());
+                comments.setCommentDate(LocalDateTime.now());
                 commentsRepository.save(comments);
                 return ResponseEntity.ok().body("Update comment");
             }
