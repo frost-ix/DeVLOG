@@ -114,7 +114,8 @@ public class CategoryServiceImpl implements CategoryService {
                 List<Categories> categories = cateRepository.findByPUserUuid(id);
                 return getCategories(categories);
             } else if (state.equals("t")) {
-                Long id = tblogRepository.getTBlogCategories(domain);
+                log.info("# {}", domain);
+                Long id = tblogRepository.getTBlogCategory(domain);
                 List<Categories> categories = cateRepository.findByTUserUuid(id);
                 return getCategories(categories);
             } else {

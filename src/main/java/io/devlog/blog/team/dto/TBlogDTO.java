@@ -33,7 +33,7 @@ public class TBlogDTO {
         return TBlogDTO.of(
                 tBlog.getTUuid(), tBlog.getTDomain(),
                 tBlog.getTTitle(), tBlog.getTName(),
-                tBlog.getTSubject(), tBlog.getTInfo(), tBlog.getTBanner()
+                tBlog.getTSubject(), tBlog.getTBanner(), tBlog.getTInfo()
         );
     }
 

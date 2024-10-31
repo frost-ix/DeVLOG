@@ -17,8 +17,8 @@ public interface CateRepository extends JpaRepository<Categories, String> {
     @Query("select c from Categories c where c.userUuid = :userUuid and c.tBlog.tUuid IS NULL order by c.cateIdx")
     List<Categories> findByPUserUuid(@Param("userUuid") Long userUuid);
 
-    @Query("select c from Categories c where c.userUuid = :userUuid and c.tBlog.tUuid IS not NULL order by c.cateIdx")
-    List<Categories> findByTUserUuid(@Param("userUuid") Long userUuid);
+    @Query("select c from Categories c where c.tBlog.tUuid = :tUuid and c.pBlog.pUuid IS NULL order by c.cateIdx")
+    List<Categories> findByTUserUuid(@Param("tUuid") Long tUuid);
 
     Optional<Categories> findByCateUuid(Long cateUuid);
 
