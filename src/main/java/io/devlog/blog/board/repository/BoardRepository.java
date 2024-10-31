@@ -16,6 +16,11 @@ import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, String> {
+
+
+    @Query("select b from Board b where b.categories.tBlog.tDomain = ?1 and b.categories.cateName = ?2")
+    List<Board> findBoardByTUserUuidAndCategoriesCateUuid(String tDomain, String cateName);
+
     Optional<Board> findOneByBoardUuid(Long id);
 
     @Query(value = """

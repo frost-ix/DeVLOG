@@ -174,9 +174,9 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public ResponseEntity<?> getTCateBoardList(String pDomain, String cateName) {
+    public ResponseEntity<?> getTCateBoardList(String tDomain, String cateName) {
         try {
-            List<Board> boardList = boardRepository.findBoardByUserUuidAndCategoriesCateUuid(pDomain, cateName);
+            List<Board> boardList = boardRepository.findBoardByTUserUuidAndCategoriesCateUuid(tDomain, cateName);
             List<BoardDTO> boardDTOS = streamTBoards(boardList);
             return ResponseEntity.ok().body(boardDTOS);
 
