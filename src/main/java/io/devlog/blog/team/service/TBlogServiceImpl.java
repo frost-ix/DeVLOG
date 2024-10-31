@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,22 +80,27 @@ public class TBlogServiceImpl implements TBlogService {
     }
 
     @Override
-    public ResponseEntity<?> getTeamBlogMembers(TBlogDTO tBlogDTO) {
+    public ResponseEntity<?> getTeamBlogMembers(String tDomain) {
         try {
-            List<TBlogRole> tBlogRole = tBlogRoleRepository.findByTUuid(tBlogDTO.getTUuid());
-            if (tBlogRole.isEmpty()) {
+            List<TBlogRole> tBlogRole = tBlogRoleRepository.findByTDomain(tDomain);
+            if (tBlogRole == null) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
             } else {
-                List<TBlogRoleDTO> list = new ArrayList<>();
-                tBlogRole.forEach(t -> list.add(TBlogRoleDTO.of(
-                                t.getUserUuid(),
-                                t.getTBlog().getTUuid(),
-                                t.getTeamRole(),
-                                t.getUserIcon(),
-                                t.getMemberDescription()
-                        )
-                ));
-                return ResponseEntity.ok(list);
+                List<String> userNames = new ArrayList<>();
+                tBlogRole.forEach(t -> {
+                    Optional<User> user = userRepository.findByUserUuid(t.getUserUuid());
+                    user.ifPresent(value -> userNames.add(value.getName()));
+                });
+                List<TBlogRoleDTO> memberList = new ArrayList<>();
+                for (int i = 0; i < userNames.size(); i++) {
+                    memberList.add(TBlogRoleDTO.of(
+                            tBlogRole.get(i).getTeamRole(),
+                            tBlogRole.get(i).getUserIcon(),
+                            tBlogRole.get(i).getMemberDescription(),
+                            userNames.get(i)
+                    ));
+                }
+                return ResponseEntity.ok().body(memberList);
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
@@ -110,17 +114,21 @@ public class TBlogServiceImpl implements TBlogService {
             if (id == 0L) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             } else {
-                List<TBlogRole> list = tBlogRoleRepository.findAllByUserUuid(id);
-                HashMap<Long, TBlogDTO> myList = new HashMap<>();
-                list.forEach((e) -> {
-                    long tUuid = e.getTBlog().getTUuid();
-                    Optional<TBlog> t = tBlogRepository.findByTUuid(tUuid);
-                    if (t.isPresent()) {
-                        TBlogDTO dto = TBlogDTO.toDTO(t.get());
-                        myList.put(tUuid, dto);
-                    }
-                });
-                return ResponseEntity.ok(myList);
+                TBlog tBlog = tBlogRepository.findByUserUuid(id);
+                if (tBlog == null) {
+                    return ResponseEntity.status(204).body(ExceptionStatus.NO_CONTENT);
+                } else {
+                    TBlogDTO myBlog = TBlogDTO.of(
+                            tBlog.getTUuid(),
+                            tBlog.getTDomain(),
+                            tBlog.getTTitle(),
+                            tBlog.getTName(),
+                            tBlog.getTBanner(),
+                            tBlog.getTSubject(),
+                            tBlog.getTInfo()
+                    );
+                    return ResponseEntity.ok(myBlog);
+                }
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
@@ -144,21 +152,21 @@ public class TBlogServiceImpl implements TBlogService {
                             .tTitle(tBlogDTO.getTTitle())
                             .tName(tBlogDTO.getTName())
                             .tSubject(tBlogDTO.getTSubject())
+                            .tInfo(tBlogDTO.getTInfo())
                             .user(u.get())
                             .build();
-                    log.info("tBlog: {}", tBlog);
                     TBlog t = tBlogRepository.save(tBlog);
                     TBlogRoleDTO tBlogRoleDTO = TBlogRoleDTO.of(
-                            id, t.getTUuid(), "LEADER",
+                            id, tBlog.getTUuid(), "LEADER",
                             u.get().getUserInfo().getUserIcon(),
                             "팀장 입니다.");
-                    TBlogRole tBlogRole = tBlogRoleDTO.toEntity(t);
+                    TBlogRole tBlogRole = tBlogRoleDTO.toEntity(tBlogRoleDTO, t);
                     tBlogRoleRepository.save(tBlogRole);
                     Categories categories = Categories.builder()
                             .cateName("기본 카테고리")
                             .userUuid(id)
                             .cateIdx(0)
-                            .tBlog(t)
+                            .tBlog(tBlog)
                             .build();
                     cateRepository.save(categories);
                     return ResponseEntity.ok().body(Status.CREATED);
@@ -208,12 +216,8 @@ public class TBlogServiceImpl implements TBlogService {
                 String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
                 if (role.equals("LEADER")) {
                     tBlog.setTDomain(tBlogDTO.getTDomain());
-                    int result = tBlogRepository.updateTBlogDomain(tBlog.getTUuid(), tBlog.getTDomain());
-                    if (result == 1) {
-                        return ResponseEntity.ok().body(Status.OK);
-                    } else {
-                        return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
-                    }
+                    tBlogRepository.updateTBlogDomain(tBlog.getTUuid(), tBlog.getTDomain());
+                    return ResponseEntity.ok().body(Status.OK);
                 } else {
                     return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
                 }
@@ -234,12 +238,8 @@ public class TBlogServiceImpl implements TBlogService {
                 String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
                 if (role.equals("LEADER")) {
                     tBlog.setTTitle(tBlogDTO.getTTitle());
-                    int result = tBlogRepository.updateTBlogTitle(tBlog.getTUuid(), tBlog.getTTitle());
-                    if (result == 1) {
-                        return ResponseEntity.ok().body(Status.OK);
-                    } else {
-                        return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
-                    }
+                    tBlogRepository.updateTBlogTitle(tBlog.getTUuid(), tBlog.getTTitle());
+                    return ResponseEntity.ok().body(Status.OK);
                 } else {
                     return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
                 }
@@ -259,12 +259,8 @@ public class TBlogServiceImpl implements TBlogService {
                 TBlog tBlog = tBlogRepository.findTBlogByUserUuid(id);
                 String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
                 if (role.equals("LEADER")) {
-                    int result = tBlogRepository.updateTBlogBanner(tBlog.getTUuid(), tBlog.getTBanner());
-                    if (result == 1) {
-                        return ResponseEntity.ok().body(Status.OK);
-                    } else {
-                        return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
-                    }
+                    tBlogRepository.updateTBlogBanner(tBlog.getTUuid(), tBlogDTO.getTBanner());
+                    return ResponseEntity.ok().body(Status.OK);
                 } else {
                     return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
                 }
@@ -307,12 +303,8 @@ public class TBlogServiceImpl implements TBlogService {
                 String role = tBlogRoleRepository.findTeamRole(id, tBlog.getTUuid());
                 if (role.equals("LEADER")) {
                     tBlog.setTName(tBlogDTO.getTName());
-                    int result = tBlogRepository.updateTBlogName(tBlog.getTUuid(), tBlog.getTName());
-                    if (result == 1) {
-                        return ResponseEntity.ok().body(Status.OK);
-                    } else {
-                        return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
-                    }
+                    tBlogRepository.updateTBlogName(tBlog.getTUuid(), tBlog.getTName());
+                    return ResponseEntity.ok().body(Status.OK);
                 } else {
                     return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
                 }

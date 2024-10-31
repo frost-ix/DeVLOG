@@ -25,9 +25,9 @@ public class TeamAPI {
         return tBlogService.getTeamBlog(tDomain);
     }
 
-    @GetMapping("/members")
-    public ResponseEntity<?> getTeamBlogMembers(@RequestBody TBlogDTO tBlogDTO) {
-        return tBlogService.getTeamBlogMembers(tBlogDTO);
+    @GetMapping("/{tDomain}/members")
+    public ResponseEntity<?> getTeamBlogMembers(@PathVariable String tDomain) {
+        return tBlogService.getTeamBlogMembers(tDomain);
     }
 
     @GetMapping("/my")

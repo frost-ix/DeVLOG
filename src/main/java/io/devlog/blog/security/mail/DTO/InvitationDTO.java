@@ -1,8 +1,8 @@
 package io.devlog.blog.security.mail.DTO;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class InvitationDTO {
     private String sender;
 

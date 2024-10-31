@@ -15,14 +15,17 @@ import java.util.Optional;
 public interface TBlogRepository extends JpaRepository<TBlog, String> {
     @Query("select tb from TBlog tb where tb.tUuid = :tUuid")
     Optional<TBlog> findByTUuid(@Param("tUuid") long tUuid);
-    
+
     @Query("select tb from TBlog tb where tb.tDomain = :tDomain")
     Optional<TBlog> findByTDomain(@Param("tDomain") String tDomain);
 
     @Query("select t.tUuid from TBlog t where t.tDomain = :tDomain")
     Long getTBlogCategory(@Param("tDomain") String tDomain);
 
-    @Query("select tb from TBlog tb where tb.user.userUuid = :userUuid or tb.tBlogRole.userUuid = :userUuid")
+    @Query("select tb from TBlog tb where tb.user.userUuid = :userUuid")
+    TBlog findByUserUuid(@Param("userUuid") long userUuid);
+
+    @Query("select tb from TBlog tb where tb.user.userUuid = :userUuid or tb.user.userUuid = :userUuid")
     List<TBlog> findTBlogsByTUuid(@Param("userUuid") long userUuid);
 
     @Query("select tb from TBlog tb where tb.user.userUuid = :userUuid")
@@ -50,20 +53,20 @@ public interface TBlogRepository extends JpaRepository<TBlog, String> {
 
     @Transactional
     @Modifying
-    @Query("update TBlog tb set tb.tBanner = :tBanner where tb.user.userUuid = :userUuid")
-    int updateTBlogBanner(@Param("userUuid") long userUuid,
+    @Query("update TBlog tb set tb.tBanner = :tBanner where tb.tUuid = :tUuid")
+    int updateTBlogBanner(@Param("tUuid") long tUuid,
                           @Param("tBanner") String tBanner);
 
     @Transactional
     @Modifying
-    @Query("update TBlog tb set tb.tTitle = :tTitle where tb.user.userUuid = :userUuid")
-    int updateTBlogTitle(@Param("userUuid") long userUuid,
+    @Query("update TBlog tb set tb.tTitle = :tTitle where tb.tUuid = :tUuid")
+    int updateTBlogTitle(@Param("tUuid") long tUuid,
                          @Param("tTitle") String tTitle);
 
     @Transactional
     @Modifying
-    @Query("update TBlog tb set tb.tName = :tName where tb.user.userUuid = :userUuid")
-    int updateTBlogName(@Param("userUuid") long userUuid,
+    @Query("update TBlog tb set tb.tName = :tName where tb.tUuid = :tUuid")
+    int updateTBlogName(@Param("tUuid") long tUuid,
                         @Param("tName") String tName);
 
     @Transactional

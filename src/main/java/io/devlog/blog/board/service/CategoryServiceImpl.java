@@ -78,7 +78,8 @@ public class CategoryServiceImpl implements CategoryService {
             if (id == 0) {
                 return ResponseEntity.badRequest().body("Token error");
             }
-            List<Categories> categories = cateRepository.findByTUserUuid(id);
+            TBlog t = tblogRepository.findTBlogByUserUuid(id);
+            List<Categories> categories = cateRepository.findByTUserUuid(t.getTUuid());
             List<CateDTO> cateDTOS = categories.stream()
                     .map(CateDTO::toDTO)
                     .collect(Collectors.toList());

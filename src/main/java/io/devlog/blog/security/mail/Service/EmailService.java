@@ -87,15 +87,16 @@ public class EmailService {
     }
 
     public ResponseEntity<?> verifyEmail(VerifyCode code) {
-        log.info("code: {}", code);
-        Optional<Invitation> invitation = invitationRepository.findByCode(code.getCode());
+        log.info("code: {}", code.getCode());
+        Optional<Invitation> invitation = invitationRepository.findInvitationByCode(code.getCode());
         if (invitation.isEmpty() || invitation.get().getStatus().equals(InvitationStatus.ACCEPTED)) {
             return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
         } else {
-            invitation.get().setStatus(InvitationStatus.ACCEPTED);
-            invitationRepository.save(invitation.get());
-            Optional<User> sender = userRepository.findOneByName(invitation.get().getSender());
-            Optional<User> receiver = userRepository.findOneByName(invitation.get().getReceiver());
+            Invitation i = invitation.get();
+            i.setStatus(InvitationStatus.ACCEPTED);
+            invitationRepository.save(i);
+            Optional<User> sender = userRepository.findOneByName(i.getSender());
+            Optional<User> receiver = userRepository.findOneByName(i.getReceiver());
             if (sender.isEmpty() || receiver.isEmpty()) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
             }
@@ -106,7 +107,7 @@ public class EmailService {
             TBlogRole tBlogRole = TBlogRole.builder()
                     .tBlog(tBlog)
                     .userUuid(receiver.get().getUserUuid())
-                    .teamRole("팀원")
+                    .teamRole("MEMBER")
                     .userIcon(receiver.get().getUserInfo().getUserIcon())
                     .memberDescription("팀원 입니다.")
                     .build();

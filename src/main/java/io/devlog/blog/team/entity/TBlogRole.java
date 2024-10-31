@@ -15,7 +15,7 @@ public class TBlogRole {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tRoleUuid;
 
-    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "tUuid")
     @JsonBackReference
     private TBlog tBlog;
@@ -25,7 +25,6 @@ public class TBlogRole {
     private String userIcon;
 
     private String memberDescription;
-
-    @Column(unique = true)
+    
     private long userUuid;
 }

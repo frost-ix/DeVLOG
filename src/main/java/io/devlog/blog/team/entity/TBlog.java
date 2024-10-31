@@ -38,9 +38,9 @@ public class TBlog {
     private List<Categories> categories;
 
 
-    @OneToOne(mappedBy = "tBlog", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tBlog", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private TBlogRole tBlogRole;
+    private List<TBlogRole> tBlogRole;
 
     public long getUserUuid() {
         return this.user.getUserUuid();

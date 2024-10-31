@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     @Query("select i from Invitation i where i.code = :code")
-    Optional<Invitation> findByCode(@Param("code") String code);
+    Optional<Invitation> findInvitationByCode(@Param("code") String code);
 }

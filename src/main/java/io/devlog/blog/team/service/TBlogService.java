@@ -8,7 +8,7 @@ public interface TBlogService {
 
     ResponseEntity<?> getTeamBlog(String tDomain);
 
-    ResponseEntity<?> getTeamBlogMembers(TBlogDTO tBlogDTO);
+    ResponseEntity<?> getTeamBlogMembers(String tDomain);
 
     ResponseEntity<?> getMyTeamBlog();
 
