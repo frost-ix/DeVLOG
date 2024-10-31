@@ -140,7 +140,7 @@ public class TBlogServiceImpl implements TBlogService {
                 } else if (tBlogRepository.findTBlogByUserUuid(id) == null) {
                     log.info("tBlogDTO: {}", tBlogDTO);
                     TBlog tBlog = TBlog.builder()
-                            .tDomain("#" + tBlogDTO.getTDomain())
+                            .tDomain(tBlogDTO.getTDomain())
                             .tTitle(tBlogDTO.getTTitle())
                             .tName(tBlogDTO.getTName())
                             .tSubject(tBlogDTO.getTSubject())
