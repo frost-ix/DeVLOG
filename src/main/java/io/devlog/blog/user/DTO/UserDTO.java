@@ -1,5 +1,6 @@
 package io.devlog.blog.user.DTO;
 
+import io.devlog.blog.pblog.DTO.PblogDTO;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.enums.AccessRole;
 import jakarta.annotation.Nullable;
@@ -10,18 +11,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserDTO {
     private UserInfoDTO userInfo;
+    private PblogDTO pBlogDTO;
     private String id;
     private String pw;
     private String bender;
     private String benderUuid;
     private String name;
     private String mail;
+    private int subCount;
+    private LocalDateTime subDate = null;
     @Enumerated(EnumType.STRING)
     private AccessRole accessRole;
 
@@ -56,8 +61,81 @@ public class UserDTO {
     }
 
     @Builder
+    public UserDTO(@Nullable String id, @Nullable String pw,
+                   @Nullable String bender, @Nullable String benderUuid,
+                   @Nullable String name, @Nullable String mail,
+                   @Nullable PblogDTO pBlogDTO) {
+        this.id = id;
+        this.pw = pw;
+        this.bender = bender;
+        this.benderUuid = benderUuid;
+        this.name = name;
+        this.mail = mail;
+        this.accessRole = AccessRole.CLIENT;
+        this.pBlogDTO = pBlogDTO;
+    }
+
+    @Builder
+    public UserDTO(@Nullable String id, @Nullable String pw,
+                   @Nullable String bender, @Nullable String benderUuid,
+                   @Nullable String name, @Nullable String mail,
+                   @Nullable UserInfoDTO userInfo, @Nullable PblogDTO pBlogDTO) {
+        this.id = id;
+        this.pw = pw;
+        this.bender = bender;
+        this.benderUuid = benderUuid;
+        this.name = name;
+        this.mail = mail;
+        this.accessRole = AccessRole.CLIENT;
+        this.userInfo = userInfo;
+        this.pBlogDTO = pBlogDTO;
+    }
+
+    @Builder
+    public UserDTO(@Nullable String id, @Nullable String pw,
+                   @Nullable String bender, @Nullable String benderUuid,
+                   @Nullable String name, @Nullable String mail,
+                   @Nullable UserInfoDTO userInfo, @Nullable PblogDTO pBlogDTO,
+                   @Nullable int subCount) {
+        this.id = id;
+        this.pw = pw;
+        this.bender = bender;
+        this.benderUuid = benderUuid;
+        this.name = name;
+        this.mail = mail;
+        this.subCount = subCount;
+        this.accessRole = AccessRole.CLIENT;
+        this.pBlogDTO = pBlogDTO;
+        this.userInfo = userInfo;
+    }
+
+    @Builder
+    public UserDTO(@Nullable String id, @Nullable String pw,
+                   @Nullable String bender, @Nullable String benderUuid,
+                   @Nullable String name, @Nullable String mail,
+                   @Nullable UserInfoDTO userInfo, @Nullable PblogDTO pBlogDTO,
+                   @Nullable int subCount, @Nullable LocalDateTime subDate) {
+        this.id = id;
+        this.pw = pw;
+        this.bender = bender;
+        this.benderUuid = benderUuid;
+        this.name = name;
+        this.mail = mail;
+        this.subCount = subCount;
+        this.subDate = subDate;
+        this.accessRole = AccessRole.CLIENT;
+        this.pBlogDTO = pBlogDTO;
+        this.userInfo = userInfo;
+    }
+
+    @Builder
     public UserDTO(UserInfoDTO userInfo) {
         this.userInfo = userInfo;
+    }
+
+    @Builder
+    public UserDTO(PblogDTO pBlogDTO) {
+        this.pBlogDTO = pBlogDTO;
     }
 
     // Entity to DTO

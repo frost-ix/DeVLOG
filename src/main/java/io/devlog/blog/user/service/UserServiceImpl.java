@@ -22,6 +22,7 @@ import io.devlog.blog.team.repository.TBlogRepository;
 import io.devlog.blog.user.DTO.OAuthDTO;
 import io.devlog.blog.user.DTO.UserDTO;
 import io.devlog.blog.user.DTO.UserInfoDTO;
+import io.devlog.blog.user.entity.Subscribes;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.entity.UserInfo;
 import io.devlog.blog.user.repository.SubscribesRepository;
@@ -94,7 +95,8 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     @Override
     public ResponseEntity<?> getUsers() {
         try {
-            List<User> finds = userRepository.findUserBy();
+            List<User> finds = userRepository.findAll();
+            log.info(finds.get(0).getName());
             if (finds.isEmpty()) {
                 log.error("No user");
                 return ResponseEntity.badRequest().body(ExceptionStatus.NO_CONTENT);
@@ -106,14 +108,28 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                     return ResponseEntity.ok().body(UserDTO.toDTO(finds.get(0)));
                 } else {
                     List<UserDTO> dto = new ArrayList<>();
-                    log.info("user : {}", finds.get(0));
-                    finds.forEach((u) -> {
-                        u.setUserPw(null);
-                        u.setBenderUuid(null);
-                        u.setBender(null);
-                        dto.add(UserDTO.toDTO(u));
-                    });
-                    log.info("Response");
+                    for (int i = 0; i < 4; i++) {
+                        int random = (int) (Math.random() * finds.size());
+                        UserDTO userDTO = UserDTO.toDTO(finds.get(random));
+                        List<Subscribes> listSub = subscribesRepository.findAll();
+                        UserInfo userInfo = userInfoRepository.findByUserUuid(finds.get(random).getUserUuid());
+                        if (listSub.isEmpty()) {
+                            userDTO.setSubCount(0);
+                        } else {
+                            int count = 0;
+                            log.info("check : {}, {}", finds.get(random).getUserId(), listSub.get(0).getUser().getUserId());
+                            for (Subscribes s : listSub) {
+                                if (s.getUser().getUserId().equals(finds.get(random).getUserId())) {
+                                    count++;
+                                }
+                            }
+                            userDTO.setSubCount(count);
+                        }
+                        userDTO.setPw(null);
+                        userDTO.setBender(null);
+                        userDTO.setBenderUuid(null);
+                        dto.add(UserDTO.toDTO(finds.get(random), UserInfoDTO.toDTO(userInfo)));
+                    }
                     return ResponseEntity.ok().body(dto);
                 }
             }

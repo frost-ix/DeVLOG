@@ -1,5 +1,6 @@
 package io.devlog.blog.pblog.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.devlog.blog.board.entity.Categories;
 import io.devlog.blog.user.entity.User;
@@ -20,6 +21,7 @@ public class PBlog {
     private Long pUuid;
 
     @OneToOne(cascade = CascadeType.PERSIST)
+    @JsonBackReference
     @JoinColumn(name = "userUuid")
     private User user;
 

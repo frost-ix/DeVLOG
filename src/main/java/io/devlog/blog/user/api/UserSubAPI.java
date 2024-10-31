@@ -74,12 +74,12 @@ public class UserSubAPI {
      * <h1>Delete user subscribe</h1>
      * <ul>DELETE /user/s/{userUuid} : Delete user subscribe</ul>
      *
-     * @param sbDTO SubscribesDTO
+     * @param subUserid String
      * @return ResponseEntity<?> ? Success : Error
      */
-    @DeleteMapping("")
-    public ResponseEntity<?> deleteUserSub(@RequestBody SubscribesDTO sbDTO) {
-        return userSubService.deleteUserSub(sbDTO);
+    @DeleteMapping("/{subUserid}")
+    public ResponseEntity<?> deleteUserSub(@PathVariable String subUserid) {
+        return userSubService.deleteUserSub(subUserid);
     }
 
     /**

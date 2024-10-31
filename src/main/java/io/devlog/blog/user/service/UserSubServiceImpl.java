@@ -3,6 +3,9 @@ package io.devlog.blog.user.service;
 import io.devlog.blog.config.CustomException;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.config.enums.Status;
+import io.devlog.blog.pblog.DTO.PblogDTO;
+import io.devlog.blog.pblog.Entity.PBlog;
+import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.user.DTO.SubscribesDTO;
 import io.devlog.blog.user.DTO.UserDTO;
@@ -19,7 +22,7 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,14 +34,16 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
     private final JwtService jwtService;
     private final HttpServletRequest httpServletRequest;
     private final UserInfoRepository userInfoRepository;
+    private final PblogRepository pblogRepository;
 
-    public UserSubServiceImpl(final SubscribesRepository sbRepo, final UserRepository userRepo, JwtService jwtService, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository) {
+    public UserSubServiceImpl(final SubscribesRepository sbRepo, final UserRepository userRepo, JwtService jwtService, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository, PblogRepository pblogRepository) {
         super(Subscribes.class);
         this.sbRepo = sbRepo;
         this.userRepo = userRepo;
         this.jwtService = jwtService;
         this.httpServletRequest = httpServletRequest;
         this.userInfoRepository = userInfoRepository;
+        this.pblogRepository = pblogRepository;
     }
 
     @Override
@@ -61,7 +66,7 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
             if (finds.isEmpty()) {
                 return ResponseEntity.noContent().build();
             } else {
-                HashMap<Long, UserDTO> subUsers = new HashMap<>();
+                List<UserDTO> subUsers = new ArrayList<>();
                 finds.forEach((s) -> {
                     Optional<User> i = userRepo.findByUserId(s.getSubUserId());
                     if (i.isEmpty()) {
@@ -69,10 +74,14 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
                         long iUuid = i.get().getUserUuid();
                         if (iUuid != 0) {
                             UserInfo uI = userInfoRepository.findByUserUuid(iUuid);
+                            PBlog pBlog = pblogRepository.findPBlogByUserUuid(i.get().getUserUuid());
+                            int count = sbRepo.countBySubUserId(i.get().getUserId());
                             UserDTO e = new UserDTO(
                                     i.get().getUserId(), null, null, null,
-                                    i.get().getName(), i.get().getMail(), UserInfoDTO.toDTO(uI));
-                            subUsers.put(i.get().getUserUuid(), e);
+                                    i.get().getName(), i.get().getMail(),
+                                    UserInfoDTO.toDTO(uI), PblogDTO.fromEntity(pBlog), count,
+                                    s.getSubDate());
+                            subUsers.add(e);
                         }
                     }
                 });
@@ -114,13 +123,13 @@ public class UserSubServiceImpl extends QuerydslRepositorySupport implements Use
 
 
     @Override
-    public ResponseEntity<?> deleteUserSub(SubscribesDTO sbDTO) {
+    public ResponseEntity<?> deleteUserSub(String subUserId) {
         try {
             long id = jwtService.getAuthorizationId(httpServletRequest.getHeader("Authorization"));
             if (id == 0) {
                 return ResponseEntity.badRequest().body(ExceptionStatus.UNAUTHORIZED);
             } else {
-                Subscribes s = sbRepo.findBySubUser(sbDTO.getSubUserId());
+                Subscribes s = sbRepo.findBySubUser(subUserId);
                 if (s == null) {
                     return ResponseEntity.badRequest().body(ExceptionStatus.NOT_FOUND);
                 } else {

@@ -10,7 +10,7 @@ public interface UserSubService {
 
     ResponseEntity<?> addUserSub(SubscribesDTO sbDTO);
 
-    ResponseEntity<?> deleteUserSub(SubscribesDTO sbDTO);
+    ResponseEntity<?> deleteUserSub(String subUserid);
 
     ResponseEntity<?> deleteUserSubs();
 }

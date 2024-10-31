@@ -35,11 +35,11 @@ public class SecurityConfig {
                                 .requestMatchers("/mail", "/mail/**").permitAll()
                                 .requestMatchers("/t", "/t/**").permitAll()
                                 .requestMatchers("/oauth/**").permitAll()
-                                .requestMatchers("/board", "/user").permitAll()
                                 .requestMatchers("/p", "/p/**").permitAll()
-                                .requestMatchers("/board/**", "/user/**").permitAll()
-                                .requestMatchers("/board/**/**", "/user/**/**").permitAll()
-                                .requestMatchers("/board/**/**/**", "/user/**/**/**").permitAll()
+                                .requestMatchers("/board", "/user").permitAll()
+                                .requestMatchers("/board/*", "/user/*").permitAll()
+                                .requestMatchers("/board/*/*", "/user/*/*").permitAll()
+                                .requestMatchers("/board/*/*/*", "/user/*/*/*").permitAll()
                                 .requestMatchers("/oauth/**").permitAll()
                                 .anyRequest().authenticated());
         return httpSecurity.build();

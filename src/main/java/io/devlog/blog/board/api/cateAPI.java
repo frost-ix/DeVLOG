@@ -49,7 +49,7 @@ public class cateAPI {
         return categoryService.updatePCategory(cateDTO);
     }
 
-    @DeleteMapping("/{cateUuid}")
+    @DeleteMapping("/pBlog/{cateUuid}")
     public ResponseEntity<?> deleteCategory(@PathVariable Long cateUuid) {
         return categoryService.deleteCategory(cateUuid);
     }
