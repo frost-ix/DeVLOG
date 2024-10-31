@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface TBlogRepository extends JpaRepository<TBlog, String> {
     @Query("select tb from TBlog tb where tb.tUuid = :tUuid")
     Optional<TBlog> findByTUuid(@Param("tUuid") long tUuid);
-    
+
     @Query("select tb from TBlog tb where tb.tDomain = :tDomain")
     Optional<TBlog> findByTDomain(@Param("tDomain") String tDomain);
 
@@ -27,6 +27,7 @@ public interface TBlogRepository extends JpaRepository<TBlog, String> {
 
     @Query("select tb from TBlog tb where tb.user.userUuid = :userUuid")
     TBlog findTBlogByUserUuid(@Param("userUuid") long userUuid);
+
 
     @Query("select tb.tDomain from TBlog tb where tb.user.userUuid = :userUuid")
     String findbyTDomain(@Param("userUuid") long userUuid);
