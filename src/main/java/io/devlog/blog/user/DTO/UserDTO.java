@@ -1,6 +1,7 @@
 package io.devlog.blog.user.DTO;
 
 import io.devlog.blog.pblog.DTO.PblogDTO;
+import io.devlog.blog.team.dto.TBlogDTO;
 import io.devlog.blog.user.entity.User;
 import io.devlog.blog.user.enums.AccessRole;
 import jakarta.annotation.Nullable;
@@ -12,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -19,6 +21,7 @@ import java.util.Objects;
 public class UserDTO {
     private UserInfoDTO userInfo;
     private PblogDTO pBlogDTO;
+    private List<TBlogDTO> tBlogDTO;
     private String id;
     private String pw;
     private String bender;
@@ -26,6 +29,7 @@ public class UserDTO {
     private String name;
     private String mail;
     private int subCount;
+    private boolean sub = false;
     private LocalDateTime subDate = null;
     @Enumerated(EnumType.STRING)
     private AccessRole accessRole;
@@ -61,6 +65,18 @@ public class UserDTO {
     }
 
     @Builder
+    public UserDTO(@Nullable String id,
+                   @Nullable String name, @Nullable String mail,
+                   @Nullable UserInfoDTO userInfo, @Nullable PblogDTO pBlogDTO) {
+        this.id = id;
+        this.name = name;
+        this.mail = mail;
+        this.accessRole = AccessRole.CLIENT;
+        this.userInfo = userInfo;
+        this.pBlogDTO = pBlogDTO;
+    }
+
+    @Builder
     public UserDTO(@Nullable String id, @Nullable String pw,
                    @Nullable String bender, @Nullable String benderUuid,
                    @Nullable String name, @Nullable String mail,
@@ -73,6 +89,41 @@ public class UserDTO {
         this.mail = mail;
         this.accessRole = AccessRole.CLIENT;
         this.pBlogDTO = pBlogDTO;
+    }
+
+    @Builder
+    public UserDTO(UserDTO userDTO, @Nullable UserInfoDTO userInfo, PblogDTO pBlog, boolean isSub) {
+        this.id = userDTO.getId();
+        this.name = userDTO.getName();
+        this.mail = userDTO.getMail();
+        this.subCount = userDTO.getSubCount();
+        this.accessRole = AccessRole.CLIENT;
+        this.userInfo = userInfo;
+        this.pBlogDTO = pBlog;
+        this.sub = isSub;
+    }
+
+    @Builder
+    public UserDTO(UserDTO userDTO, @Nullable UserInfoDTO userInfo,
+                   @Nullable PblogDTO pBlogDTO) {
+        this.id = userDTO.getId();
+        this.name = userDTO.getName();
+        this.mail = userDTO.getMail();
+        this.accessRole = AccessRole.CLIENT;
+        this.userInfo = userInfo;
+        this.pBlogDTO = pBlogDTO;
+    }
+
+    @Builder
+    public UserDTO(UserDTO userDTO, @Nullable UserInfoDTO userInfo,
+                   @Nullable PblogDTO pBlogDTO, @Nullable List<TBlogDTO> tBlogDTO) {
+        this.id = userDTO.getId();
+        this.name = userDTO.getName();
+        this.mail = userDTO.getMail();
+        this.accessRole = AccessRole.CLIENT;
+        this.userInfo = userInfo;
+        this.pBlogDTO = pBlogDTO;
+        this.tBlogDTO = tBlogDTO;
     }
 
     @Builder

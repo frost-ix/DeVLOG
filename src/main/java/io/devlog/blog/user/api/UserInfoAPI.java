@@ -53,4 +53,19 @@ public class UserInfoAPI {
     public ResponseEntity<?> updateUserInfo(@RequestBody UserInfoDTO info) {
         return userInfoService.updateUserInfo(info);
     }
+
+    @PatchMapping("/twitter")
+    public ResponseEntity<?> updateTwitter(@RequestBody UserInfoDTO info) {
+        return userInfoService.updateTwitter(info);
+    }
+
+    @PatchMapping("/github")
+    public ResponseEntity<?> updateGithub(@RequestBody UserInfoDTO info) {
+        return userInfoService.updateGithub(info);
+    }
+
+    @PatchMapping("/instagram")
+    public ResponseEntity<?> updateInstagram(@RequestBody UserInfoDTO info) {
+        return userInfoService.updateInstagram(info);
+    }
 }

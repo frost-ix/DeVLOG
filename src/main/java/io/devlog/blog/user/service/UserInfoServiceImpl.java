@@ -97,4 +97,64 @@ public class UserInfoServiceImpl extends QuerydslRepositorySupport implements Us
             return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
         }
     }
+
+    @Override
+    public ResponseEntity<?> updateTwitter(UserInfoDTO info) {
+        try {
+            long userUuid = jwtService.checkJwt();
+            if (userUuid == 0) {
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+            } else {
+                int c = userInfoRepository.updateTwitter(userUuid, info.getUserX());
+                if (c == 0) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
+                } else {
+                    return ResponseEntity.ok().body(Status.OK);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateInstagram(UserInfoDTO info) {
+        try {
+            long userUuid = jwtService.checkJwt();
+            if (userUuid == 0) {
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+            } else {
+                int c = userInfoRepository.updateInstagram(userUuid, info.getUserInsta());
+                if (c == 0) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
+                } else {
+                    return ResponseEntity.ok().body(Status.OK);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateGithub(UserInfoDTO info) {
+        try {
+            long userUuid = jwtService.checkJwt();
+            if (userUuid == 0) {
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.UNAUTHORIZED));
+            } else {
+                int c = userInfoRepository.updateGit(userUuid, info.getUserGit());
+                if (c == 0) {
+                    return ResponseEntity.badRequest().body(ExceptionStatus.NOT_MODIFIED);
+                } else {
+                    return ResponseEntity.ok().body(Status.OK);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+        }
+    }
 }

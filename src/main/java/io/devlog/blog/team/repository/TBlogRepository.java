@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,8 +22,14 @@ public interface TBlogRepository extends JpaRepository<TBlog, String> {
     @Query("select p.user.userUuid from PBlog p where p.pDomain = :tDomain")
     Long getTBlogCategories(@Param("tDomain") String tDomain);
 
+    @Query("select tb from TBlog tb where tb.user.userUuid = :userUuid or tb.tBlogRole.userUuid = :userUuid")
+    List<TBlog> findTBlogsByTUuid(@Param("userUuid") long userUuid);
+
     @Query("select tb from TBlog tb where tb.user.userUuid = :userUuid")
     TBlog findTBlogByUserUuid(@Param("userUuid") long userUuid);
+
+    @Query("select count(tb) from TBlog tb where tb.user.userUuid = :userUuid")
+    int countByUserUuid(@Param("userUuid") long userUuid);
 
     @Transactional
     @Modifying

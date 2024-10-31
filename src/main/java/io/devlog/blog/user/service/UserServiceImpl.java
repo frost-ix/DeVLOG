@@ -18,6 +18,8 @@ import io.devlog.blog.pblog.Entity.PBlog;
 import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.security.Jwt.JwtToken;
+import io.devlog.blog.team.dto.TBlogDTO;
+import io.devlog.blog.team.entity.TBlog;
 import io.devlog.blog.team.repository.TBlogRepository;
 import io.devlog.blog.user.DTO.OAuthDTO;
 import io.devlog.blog.user.DTO.UserDTO;
@@ -94,6 +96,7 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     @Override
     public ResponseEntity<?> getUsers() {
         try {
+            long sessionId = jwtService.checkJwt();
             List<User> finds = userRepository.findAll();
             if (finds.isEmpty()) {
                 log.error("No user");
@@ -106,26 +109,28 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
                     return ResponseEntity.ok().body(UserDTO.toDTO(finds.get(0)));
                 } else {
                     List<UserDTO> dto = new ArrayList<>();
-                    for (int i = 0; ; i++) {
+                    for (int i = 0; i < 4; i++) {
                         int random = (int) (Math.random() * finds.size());
-                        log.info(random);
-                        log.info(finds.get(random).getName());
                         UserDTO userDTO = UserDTO.toDTO(finds.get(random));
                         long id = finds.get(random).getUserUuid();
-                        log.info("User Uuid: {}", id);
                         UserInfo userInfo = userInfoRepository.findByUserUuid(id);
+                        PblogDTO pblog = PblogDTO.fromEntity(pblogRepository.findPBlogByUserUuid(id));
                         int count = subscribesRepository.countBySubUserId(userDTO.getId());
                         userDTO.setSubCount(count);
                         userDTO.setPw(null);
                         userDTO.setBender(null);
                         userDTO.setBenderUuid(null);
-                        if (!dto.contains(new UserDTO(userDTO, UserInfoDTO.toDTO(userInfo)))) {
-                            dto.add(new UserDTO(userDTO, UserInfoDTO.toDTO(userInfo)));
+                        log.info("session : {}, target : {}", sessionId, id);
+                        boolean isSub = subscribesRepository.existsByUserUuidAndSubUserId(sessionId, userDTO.getId());
+                        if (!dto.contains(new UserDTO(userDTO, UserInfoDTO.toDTO(userInfo), pblog, isSub))) {
+                            dto.add(new UserDTO(userDTO, UserInfoDTO.toDTO(userInfo), pblog, isSub));
                         } else {
                             log.info("Already exist");
                         }
                         if (dto.size() == 4 || dto.size() == finds.size()) {
                             break;
+                        } else {
+                            i--;
                         }
                     }
                     return ResponseEntity.ok().body(dto);
@@ -246,10 +251,26 @@ public class UserServiceImpl extends QuerydslRepositorySupport implements UserSe
     }
 
     private ResponseEntity<?> responseLogin(UserDTO r) {
-        r.setPw(null);
-        r.setBenderUuid(null);
-        r.setBender(null);
-        return ResponseEntity.status(200).body(r);
+        Optional<User> userO = userRepository.findOneByUserId(r.getId());
+        if (userO.isEmpty()) {
+            return ResponseEntity.badRequest().body(ExceptionStatus.USER_NOT_FOUND);
+        }
+        User user = userO.get();
+        UserInfo userInfo = userInfoRepository.findByUserUuid(user.getUserUuid());
+        PBlog pBlog = pblogRepository.findPBlogByUserUuid(user.getUserUuid());
+        int t = tBlogRepository.countByUserUuid(user.getUserUuid());
+        if (t != 0) {
+            List<TBlog> tBlog = tBlogRepository.findTBlogsByTUuid(user.getUserUuid());
+            List<TBlogDTO> tBlogDTOS = new ArrayList<>();
+            for (TBlog tBlog1 : tBlog) {
+                tBlogDTOS.add(TBlogDTO.toDTO(tBlog1));
+            }
+            UserDTO userDTO = new UserDTO(UserDTO.toDTO(user), UserInfoDTO.toDTO(userInfo), PblogDTO.fromEntity(pBlog), tBlogDTOS);
+            return ResponseEntity.ok().body(userDTO);
+        } else {
+            UserDTO userDTO = new UserDTO(UserDTO.toDTO(user), UserInfoDTO.toDTO(userInfo), PblogDTO.fromEntity(pBlog));
+            return ResponseEntity.ok().body(userDTO);
+        }
     }
 
     /**

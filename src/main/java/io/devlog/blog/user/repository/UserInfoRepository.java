@@ -28,6 +28,24 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
 
     @Transactional
     @Modifying
+    @Query("update UserInfo u set u.userGit = :userGit where u.user.userUuid = :userUuid")
+    int updateGit(@Param("userUuid") long userUuid, @Param("userGit") String userGit);
+
+    @Transactional
+
+    @Modifying
+    @Query("update UserInfo u set u.userX = :userTwitter where u.user.userUuid = :userUuid")
+    int updateTwitter(@Param("userUuid") long userUuid, @Param("userTwitter") String userTwitter);
+
+    @Transactional
+
+    @Modifying
+    @Query("update UserInfo u set u.userInsta = :userInsta where u.user.userUuid = :userUuid")
+    int updateInstagram(@Param("userUuid") long userUuid, @Param("userInsta") String userInsta);
+
+
+    @Transactional
+    @Modifying
     @Query("DELETE FROM UserInfo u WHERE u.user.userUuid = :userUuid")
     void deleteByUserUuid(@Param("userUuid") long userUuid);
 }
