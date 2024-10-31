@@ -10,6 +10,9 @@ import java.util.List;
 
 @Repository
 public interface TBlogRoleRepository extends JpaRepository<TBlogRole, String> {
+    @Query("select tbr.teamRole from TBlogRole tbr where tbr.userUuid = :userUuid and tbr.tBlog.tUuid = :tUuid")
+    String findRoleByUserUuid(long userUuid, long tUuid);
+
     @Query("select tbr from TBlogRole tbr where tbr.userUuid = :userUuid")
     TBlogRole findByUserUuid(@Param("userUuid") long userUuid);
 
@@ -18,6 +21,7 @@ public interface TBlogRoleRepository extends JpaRepository<TBlogRole, String> {
 
     @Query("select tbr from TBlogRole tbr where tbr.tBlog.tUuid = :tUuid")
     List<TBlogRole> findByTUuid(@Param("tUuid") long tUuid);
+
 
     @Query("select tbr.teamRole from TBlogRole tbr where tbr.userUuid = :userUuid and tbr.tBlog.tUuid = :tUuid")
     String findTeamRole(@Param("userUuid") long userUuid, @Param("tUuid") long tUuid);
