@@ -56,12 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
             }
             List<Categories> categories = cateRepository.findByPUserUuid(id);
             List<CateDTO> cateDTOS = categories.stream()
-                    .map(Categories -> CateDTO.builder()
-                            .cateUuid(Categories.getCateUuid())
-                            .cateName(Categories.getCateName())
-                            .cateIdx(Categories.getCateIdx())
-                            .boardCount(boardRepository.countByCateUuid(Categories.getCateUuid()))
-                            .build())
+                    .map(CateDTO::toDTO)
                     .collect(Collectors.toList());
             return ResponseEntity.status(200).body(cateDTOS);
         } catch (Exception e) {
@@ -87,20 +82,35 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    @Override
-    public ResponseEntity<?> getPBlogCategories(String pDomain) {
+    private ResponseEntity<?> getCategories(String domain, String state) {
         try {
-            Long id = pblogRepository.getPBlogCategories(pDomain);
-            List<Categories> categories = cateRepository.findByPUserUuid(id);
-            List<CateDTO> cateDTOS = categories.stream()
-                    .map(Categories -> CateDTO.builder()
-                            .cateUuid(Categories.getCateUuid())
-                            .cateName(Categories.getCateName())
-                            .cateIdx(Categories.getCateIdx())
-                            .boardCount(boardRepository.countByCateUuid(Categories.getCateUuid()))
-                            .build())
-                    .collect(Collectors.toList());
-            return ResponseEntity.status(200).body(cateDTOS);
+            if (state.equals("p")) {
+                Long id = pblogRepository.getPBlogCategories(domain);
+                List<Categories> categories = cateRepository.findByPUserUuid(id);
+                List<CateDTO> cateDTOS = categories.stream()
+                        .map(CateDTO::toDTO)
+                        .collect(Collectors.toList());
+                return ResponseEntity.status(200).body(cateDTOS);
+            } else if (state.equals("t")) {
+                Long id = tblogRepository.getTBlogCategories(domain);
+                List<Categories> categories = cateRepository.findByTUserUuid(id);
+                List<CateDTO> cateDTOS = categories.stream()
+                        .map(CateDTO::toDTO)
+                        .collect(Collectors.toList());
+                return ResponseEntity.status(200).body(cateDTOS);
+            } else {
+                return ResponseEntity.badRequest().body(new CustomException(ExceptionStatus.BAD_REQUEST));
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body("get categories error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getBlogCategories(String domain, String state) {
+        try {
+            return getCategories(domain, state);
         } catch (Exception e) {
             log.error(e.getMessage());
             return ResponseEntity.badRequest().body("get categories error");
