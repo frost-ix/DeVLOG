@@ -82,6 +82,21 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    @Override
+    public ResponseEntity<?> getPBlogCategories(String pDomain) {
+        try {
+            Long id = pblogRepository.getPBlogCategories(pDomain);
+            List<Categories> categories = cateRepository.findByPUserUuid(id);
+            List<CateDTO> cateDTOS = categories.stream()
+                    .map(CateDTO::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(200).body(cateDTOS);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().body("get categories error");
+        }
+    }
+
     //{"","","",""}
     @Override
     public ResponseEntity<?> createPCategory(CateDTO cateDTO) {

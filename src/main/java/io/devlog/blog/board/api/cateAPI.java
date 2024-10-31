@@ -23,6 +23,11 @@ public class cateAPI {
         return categoryService.getPCategories();
     }
 
+    @GetMapping("/pBlog/{pDomain}")
+    public ResponseEntity<?> getCategories(@PathVariable String pDomain) {
+        return categoryService.getPBlogCategories(pDomain);
+    }
+
     @PostMapping("/pBlog")
     public ResponseEntity<?> createCategory(@RequestBody CateDTO cateDTO) {
         log.info("Create category : {}", cateDTO);
