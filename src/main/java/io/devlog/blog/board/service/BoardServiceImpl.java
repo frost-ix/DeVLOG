@@ -155,6 +155,18 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    public ResponseEntity<?> getTDomainBoardList(String tDomain) {
+        try {
+            List<Board> boardList = boardRepository.findBoardByTDomain(tDomain);
+            List<BoardDTO> boardDTOS = streamBoards(boardList);
+            return ResponseEntity.ok().body(boardDTOS);
+        } catch (Exception e) {
+            log.error("Server error : ", e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
     public ResponseEntity<?> getTagBoardList(String tagName) {
         try {
             System.out.println();

@@ -62,6 +62,9 @@ public interface BoardRepository extends JpaRepository<Board, String> {
             """, nativeQuery = true)
     List<Board> findBoardByTagsTagName(@Param("tagName") String tagName);
 
+    @Query("select b from Board b where b.categories.tBlog.tDomain = :tDomain order by b.boardDate desc")
+    List<Board> findBoardByTDomain(@Param("tDomain") String tDomain);
+
     @Modifying
     @Transactional
     @Query("delete from Board b where b.boardUuid = ?1")
