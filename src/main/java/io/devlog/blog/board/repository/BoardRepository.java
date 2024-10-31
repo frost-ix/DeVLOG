@@ -58,6 +58,7 @@ public interface BoardRepository extends JpaRepository<Board, String> {
             LEFT JOIN board_tags bt ON b.board_uuid = bt.board_uuid
             LEFT JOIN tags t ON bt.taguid = t.taguid
                WHERE t.tag_name= :tagName
+            order by b.visit_count desc
             """, nativeQuery = true)
     List<Board> findBoardByTagsTagName(@Param("tagName") String tagName);
 
