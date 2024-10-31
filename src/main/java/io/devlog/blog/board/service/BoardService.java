@@ -20,6 +20,8 @@ public interface BoardService {
 
     ResponseEntity<?> getCateBoardList(String pDomain, String cateName);
 
+    ResponseEntity<?> getTCateBoardList(String tDomain, String cateName);
+
     ResponseEntity<?> getTagBoardList(String tagName);
 
     ResponseEntity<?> create(BoardDTO boardDTO);
