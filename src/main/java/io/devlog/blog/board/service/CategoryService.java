@@ -10,6 +10,8 @@ public interface CategoryService {
 
     ResponseEntity<?> getTCategories();
 
+    ResponseEntity<?> getPBlogCategories(String pDomain);
+    
     ResponseEntity<?> createPCategory(CateDTO cateDTO);
 
 
