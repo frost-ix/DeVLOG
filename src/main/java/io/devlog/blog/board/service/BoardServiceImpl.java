@@ -9,6 +9,7 @@ import io.devlog.blog.board.repository.*;
 import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
+import io.devlog.blog.team.repository.TBlogRepository;
 import io.devlog.blog.user.repository.UserInfoRepository;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,9 +40,10 @@ public class BoardServiceImpl implements BoardService {
     private final HttpServletRequest httpServletRequest;
     private final UserInfoRepository userInfoRepository;
     private final PblogRepository pblogRepository;
+    private final TBlogRepository tblogRepository;
     private final CommentsRepository commentsRepository;
 
-    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository, PblogRepository pblogRepository, CommentsRepository commentsRepository) {
+    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository, PblogRepository pblogRepository, CommentsRepository commentsRepository, TBlogRepository tblogRepository) {
         this.boardRepository = boardRepository;
         this.cateRepository = cateRepository;
         this.tagRepository = tagRepository;
@@ -51,6 +53,7 @@ public class BoardServiceImpl implements BoardService {
         this.httpServletRequest = httpServletRequest;
         this.userInfoRepository = userInfoRepository;
         this.pblogRepository = pblogRepository;
+        this.tblogRepository = tblogRepository;
         this.commentsRepository = commentsRepository;
     }
 
@@ -69,6 +72,30 @@ public class BoardServiceImpl implements BoardService {
                                 .collect(Collectors.toList()))
                         .boardDate(board.getBoardDate())
                         .pdomain(pblogRepository.findbyPDomain(board.getUserUuid()))
+                        .tdomain(null)
+                        .commentCont(commentsRepository.countByBoard_BoardUuid(board.getBoardUuid()))
+                        .userIcon(userInfoRepository.findUserInfoByUserUuid(board.getUserUuid()))
+                        .build())
+                .collect(Collectors.toList());
+
+    }
+
+    private List<BoardDTO> streamTBoards(List<Board> boardList) {
+        return boardList.stream()
+                .map(board -> BoardDTO.builder()
+                        .boardUuid(board.getBoardUuid())
+                        .categories(board.getCategories().getCateName())
+                        .title(board.getBoardTitle())
+                        .content(board.getBoardContent())
+                        .visitCount(board.getVisitCount())
+                        .userName(board.getUserName())
+                        .boardProfilepath(board.getBoardProfilepath())
+                        .tags(board.getBoardTags().stream()
+                                .map(boardTag -> boardTag.getTag().getTagName())
+                                .collect(Collectors.toList()))
+                        .boardDate(board.getBoardDate())
+                        .pdomain(null)
+                        .tdomain(tblogRepository.findbyTDomain(board.getUserUuid()))
                         .commentCont(commentsRepository.countByBoard_BoardUuid(board.getBoardUuid()))
                         .userIcon(userInfoRepository.findUserInfoByUserUuid(board.getUserUuid()))
                         .build())
@@ -143,6 +170,19 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    public ResponseEntity<?> getTCateBoardList(String pDomain, String cateName) {
+        try {
+            List<Board> boardList = boardRepository.findBoardByUserUuidAndCategoriesCateUuid(pDomain, cateName);
+            List<BoardDTO> boardDTOS = streamTBoards(boardList);
+            return ResponseEntity.ok().body(boardDTOS);
+
+        } catch (Exception e) {
+            log.error("Server error : ", e);
+            return ResponseEntity.badRequest().body(ExceptionStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
     public ResponseEntity<?> getPDomainBoardList(String pDomain) {
         try {
             List<Board> boardList = boardRepository.findBoardByPDomain(pDomain);
@@ -158,7 +198,7 @@ public class BoardServiceImpl implements BoardService {
     public ResponseEntity<?> getTDomainBoardList(String tDomain) {
         try {
             List<Board> boardList = boardRepository.findBoardByTDomain(tDomain);
-            List<BoardDTO> boardDTOS = streamBoards(boardList);
+            List<BoardDTO> boardDTOS = streamTBoards(boardList);
             return ResponseEntity.ok().body(boardDTOS);
         } catch (Exception e) {
             log.error("Server error : ", e);

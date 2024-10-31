@@ -29,11 +29,12 @@ public class BoardDTO {
     private List<String> comments;
     private List<String> boardTags;
     private String pdomain;
+    private String tdomain;
     private int commentCount;
     private String userIcon;
 
     @Builder
-    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath, @Nullable int visitCount, @Nullable LocalDateTime boardDate, @Nullable String pdomain, @Nullable int commentCont, @Nullable List<String> comments, @Nullable List<String> boardTags, @Nullable String userIcon) {
+    public BoardDTO(@Nullable Long boardUuid, @Nullable String categories, @Nullable String title, @Nullable String content, @Nullable List<String> tags, @Nullable String userName, @Nullable Long userUuID, @Nullable String boardProfilepath, @Nullable int visitCount, @Nullable LocalDateTime boardDate, @Nullable String pdomain, @Nullable String tdomain, @Nullable int commentCont, @Nullable List<String> comments, @Nullable List<String> boardTags, @Nullable String userIcon) {
         this.boardUuid = boardUuid;
         this.title = title;
         this.content = content;
@@ -49,8 +50,10 @@ public class BoardDTO {
         this.comments = comments;
         this.boardTags = boardTags;
         this.userIcon = userIcon;
+        this.tdomain = tdomain;
 
     }
+
 
     public static BoardDTO fromEntity(Board board) {
         return BoardDTO.builder()
