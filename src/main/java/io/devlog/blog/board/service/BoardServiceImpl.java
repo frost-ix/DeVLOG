@@ -10,6 +10,7 @@ import io.devlog.blog.config.enums.ExceptionStatus;
 import io.devlog.blog.pblog.repository.PblogRepository;
 import io.devlog.blog.security.Jwt.JwtService;
 import io.devlog.blog.team.repository.TBlogRepository;
+import io.devlog.blog.team.repository.TBlogRoleRepository;
 import io.devlog.blog.user.repository.UserInfoRepository;
 import io.devlog.blog.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,8 +43,9 @@ public class BoardServiceImpl implements BoardService {
     private final PblogRepository pblogRepository;
     private final TBlogRepository tblogRepository;
     private final CommentsRepository commentsRepository;
+    private final TBlogRoleRepository tblogroleRepository;
 
-    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository, PblogRepository pblogRepository, CommentsRepository commentsRepository, TBlogRepository tblogRepository) {
+    public BoardServiceImpl(BoardRepository boardRepository, CateRepository cateRepository, TagRepository tagRepository, BoardTagsRepository boardTagsRepository, JwtService jwtService, UserRepository userRepository, HttpServletRequest httpServletRequest, UserInfoRepository userInfoRepository, PblogRepository pblogRepository, CommentsRepository commentsRepository, TBlogRepository tblogRepository, TBlogRoleRepository tblogroleRepository) {
         this.boardRepository = boardRepository;
         this.cateRepository = cateRepository;
         this.tagRepository = tagRepository;
@@ -55,6 +57,7 @@ public class BoardServiceImpl implements BoardService {
         this.pblogRepository = pblogRepository;
         this.tblogRepository = tblogRepository;
         this.commentsRepository = commentsRepository;
+        this.tblogroleRepository = tblogroleRepository;
     }
 
     private List<BoardDTO> streamBoards(List<Board> boardList) {
@@ -98,6 +101,7 @@ public class BoardServiceImpl implements BoardService {
                         .tdomain(tblogRepository.findbyTDomain(board.getUserUuid()))
                         .commentCont(commentsRepository.countByBoard_BoardUuid(board.getBoardUuid()))
                         .userIcon(userInfoRepository.findUserInfoByUserUuid(board.getUserUuid()))
+                        .position(tblogroleRepository.findRoleByUserUuid(board.getUserUuid(), cateRepository.findByTUuid(board.getCategories().getCateUuid())))
                         .build())
                 .collect(Collectors.toList());
     }
