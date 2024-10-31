@@ -284,7 +284,7 @@ public class BoardServiceImpl implements BoardService {
                 return ResponseEntity.badRequest().body("Token is invalid");
             }
             System.out.println(boardDTO);
-            if (boardDTO.getPdomain() == null) {
+            if (boardDTO.getDomain().indexOf(0) != '@') {
                 //tblog board create
                 Long tUuid = tblogRepository.findTBlogByUserUuid(id).getTUuid();
                 Optional<Categories> category = cateRepository.findByTCateNameAndUserUuid(boardDTO.getCategories(), id, tUuid);
